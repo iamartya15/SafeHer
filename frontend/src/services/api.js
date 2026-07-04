@@ -1,11 +1,5 @@
 const getBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    // If there is an environment variable, use it
-    if (import.meta.env.VITE_API_URL) {
-      return import.meta.env.VITE_API_URL;
-    }
-  }
-  return 'http://localhost:5000/api';
+  return import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 };
 
 import axios from 'axios';
