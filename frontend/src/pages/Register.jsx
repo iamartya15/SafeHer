@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Shield, Mail, Lock, User, Phone, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Mail, Lock, User, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export const Register = () => {
@@ -11,7 +11,6 @@ export const Register = () => {
   
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
-  const [registeredEmail, setRegisteredEmail] = useState('');
 
   const {
     register,
@@ -33,14 +32,8 @@ export const Register = () => {
     try {
       const res = await signup(data);
       if (res.success) {
-        toast.success(res.message || 'Registration successful!');
-        // Dev mode: backend returns tokens → auto-login, go to dashboard
-        if (res.accessToken && res.user) {
-          navigate('/dashboard', { replace: true });
-        } else {
-          // Production: show email verification screen
-          setRegisteredEmail(data.email);
-        }
+        toast.success('Registration successful! Welcome to SafeHer AI.');
+        navigate('/dashboard', { replace: true });
       }
     } catch (err) {
       console.error(err);
@@ -52,46 +45,6 @@ export const Register = () => {
     }
   };
 
-  // Render Success Screen
-  if (registeredEmail) {
-    const isDev = import.meta.env.DEV || import.meta.env.MODE === 'development';
-    return (
-      <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
-        <div className="w-full max-w-md glass-card rounded-2xl p-8 border border-white/5 shadow-2xl text-center space-y-6">
-          <div className="inline-flex p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20 text-emerald-400">
-            <CheckCircle className="w-10 h-10" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-2xl font-extrabold text-white">Registration Successful!</h2>
-            {isDev ? (
-              <>
-                <p className="text-sm text-slate-300">
-                  Development Mode: Your account has been <strong className="text-purple-400">automatically verified</strong>.
-                </p>
-                <p className="text-xs text-slate-400 leading-relaxed pt-2">
-                  You can skip email activation and sign in immediately to start exploring the SafeHer safety command center.
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-slate-300">
-                  We've sent a verification link to <strong className="text-purple-400">{registeredEmail}</strong>.
-                </p>
-                <p className="text-xs text-slate-400 leading-relaxed pt-2">
-                  Please check your inbox and click the verification link to activate your SafeHer AI account. If you do not receive it in 2 minutes, check your spam folder.
-                </p>
-              </>
-            )}
-          </div>
-          <div className="pt-4">
-            <Link to="/login" className="btn-primary w-full block py-3 text-sm">
-              Proceed to Sign In
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">

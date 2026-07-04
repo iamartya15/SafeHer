@@ -27,108 +27,42 @@ const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    // Generate email verification token
-    const verificationToken = crypto.randomBytes(32).toString('hex');
-    const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-
-    const isDev = process.env.NODE_ENV !== 'production';
-
     const user = new User({
       name,
       email,
       password,
       phone,
       role: role || 'user',
-      isVerified: isDev ? true : false,
-      verificationToken,
-      verificationTokenExpires
+      isVerified: true  // Auto-verify all users — email verification disabled for now
     });
 
-    const message = isDev
-      ? 'Registration successful! Development mode: Account auto-verified. Logging you in...'
-      : 'Registration successful! Please check your email to verify your account.';
+    const tokens = generateTokens(user._id);
+    user.refreshToken = tokens.refreshToken;
 
-    let accessToken, refreshToken;
-
-    // In dev mode: generate tokens and return user data for auto-login
-    if (isDev) {
-      const tokens = generateTokens(user._id);
-      accessToken = tokens.accessToken;
-      refreshToken = tokens.refreshToken;
-
-      // Save refresh token in user document
-      user.refreshToken = refreshToken;
-
-      // Set refresh token in cookie
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: false, // not production
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      });
-    }
-
-    // Single database write for both Dev and Production modes
+    // Single database write
     await user.save();
 
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
-
-    if (isDev) {
-      // Send verification email in background (don't block response)
-      sendMail({
-        to: user.email,
-        subject: 'Verify your email - SafeHer AI',
-        text: `Welcome to SafeHer. Please verify your email by opening: ${verificationUrl}`,
-        html: `<p>Welcome ${name}! Verify at: <a href="${verificationUrl}">${verificationUrl}</a></p>`
-      }).catch((mailErr) => {
-        console.warn('Dev: Mail delivery skipped/failed:', mailErr.message);
-      });
-
-      return res.status(201).json({
-        success: true,
-        message,
-        accessToken,
-        refreshToken,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          phone: user.phone,
-          avatar: user.avatar
-        }
-      });
-    }
-
-    // Production: just send success message, require email verification
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #c026d3; text-align: center;">Welcome to SafeHer AI</h2>
-        <p>Dear ${name},</p>
-        <p>Thank you for joining our community to make women safety smarter and more connected. Please verify your email by clicking the button below:</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${verificationUrl}" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Verify Email Address</a>
-        </div>
-        <p>Or copy this link to your browser:</p>
-        <p style="word-break: break-all; color: #555;">${verificationUrl}</p>
-        <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #999; text-align: center;">This link will expire in 24 hours. If you did not register, please ignore this email.</p>
-      </div>
-    `;
-
-    // Send verification email in background (don't block response)
-    sendMail({
-      to: user.email,
-      subject: 'Verify your email - SafeHer AI',
-      text: `Welcome to SafeHer. Please verify your email by opening: ${verificationUrl}`,
-      html: emailHtml
-    }).catch((mailErr) => {
-      console.error('Mail delivery failed during registration:', mailErr.message);
+    // Set refresh token in cookie
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
-      message
+      message: 'Registration successful! Welcome to SafeHer AI.',
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        avatar: user.avatar
+      }
     });
   } catch (error) {
     next(error);
@@ -184,16 +118,9 @@ const login = async (req, res, next) => {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
 
-    // Dynamic verification check for development environment
-    const isDev = process.env.NODE_ENV !== 'production';
-    if (!user.isVerified && isDev) {
-      // In local dev, auto-verify if they haven't to avoid blocking
-      user.isVerified = true;
-    } else if (!user.isVerified) {
-      return res.status(403).json({
-        success: false,
-        message: 'Please verify your email address before logging in. Check your inbox.'
-      });
+    // Email verification disabled — allow all users to login directly
+    if (!user.isVerified) {
+      user.isVerified = true; // Auto-fix any unverified legacy users
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
