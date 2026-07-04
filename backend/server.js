@@ -1,4 +1,13 @@
 require('dotenv').config();
+
+// Validate required environment variables at startup
+const requiredEnv = ['MONGODB_URI', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
+const missingEnv = requiredEnv.filter((name) => !process.env[name]);
+if (missingEnv.length > 0) {
+  console.error(`CRITICAL CONFIGURATION ERROR: Missing environment variables: ${missingEnv.join(', ')}`);
+  process.exit(1);
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
