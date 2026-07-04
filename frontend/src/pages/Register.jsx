@@ -49,15 +49,28 @@ export const Register = () => {
   const handleGoogleSuccess = async (credentialResponse) => {
     setLoading(true);
     setApiError('');
+    console.log('[GOOGLE AUTH FRONTEND] handleGoogleSuccess triggered.');
+    console.log('[GOOGLE AUTH FRONTEND] Credential response object:', credentialResponse);
+    console.log('[GOOGLE AUTH FRONTEND] ID Token received (length):', credentialResponse?.credential ? credentialResponse.credential.length : 0);
+    
     try {
+      console.log('[GOOGLE AUTH FRONTEND] Sending POST request to /api/auth/google...');
       const res = await loginWithGoogle(credentialResponse.credential);
+      console.log('[GOOGLE AUTH FRONTEND] API Response received:', res);
       if (res.success) {
+        console.log('[GOOGLE AUTH FRONTEND] Login success. User:', res.user);
         toast.success('Registration successful! Welcome to SafeHer AI.');
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
-      console.error(err);
-      const msg = err.response?.data?.message || 'Google Sign In failed.';
+      console.error('[GOOGLE AUTH FRONTEND] Login failed with error:', err);
+      if (err.response) {
+        console.error('[GOOGLE AUTH FRONTEND] Error status code:', err.response.status);
+        console.error('[GOOGLE AUTH FRONTEND] Error response body:', err.response.data);
+      } else {
+        console.error('[GOOGLE AUTH FRONTEND] Error message (no response):', err.message);
+      }
+      const msg = err.response?.data?.message || err.message || 'Google Sign In failed.';
       setApiError(msg);
       toast.error(msg);
     } finally {
@@ -65,7 +78,8 @@ export const Register = () => {
     }
   };
 
-  const handleGoogleError = () => {
+  const handleGoogleError = (error) => {
+    console.error('[GOOGLE AUTH FRONTEND] Google Sign-In error callback triggered. Error details:', error);
     const msg = 'Google popup blocked or authentication failed. Please try again.';
     setApiError(msg);
     toast.error(msg);

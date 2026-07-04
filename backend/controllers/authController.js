@@ -359,31 +359,50 @@ const uploadAvatar = async (req, res, next) => {
   }
 };
 
-/**
- * Google Authentication
- */
 const googleLogin = async (req, res, next) => {
   const { idToken } = req.body;
+  console.log('[GOOGLE AUTH BACKEND] Request received.');
+  console.log('[GOOGLE AUTH BACKEND] GOOGLE_CLIENT_ID from env:', process.env.GOOGLE_CLIENT_ID);
+  console.log('[GOOGLE AUTH BACKEND] Received ID Token (length):', idToken ? idToken.length : 0);
   
   if (!idToken) {
+    console.error('[GOOGLE AUTH BACKEND] Failure: Google ID Token is missing');
     return res.status(400).json({ success: false, message: 'Google ID Token is required' });
   }
 
   try {
-    const ticket = await client.verifyIdToken({
+    console.log('[GOOGLE AUTH BACKEND] Initializing OAuth2Client with client ID');
+    const authClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    
+    console.log('[GOOGLE AUTH BACKEND] Verifying ID Token...');
+    const ticket = await authClient.verifyIdToken({
       idToken,
       audience: process.env.GOOGLE_CLIENT_ID
     });
 
     const payload = ticket.getPayload();
+    console.log('[GOOGLE AUTH BACKEND] Token verified successfully. Payload audience:', payload.aud);
+    console.log('[GOOGLE AUTH BACKEND] Extracted user info:');
+    console.log('  - Email:', payload.email);
+    console.log('  - Name:', payload.name);
+    console.log('  - googleId (sub):', payload.sub);
+    console.log('  - Picture:', payload.picture);
+
     const { sub: googleId, email, name, picture } = payload;
 
+    console.log('[GOOGLE AUTH BACKEND] Searching MongoDB for user...');
     let user = await User.findOne({
       $or: [{ googleId }, { email }]
     });
 
     if (user) {
+      console.log('[GOOGLE AUTH BACKEND] Found existing user in MongoDB:', user._id);
+      console.log('  - Existing googleId:', user.googleId);
+      console.log('  - Existing email:', user.email);
+      console.log('  - Existing isVerified:', user.isVerified);
+
       if (user.googleId && user.googleId !== googleId) {
+        console.error('[GOOGLE AUTH BACKEND] Failure: Account already linked with a different Google account');
         return res.status(409).json({
           success: false,
           message: 'This account is already linked with another Google account.'
@@ -391,23 +410,30 @@ const googleLogin = async (req, res, next) => {
       }
 
       if (!user.googleId) {
+        console.log('[GOOGLE AUTH BACKEND] User does not have a googleId linked yet. Checking verification...');
         if (!user.isVerified) {
+          console.error('[GOOGLE AUTH BACKEND] Failure: Existing email is not verified');
           return res.status(400).json({
             success: false,
             message: 'An account with this email already exists but is not verified. Please log in with your password first.'
           });
         }
+        console.log('[GOOGLE AUTH BACKEND] Email is verified. Linking googleId to existing user.');
         user.googleId = googleId;
       }
 
       const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
       if (!user.avatar || user.avatar === defaultAvatar) {
+        console.log('[GOOGLE AUTH BACKEND] Current avatar is empty or default. Setting Google picture.');
         user.avatar = picture || defaultAvatar;
+      } else {
+        console.log('[GOOGLE AUTH BACKEND] Keeping existing avatar:', user.avatar);
       }
 
       user.isVerified = true;
 
     } else {
+      console.log('[GOOGLE AUTH BACKEND] No user found. Registering a new Google user...');
       const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
       user = new User({
         name,
@@ -418,12 +444,16 @@ const googleLogin = async (req, res, next) => {
       });
     }
 
+    console.log('[GOOGLE AUTH BACKEND] Generating Access/Refresh tokens...');
     const { accessToken, refreshToken } = generateTokens(user._id);
     user.refreshToken = refreshToken;
 
+    console.log('[GOOGLE AUTH BACKEND] Saving user document...');
     try {
       await user.save();
+      console.log('[GOOGLE AUTH BACKEND] User saved successfully in database.');
     } catch (dbError) {
+      console.error('[GOOGLE AUTH BACKEND] Database Save Failure:', dbError);
       if (dbError.code === 11000) {
         return res.status(400).json({
           success: false,
@@ -433,6 +463,7 @@ const googleLogin = async (req, res, next) => {
       throw dbError;
     }
 
+    console.log('[GOOGLE AUTH BACKEND] Setting cookies and sending successful response.');
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -455,10 +486,10 @@ const googleLogin = async (req, res, next) => {
     });
 
   } catch (error) {
-    console.error('Google Auth Error:', error);
+    console.error('[GOOGLE AUTH BACKEND] UNCAUGHT ERROR during verification or execution:', error);
     return res.status(400).json({
       success: false,
-      message: 'Invalid Google ID Token or verification failed.'
+      message: `Google Authentication failed: ${error.message}`
     });
   }
 };

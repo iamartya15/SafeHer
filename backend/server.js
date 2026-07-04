@@ -46,7 +46,9 @@ app.use((req, res, next) => {
 const allowedOrigins = [
   process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/api\/?$/, '').replace(/\/$/, '') : 'http://localhost:5173',
   'http://localhost:5173',
-  'http://localhost:5174'
+  'http://localhost:5174',
+  'https://safeher.live',
+  'https://safeher1-s6xf.onrender.com'
 ];
 
 app.use(

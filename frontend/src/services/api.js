@@ -51,6 +51,7 @@ api.interceptors.response.use(
     const isAuthRoute = originalRequest.url && (
       originalRequest.url.includes('/auth/login') ||
       originalRequest.url.includes('/auth/register') ||
+      originalRequest.url.includes('/auth/google') ||
       originalRequest.url.includes('/auth/forgot-password') ||
       originalRequest.url.includes('/auth/reset-password') ||
       originalRequest.url.includes('/auth/verify-email') ||
