@@ -161,18 +161,18 @@ export const Home = () => {
           {[
             {
               quote: "The Gemini AI companion is incredibly smart. I felt someone was following me, and it instantly guided me to a well-lit pharmacy nearby.",
-              author: "Priya S.",
+              author: "Aparna Shukla",
               role: "College Student"
             },
             {
               quote: "The SOS system works. I tested it with my parents and they received the Google Maps location link within seconds in their inbox.",
-              author: "Anjali M.",
-              role: "Software Engineer"
+              author: "Sambhavi Singh",
+              role: "College Student"
             },
             {
-              quote: "As a guardian, the dashboard makes it simple to approve requests, check trip status, and view alert history on a clean dark UI.",
-              author: "Rajesh K.",
-              role: "Father / Guardian"
+              quote: "The dashboard makes it simple to approve requests, check trip status, and view alert history on a clean dark UI.",
+              author: "Ayush",
+              role: "Trainer / Developer"
             }
           ].map((testi, i) => (
             <div key={i} className="glass-card rounded-2xl p-6 border border-white/5 flex flex-col justify-between">
