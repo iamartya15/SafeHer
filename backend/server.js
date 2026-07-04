@@ -43,12 +43,24 @@ app.use((req, res, next) => {
 });
 
 // Setup CORS - allow credentials and multiple origins (dev/production)
-
+const allowedOrigins = [
+  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/api\/?$/, '').replace(/\/$/, '') : 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:5174'
+];
 
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173'
-    ,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+        return callback(null, true);
+      }
+      
+      return callback(new Error('The CORS policy for this site does not allow access from the specified Origin.'), false);
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']

@@ -5,7 +5,7 @@ const getBaseUrl = () => {
       return import.meta.env.VITE_API_URL;
     }
   }
-  return 'http://localhost:5000/api';
+  return 'http://localhost:5001/api';
 };
 
 import axios from 'axios';

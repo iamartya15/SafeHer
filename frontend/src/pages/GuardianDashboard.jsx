@@ -303,7 +303,7 @@ export const GuardianDashboard = () => {
                     className="p-3 bg-slate-900/40 border border-white/5 rounded-xl flex items-center justify-between"
                   >
                     <div>
-                      <h4 className="text-xs font-bold text-white">{req.userId.name}</h4>
+                      <h4 className="text-xs font-bold text-white">{req.userId?.name || 'Unknown User'}</h4>
                       <span className="text-[9px] text-purple-400 font-semibold uppercase">{req.relationship}</span>
                     </div>
                     <div className="flex gap-1.5">
@@ -342,7 +342,7 @@ export const GuardianDashboard = () => {
                   <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-500" />
                   <input
                     type="email"
-                    placeholder="ward@email.com"
+                    placeholder="guardian@email.com"
                     className="glass-input pl-10 text-xs py-2"
                     {...register('email', { required: 'Email is required' })}
                   />

@@ -2,6 +2,8 @@ const Guardian = require('../models/Guardian');
 const User = require('../models/User');
 const SOSAlert = require('../models/SOSAlert');
 const Notification = require('../models/Notification');
+const { sendMail } = require('../config/mail');
+
 
 /**
  * Add a Guardian
@@ -22,7 +24,116 @@ const addGuardian = async (req, res, next) => {
     });
 
     if (existing) {
-      return res.status(400).json({ success: false, message: 'This guardian has already been added' });
+      if (existing.status === 'approved') {
+        return res.status(400).json({ success: false, message: 'This contact is already your guardian' });
+      }
+      if (existing.status === 'pending') {
+        // Resend invitation email for pending request
+        const guardianUser = await User.findOne({ email: guardianEmail });
+        if (guardianUser) {
+          await Notification.create({
+            recipientId: guardianUser._id,
+            title: 'New Guardian Request',
+            message: `${req.user.name} has requested you to be their safety guardian.`,
+            type: 'guardian_request'
+          });
+          await sendMail({
+            to: guardianEmail,
+            subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
+            text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
+                <p>Hello ${guardianUser.name},</p>
+                <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
+                <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+                </div>
+              </div>
+            `
+          });
+        } else {
+          await sendMail({
+            to: guardianEmail,
+            subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
+            text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
+                <p>Hello,</p>
+                <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</n                <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
+                <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+                </div>
+              </div>
+            `
+          });
+        }
+        return res.status(200).json({ success: true, message: 'Guardian invite resent successfully.', request: existing });
+      }
+      // If status is 'rejected', we allow re-invitation by resetting status and updating relationship
+      existing.status = 'pending';
+      existing.relationship = relationship || 'Contact';
+      await existing.save();
+
+      // Check if the guardian is registered as a user
+      const guardianUser = await User.findOne({ email: guardianEmail });
+      if (guardianUser) {
+        existing.guardianId = guardianUser._id;
+        await existing.save();
+
+        await Notification.create({
+          recipientId: guardianUser._id,
+          title: 'New Guardian Request',
+          message: `${req.user.name} has requested you to be their safety guardian.`,
+          type: 'guardian_request'
+        });
+
+        // Send notification email
+        await sendMail({
+          to: guardianEmail,
+          subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
+          text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
+              <p>Hello ${guardianUser.name},</p>
+              <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
+              <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+              </div>
+            </div>
+          `
+        });
+      } else {
+        // Send email invitation to register
+        await sendMail({
+          to: guardianEmail,
+          subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
+          text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+              <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
+              <p>Hello,</p>
+              <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
+              <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
+              <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+              </div>
+            </div>
+          `
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: 'Guardian invite resent successfully.',
+        request: existing
+      });
     }
 
     // Check if the guardian is registered as a user
@@ -43,6 +154,43 @@ const addGuardian = async (req, res, next) => {
         title: 'New Guardian Request',
         message: `${req.user.name} has requested you to be their safety guardian.`,
         type: 'guardian_request'
+      });
+
+      // Send email to registered guardian
+      await sendMail({
+        to: guardianEmail,
+        subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
+        text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
+            <p>Hello ${guardianUser.name},</p>
+            <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
+            <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+            </div>
+          </div>
+        `
+      });
+    } else {
+      // Send email invitation to register
+      await sendMail({
+        to: guardianEmail,
+        subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
+        text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
+            <p>Hello,</p>
+            <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
+            <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
+            <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+            </div>
+          </div>
+        `
       });
     }
 
@@ -84,7 +232,13 @@ const getGuardianRequests = async (req, res, next) => {
     // Find requests where guardianEmail matches current user's email and status is pending
     // Also update guardianId in the record if it is not set (backfill on register)
     await Guardian.updateMany(
-      { guardianEmail: req.user.email, guardianId: { $exists: false } },
+      { 
+        guardianEmail: req.user.email, 
+        $or: [
+          { guardianId: { $exists: false } },
+          { guardianId: null }
+        ] 
+      },
       { guardianId: req.user._id }
     );
 
