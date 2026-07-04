@@ -3,6 +3,9 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendMail } = require('../config/mail');
 const { uploadImage } = require('../config/cloudinary');
+const { OAuth2Client } = require('google-auth-library');
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper to generate access and refresh tokens
 const generateTokens = (id) => {
@@ -356,10 +359,116 @@ const uploadAvatar = async (req, res, next) => {
   }
 };
 
+/**
+ * Google Authentication
+ */
+const googleLogin = async (req, res, next) => {
+  const { idToken } = req.body;
+  
+  if (!idToken) {
+    return res.status(400).json({ success: false, message: 'Google ID Token is required' });
+  }
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name, picture } = payload;
+
+    let user = await User.findOne({
+      $or: [{ googleId }, { email }]
+    });
+
+    if (user) {
+      if (user.googleId && user.googleId !== googleId) {
+        return res.status(409).json({
+          success: false,
+          message: 'This account is already linked with another Google account.'
+        });
+      }
+
+      if (!user.googleId) {
+        if (!user.isVerified) {
+          return res.status(400).json({
+            success: false,
+            message: 'An account with this email already exists but is not verified. Please log in with your password first.'
+          });
+        }
+        user.googleId = googleId;
+      }
+
+      const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
+      if (!user.avatar || user.avatar === defaultAvatar) {
+        user.avatar = picture || defaultAvatar;
+      }
+
+      user.isVerified = true;
+
+    } else {
+      const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
+      user = new User({
+        name,
+        email,
+        googleId,
+        avatar: picture || defaultAvatar,
+        isVerified: true
+      });
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user._id);
+    user.refreshToken = refreshToken;
+
+    try {
+      await user.save();
+    } catch (dbError) {
+      if (dbError.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: 'An account with this email or Google ID already exists.'
+        });
+      }
+      throw dbError;
+    }
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return res.status(200).json({
+      success: true,
+      accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        avatar: user.avatar
+      }
+    });
+
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid Google ID Token or verification failed.'
+    });
+  }
+};
+
 module.exports = {
   register,
   verifyEmail,
   login,
+  loginWithGoogle: googleLogin, // or just googleLogin
+  googleLogin,
   refreshToken,
   logout,
   forgotPassword,

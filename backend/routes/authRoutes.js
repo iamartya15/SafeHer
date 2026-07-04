@@ -10,7 +10,8 @@ const {
   resetPassword,
   getMe,
   updateProfile,
-  uploadAvatar
+  uploadAvatar,
+  googleLogin
 } = require('../controllers/authController');
 const { protect } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
@@ -24,6 +25,7 @@ const {
 router.post('/register', registerValidator, register);
 router.get('/verify-email', verifyEmail);
 router.post('/login', loginValidator, login);
+router.post('/google', googleLogin);
 router.post('/refresh-token', refreshToken);
 router.post('/logout', logout);
 router.post('/forgot-password', forgotPasswordValidator, forgotPassword);

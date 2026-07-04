@@ -83,12 +83,27 @@ export const AuthProvider = ({ children }) => {
     setUser((prev) => (prev ? { ...prev, avatar: avatarUrl } : null));
   };
 
+  const loginWithGoogle = async (idToken) => {
+    setLoading(true);
+    try {
+      const data = await authService.loginWithGoogle(idToken);
+      if (data.success && data.user) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      return data;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
         loading,
         login,
+        loginWithGoogle,
         register,
         logout,
         updateProfile,

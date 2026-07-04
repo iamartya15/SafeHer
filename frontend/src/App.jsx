@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -26,9 +27,11 @@ import ComingSoon from './pages/ComingSoon';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   return (
-    <AuthProvider>
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+    <GoogleOAuthProvider clientId={googleClientId}>
+      <AuthProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           {/* Public Page Routes */}
           <Route element={<MainLayout />}>
@@ -89,7 +92,8 @@ function App() {
           }
         }}
       />
-    </AuthProvider>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 

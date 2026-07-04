@@ -4,9 +4,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Shield, Mail, Lock, User, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { GoogleLogin } from '@react-oauth/google';
 
 export const Register = () => {
-  const { register: signup } = useAuth();
+  const { register: signup, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
@@ -43,6 +44,31 @@ export const Register = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    setLoading(true);
+    setApiError('');
+    try {
+      const res = await loginWithGoogle(credentialResponse.credential);
+      if (res.success) {
+        toast.success('Registration successful! Welcome to SafeHer AI.');
+        navigate('/dashboard', { replace: true });
+      }
+    } catch (err) {
+      console.error(err);
+      const msg = err.response?.data?.message || 'Google Sign In failed.';
+      setApiError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    const msg = 'Google popup blocked or authentication failed. Please try again.';
+    setApiError(msg);
+    toast.error(msg);
   };
 
 
@@ -189,7 +215,26 @@ export const Register = () => {
               <span>Create Account</span>
             )}
           </button>
-        </form>
+         </form>
+ 
+        {/* OR Divider */}
+        <div className="relative flex py-2 items-center">
+          <div className="flex-grow border-t border-slate-700/50"></div>
+          <span className="flex-shrink mx-4 text-[10px] text-slate-500 uppercase font-semibold">OR</span>
+          <div className="flex-grow border-t border-slate-700/50"></div>
+        </div>
+
+        {/* Google Login Button */}
+        <div className="flex justify-center w-full">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="filled_black"
+            text="continue_with"
+            shape="rectangular"
+            width="384"
+          />
+        </div>
 
         {/* Footer */}
         <div className="text-center text-xs text-slate-400 pt-2">

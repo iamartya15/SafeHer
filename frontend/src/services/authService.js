@@ -30,6 +30,18 @@ export const login = async (credentials) => {
   return response.data;
 };
 
+export const loginWithGoogle = async (idToken) => {
+  const response = await api.post('/auth/google', { idToken });
+  if (response.data.success) {
+    localStorage.setItem('accessToken', response.data.accessToken);
+    if (response.data.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+  }
+  return response.data;
+};
+
 export const logout = async () => {
   try {
     const refreshToken = localStorage.getItem('refreshToken');
