@@ -19,198 +19,127 @@ const sendMailAsync = (options) => {
 const addGuardian = async (req, res, next) => {
   const { email, relationship } = req.body;
   try {
-    // Basic input validation
     if (!email || typeof email !== 'string') {
-      return res.status(400).json({ success: false, message: 'Valid email address is required' });
+      return res.status(400).json({
+        success: false,
+        message: 'Valid email address is required',
+        data: null
+      });
     }
 
     const guardianEmail = email.toLowerCase().trim();
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(guardianEmail)) {
-      return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address',
+        data: null
+      });
     }
 
     if (guardianEmail === req.user.email.toLowerCase().trim()) {
-      return res.status(400).json({ success: false, message: 'You cannot add yourself as a guardian' });
+      return res.status(400).json({
+        success: false,
+        message: 'You cannot add yourself as a guardian',
+        data: null
+      });
+    }
+
+    // Verify guardian user exists
+    const guardianUser = await User.findOne({ email: guardianEmail });
+    if (!guardianUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'No registered user found with this email on SafeHer AI.',
+        data: null
+      });
     }
 
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-    // Check if relationship already exists
-    const existing = await Guardian.findOne({ userId: req.user.id, guardianEmail });
+    // Atomic lookup to avoid duplicates
+    let invite = await Guardian.findOne({ userId: req.user.id, guardianEmail });
 
-    if (existing) {
-      if (existing.status === 'approved') {
-        return res.status(400).json({ success: false, message: 'This contact is already your guardian' });
-      }
-
-      if (existing.status === 'pending') {
-        // Resend invitation for pending request — fire emails in background
-        const guardianUser = await User.findOne({ email: guardianEmail });
-        if (guardianUser) {
-          await Notification.create({
-            recipientId: guardianUser._id,
-            title: 'Guardian Request Reminder',
-            message: `${req.user.name} has reminded you to accept their safety guardian request.`,
-            type: 'guardian_request'
-          });
-          sendMailAsync({
-            to: guardianEmail,
-            subject: `Guardian Request Reminder from ${req.user.name} - SafeHer AI`,
-            text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #c026d3; text-align: center;">Guardian Request Reminder</h2>
-                <p>Hello ${guardianUser.name},</p>
-                <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
-                <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
-                </div>
-              </div>
-            `
-          });
-        } else {
-          sendMailAsync({
-            to: guardianEmail,
-            subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
-            text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
-                <p>Hello,</p>
-                <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
-                <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
-                <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                  <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
-                </div>
-              </div>
-            `
-          });
-        }
-        return res.status(200).json({ success: true, message: 'Guardian invite resent successfully.', request: existing });
-      }
-
-      // If status is 'rejected' — reset and re-invite
-      existing.status = 'pending';
-      existing.relationship = relationship || 'Contact';
-      await existing.save();
-
-      const guardianUser = await User.findOne({ email: guardianEmail });
-      if (guardianUser) {
-        existing.guardianId = guardianUser._id;
-        await existing.save();
-
-        await Notification.create({
-          recipientId: guardianUser._id,
-          title: 'New Guardian Request',
-          message: `${req.user.name} has requested you to be their safety guardian.`,
-          type: 'guardian_request'
-        });
-
-        sendMailAsync({
-          to: guardianEmail,
-          subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
-          text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
-              <p>Hello ${guardianUser.name},</p>
-              <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
-              <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
-              </div>
-            </div>
-          `
-        });
-      } else {
-        sendMailAsync({
-          to: guardianEmail,
-          subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
-          text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
-              <p>Hello,</p>
-              <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
-              <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
-              <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
-              <div style="text-align: center; margin: 30px 0;">
-                <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
-              </div>
-            </div>
-          `
+    if (invite) {
+      if (invite.status === 'approved') {
+        return res.status(400).json({
+          success: false,
+          message: 'This contact is already connected as your guardian.',
+          data: null
         });
       }
 
-      return res.status(200).json({ success: true, message: 'Guardian invite resent successfully.', request: existing });
+      if (invite.status === 'pending') {
+        return res.status(409).json({
+          success: false,
+          message: 'A pending guardian request has already been sent to this user.',
+          data: null
+        });
+      }
+
+      // If status is rejected, cancelled, or removed — reset to pending
+      invite.status = 'pending';
+      invite.relationship = relationship || 'Contact';
+      invite.guardianId = guardianUser._id;
+      await invite.save();
+    } else {
+      invite = await Guardian.create({
+        userId: req.user.id,
+        guardianEmail,
+        guardianId: guardianUser._id,
+        relationship: relationship || 'Contact',
+        status: 'pending'
+      });
     }
 
-    // New invitation
-    const guardianUser = await User.findOne({ email: guardianEmail });
-
-    const newRequest = await Guardian.create({
-      userId: req.user.id,
-      guardianEmail,
-      guardianId: guardianUser ? guardianUser._id : undefined,
-      relationship: relationship || 'Contact',
-      status: 'pending'
+    // Create Notification
+    await Notification.create({
+      recipientId: guardianUser._id,
+      title: 'New Guardian Request',
+      message: `${req.user.name} has requested you to be their safety guardian.`,
+      type: 'guardian_request'
     });
 
-    if (guardianUser) {
-      await Notification.create({
-        recipientId: guardianUser._id,
-        title: 'New Guardian Request',
-        message: `${req.user.name} has requested you to be their safety guardian.`,
-        type: 'guardian_request'
-      });
+    // Professional HTML email invitation
+    const emailHtml = `
+      <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; padding: 30px; border: 1px solid #e2e8f0; border-radius: 16px; background-color: #0f172a; color: #ffffff;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <span style="font-size: 24px; font-weight: bold; color: #a855f7;">🛡️ SafeHer AI</span>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #334155; margin-bottom: 24px;" />
+        <h2 style="color: #ffffff; text-align: center; font-size: 20px; margin-top: 0;">New Guardian Invitation</h2>
+        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">Hello <strong>${guardianUser.name}</strong>,</p>
+        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+          <strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI with the relationship: <span style="color: #a855f7; font-weight: bold;">${relationship || 'Contact'}</span>.
+        </p>
+        <p style="color: #cbd5e1; font-size: 15px; line-height: 1.6;">
+          As a guardian, you will receive real-time location tracking and immediate emergency notifications if they ever trigger an SOS alert.
+        </p>
+        <div style="text-align: center; margin: 35px 0;">
+          <a href="${frontendUrl}/guardian" style="background-color: #a855f7; color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block;">
+            Accept Request inside SafeHer
+          </a>
+        </div>
+        <p style="color: #94a3b8; font-size: 13px; line-height: 1.5; text-align: center;">
+          Please log in to your SafeHer dashboard to accept or decline this safety guardian request.
+        </p>
+        <hr style="border: 0; border-top: 1px solid #334155; margin: 24px 0;" />
+        <p style="font-size: 11px; color: #64748b; text-align: center; margin-bottom: 0;">This email was sent by SafeHer AI Safety Dispatch. Please do not reply directly to this mail.</p>
+      </div>
+    `;
 
-      sendMailAsync({
-        to: guardianEmail,
-        subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
-        text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
-            <p>Hello ${guardianUser.name},</p>
-            <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
-            <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
-            </div>
-          </div>
-        `
-      });
-    } else {
-      sendMailAsync({
-        to: guardianEmail,
-        subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
-        text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
-            <p>Hello,</p>
-            <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
-            <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
-            <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
-            </div>
-          </div>
-        `
-      });
-    }
+    sendMailAsync({
+      to: guardianEmail,
+      subject: `🛡️ New Guardian Request from ${req.user.name} - SafeHer AI`,
+      text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
+      html: emailHtml
+    });
 
     res.status(201).json({
       success: true,
-      message: guardianUser
-        ? 'Guardian request sent successfully.'
-        : 'Guardian not yet registered. Invitation sent — they will be linked once they sign up.',
-      request: newRequest
+      message: 'Guardian request sent successfully.',
+      data: invite
     });
   } catch (error) {
     next(error);
@@ -218,14 +147,20 @@ const addGuardian = async (req, res, next) => {
 };
 
 /**
- * Get User's Guardians
+ * Get User's Guardians (sent invites)
  */
 const getGuardians = async (req, res, next) => {
   try {
-    const list = await Guardian.find({ userId: req.user.id })
-      .populate('guardianId', 'name email phone avatar role');
+    const list = await Guardian.find({
+      userId: req.user.id,
+      status: { $ne: 'removed' }
+    }).populate('guardianId', 'name email phone avatar role');
 
-    res.status(200).json({ success: true, count: list.length, guardians: list });
+    res.status(200).json({
+      success: true,
+      message: 'Guardians list retrieved successfully',
+      data: list
+    });
   } catch (error) {
     next(error);
   }
@@ -236,21 +171,16 @@ const getGuardians = async (req, res, next) => {
  */
 const getGuardianRequests = async (req, res, next) => {
   try {
-    // Backfill guardianId for any pending requests that matched by email but missing ObjectId
-    await Guardian.updateMany(
-      {
-        guardianEmail: req.user.email,
-        $or: [{ guardianId: { $exists: false } }, { guardianId: null }]
-      },
-      { guardianId: req.user._id }
-    );
-
     const requests = await Guardian.find({
       guardianId: req.user.id,
       status: 'pending'
     }).populate('userId', 'name email phone avatar');
 
-    res.status(200).json({ success: true, count: requests.length, requests });
+    res.status(200).json({
+      success: true,
+      message: 'Pending guardian requests retrieved successfully',
+      data: requests
+    });
   } catch (error) {
     next(error);
   }
@@ -263,16 +193,38 @@ const updateRequestStatus = async (req, res, next) => {
   const { requestId, status } = req.body;
   try {
     if (!['approved', 'rejected'].includes(status)) {
-      return res.status(400).json({ success: false, message: 'Invalid status. Must be approved or rejected' });
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid status. Must be approved or rejected',
+        data: null
+      });
     }
 
     const request = await Guardian.findById(requestId);
     if (!request) {
-      return res.status(404).json({ success: false, message: 'Guardian request not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Guardian request not found',
+        data: null
+      });
     }
 
+    // Security check: Only the designated guardian can respond
     if (request.guardianId?.toString() !== req.user.id && request.guardianEmail !== req.user.email) {
-      return res.status(403).json({ success: false, message: 'Not authorized to respond to this request' });
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to respond to this request',
+        data: null
+      });
+    }
+
+    // Valid state transition check
+    if (request.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot update request. Current status is ${request.status}`,
+        data: null
+      });
     }
 
     request.status = status;
@@ -286,7 +238,11 @@ const updateRequestStatus = async (req, res, next) => {
       type: 'system'
     });
 
-    res.status(200).json({ success: true, message: `Guardian request ${status} successfully.`, request });
+    res.status(200).json({
+      success: true,
+      message: `Guardian request ${status} successfully.`,
+      data: request
+    });
   } catch (error) {
     next(error);
   }
@@ -333,28 +289,81 @@ const getMonitoredUsers = async (req, res, next) => {
     );
 
     const filtered = monitoredUsers.filter((item) => item !== null);
-    res.status(200).json({ success: true, count: filtered.length, monitoredUsers: filtered });
+    res.status(200).json({
+      success: true,
+      message: 'Monitored users list retrieved successfully',
+      data: filtered
+    });
   } catch (error) {
     next(error);
   }
 };
 
 /**
- * Remove Guardian / Monitored relation
+ * Remove Guardian / Monitored relation (Cancel, Reject, or Disconnect)
  */
 const removeGuardianRelation = async (req, res, next) => {
   try {
     const relation = await Guardian.findById(req.params.id);
     if (!relation) {
-      return res.status(404).json({ success: false, message: 'Guardian relationship not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Guardian relationship not found',
+        data: null
+      });
     }
 
-    if (relation.userId.toString() !== req.user.id && relation.guardianId?.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Not authorized to remove this relationship' });
+    // Security check: Only sender (userId) or receiver (guardianId) can remove
+    const isSender = relation.userId.toString() === req.user.id;
+    const isReceiver = relation.guardianId?.toString() === req.user.id;
+
+    if (!isSender && !isReceiver) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to remove this relationship',
+        data: null
+      });
     }
 
-    await Guardian.findByIdAndDelete(req.params.id);
-    res.status(200).json({ success: true, message: 'Guardian relationship removed successfully' });
+    // Complete Invitation Lifecycle implementation
+    if (relation.status === 'pending') {
+      if (isSender) {
+        // Sender cancels invitation
+        relation.status = 'cancelled';
+        await relation.save();
+        return res.status(200).json({
+          success: true,
+          message: 'Guardian invitation cancelled successfully.',
+          data: relation
+        });
+      } else {
+        // Receiver rejects/declines invitation
+        relation.status = 'rejected';
+        await relation.save();
+        return res.status(200).json({
+          success: true,
+          message: 'Guardian request rejected successfully.',
+          data: relation
+        });
+      }
+    } else if (relation.status === 'approved') {
+      // Approved connection is removed/disconnected
+      relation.status = 'removed';
+      await relation.save();
+      return res.status(200).json({
+        success: true,
+        message: 'Guardian connection removed successfully.',
+        data: relation
+      });
+    } else {
+      // Rejected, Cancelled, or Removed entries can be deleted completely to clean up
+      await Guardian.findByIdAndDelete(req.params.id);
+      return res.status(200).json({
+        success: true,
+        message: 'Guardian history record deleted successfully.',
+        data: null
+      });
+    }
   } catch (error) {
     next(error);
   }
