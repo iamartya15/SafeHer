@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export const useGeolocation = (options = {}) => {
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const retriesRef = useRef(0);
 
   const getNewLocation = useCallback(() => {
     setLoading(true);
@@ -18,7 +19,7 @@ export const useGeolocation = (options = {}) => {
     const defaultOptions = {
       enableHighAccuracy: true,
       timeout: 10000,
-      maximumAge: 0,
+      maximumAge: 5000,
       ...options
     };
 
@@ -29,10 +30,20 @@ export const useGeolocation = (options = {}) => {
         accuracy: position.coords.accuracy,
         timestamp: position.timestamp
       });
+      retriesRef.current = 0;
       setLoading(false);
     };
 
     const errorHandler = (err) => {
+      if (err.code === err.TIMEOUT && retriesRef.current < 1) {
+        retriesRef.current += 1;
+        navigator.geolocation.getCurrentPosition(successHandler, finalErrorHandler, { ...defaultOptions, enableHighAccuracy: false, timeout: 15000 });
+        return;
+      }
+      finalErrorHandler(err);
+    };
+
+    const finalErrorHandler = (err) => {
       let message = 'An error occurred fetching location';
       switch (err.code) {
         case err.PERMISSION_DENIED:
@@ -42,7 +53,7 @@ export const useGeolocation = (options = {}) => {
           message = 'Location information is unavailable.';
           break;
         case err.TIMEOUT:
-          message = 'Location request timed out.';
+          message = 'Location request timed out. Try moving outdoors.';
           break;
         default:
           break;
@@ -69,6 +80,7 @@ export const useGeolocation = (options = {}) => {
     location,
     latitude: location?.latitude || null,
     longitude: location?.longitude || null,
+    accuracy: location?.accuracy || null,
     error,
     loading,
     refresh: getNewLocation

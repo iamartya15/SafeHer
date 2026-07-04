@@ -347,12 +347,24 @@ export const Navbar = () => {
           {/* Footer */}
           {isAuthenticated && (
             <div className="px-3 py-3 space-y-1" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <button onClick={() => { cycleTheme(); }} className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-colors" style={{ color: 'var(--text-secondary)' }}>
-                <ThemeToggleButton theme={theme} cycleTheme={() => {}} />
+              <button
+                onClick={() => cycleTheme()}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/5"
+                style={{ color: 'var(--text-secondary)' }}
+              >
+                {(() => {
+                  const meta = THEME_META[theme] || THEME_META.dark;
+                  const Icon = meta.icon;
+                  return <Icon className="w-5 h-5 shrink-0" style={{ color: theme === 'dark' ? '#c084fc' : theme === 'light' ? '#f59e0b' : '#38bdf8' }} />;
+                })()}
                 <span>{THEME_META[theme]?.tip}</span>
               </button>
-              <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 hover:text-red-400 transition-colors">
-                <LogOut className="w-4 h-4 shrink-0" /> Logout
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
+              >
+                <LogOut className="w-5 h-5 shrink-0" />
+                <span>Logout</span>
               </button>
             </div>
           )}

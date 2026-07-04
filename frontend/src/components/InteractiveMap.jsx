@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.markercluster';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // Fix for default marker icons missing in build bundlers
 const createPulseIcon = () => L.divIcon({
@@ -13,11 +16,16 @@ const createPulseIcon = () => L.divIcon({
   iconAnchor: [12, 12]
 });
 
-const createIncidentIcon = (category) => {
+const createIncidentIcon = (category, isGlobal = false) => {
   let color = 'bg-red-500';
   let border = 'border-red-300';
+  let iconText = '⚠️';
   
-  if (['Poor Lighting', 'Road Issue'].includes(category)) {
+  if (isGlobal) {
+    color = 'bg-rose-600';
+    border = 'border-rose-400';
+    iconText = '🌍';
+  } else if (['Poor Lighting', 'Road Issue'].includes(category)) {
     color = 'bg-orange-500';
     border = 'border-orange-300';
   } else if (category === 'Unsafe Area') {
@@ -28,9 +36,9 @@ const createIncidentIcon = (category) => {
   return L.divIcon({
     className: 'custom-map-marker',
     html: `<div class="relative flex items-center justify-center w-8 h-8">
-             <div class="absolute w-8 h-8 rounded-full ${color}/20 animate-pulse-slow"></div>
-             <div class="w-4.5 h-4.5 rounded-full ${color} border-2 border-white shadow-lg flex items-center justify-center text-[10px] text-white font-bold">
-               ⚠️
+             <div class="absolute w-8 h-8 rounded-full ${color}/30 animate-ping" style="animation-duration: 2s;"></div>
+             <div class="w-5 h-5 rounded-full ${color} border-2 ${border} shadow-lg flex items-center justify-center text-[10px] text-white font-bold">
+               ${iconText}
              </div>
            </div>`,
     iconSize: [32, 32],
@@ -59,7 +67,7 @@ export const InteractiveMap = ({
   const mapInstanceRef = useRef(null);
   const userMarkerRef = useRef(null);
   const clickMarkerRef = useRef(null);
-  const incidentMarkersRef = useRef([]);
+  const markerClusterGroupRef = useRef(null);
 
   // 1. Initialize Map
   useEffect(() => {
@@ -141,16 +149,36 @@ export const InteractiveMap = ({
     }
   }, [selectedLocation]);
 
-  // 4. Sync Incident Markers
+  // 4. Sync Incident Markers (with Clustering)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
 
-    // Clear existing markers
-    incidentMarkersRef.current.forEach(m => m.remove());
-    incidentMarkersRef.current = [];
+    if (markerClusterGroupRef.current) {
+      map.removeLayer(markerClusterGroupRef.current);
+    }
 
-    // Add new markers
+    markerClusterGroupRef.current = L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 50,
+      showCoverageOnHover: false,
+      spiderfyOnMaxZoom: true,
+      iconCreateFunction: function (cluster) {
+        const count = cluster.getChildCount();
+        let sizeClass = 'w-8 h-8';
+        if (count > 10) sizeClass = 'w-10 h-10';
+        if (count > 50) sizeClass = 'w-12 h-12';
+
+        return L.divIcon({
+          html: `<div class="${sizeClass} rounded-full bg-purple-600/90 border-2 border-purple-300 shadow-lg flex items-center justify-center text-white font-bold text-xs ring-4 ring-purple-500/30 backdrop-blur-sm transition-all hover:scale-110">
+                   ${count}
+                 </div>`,
+          className: 'custom-cluster-icon',
+          iconSize: L.point(40, 40, true),
+        });
+      }
+    });
+
     incidents.forEach((report) => {
       if (
         report.location &&
@@ -161,24 +189,35 @@ export const InteractiveMap = ({
         
         const popupContent = `
           <div style="color: #1e293b; padding: 4px; max-width: 200px;">
-            <h5 style="margin: 0 0 4px 0; font-weight: bold; color: #7e22ce;">${report.category}</h5>
+            <h5 style="margin: 0 0 4px 0; font-weight: bold; color: ${report.isGDACS ? '#e11d48' : '#7e22ce'};">
+              ${report.category} ${report.isGDACS ? '(Global Alert)' : ''}
+            </h5>
             <p style="margin: 0 0 6px 0; font-size: 11px;">${report.description}</p>
             ${report.image ? `<img src="${report.image}" style="width: 100%; border-radius: 4px; margin-bottom: 6px;" />` : ''}
             <span style="font-size: 10px; color: #64748b; display:block;">📍 ${report.address || 'Reported Location'}</span>
             <span style="font-size: 9px; color: #94a3b8; display:block; margin-top: 2px;">
-              ${new Date(report.createdAt).toLocaleString()}
+              ${new Date(report.createdAt || report.timestamp).toLocaleString()}
             </span>
           </div>
         `;
 
-        const marker = L.marker([lat, lng], { icon: createIncidentIcon(report.category) })
-          .addTo(map)
+        const marker = L.marker([lat, lng], { icon: createIncidentIcon(report.category, report.isGDACS) })
           .bindPopup(popupContent);
 
-        incidentMarkersRef.current.push(marker);
+        markerClusterGroupRef.current.addLayer(marker);
       }
     });
-  }, [incidents]);
+
+    map.addLayer(markerClusterGroupRef.current);
+    
+    // Fit bounds if we have new incidents and map is idle (don't force if user is panning)
+    if (incidents.length > 0 && !selectedLocation) {
+      const bounds = markerClusterGroupRef.current.getBounds();
+      if (bounds.isValid() && map.getZoom() <= 6) {
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 12 });
+      }
+    }
+  }, [incidents, selectedLocation]);
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden shadow-inner border border-white/5 bg-slate-900">

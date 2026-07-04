@@ -4,16 +4,26 @@ SafeHer AI is a production-ready, full-stack safety web application. It integrat
 
 ---
 
-## 🛡️ Core Features (Implemented)
+## 🛡️ Core Features
 
-1. **Authentication Hub**: Secure Register, Login, JWT access tokens, HTTP-only Refresh Tokens, Forgot Password, Reset Password, and Email Verification.
-2. **Interactive Map**: OpenStreetMap mapping powered by Leaflet. Toggles localized hazard pins by categories: Harassment, Theft, Stalking, Poor Lighting, Unsafe Area, and Road Issues.
-3. **Emergency SOS System**: One-click SOS broadcaster logging user coordinate coordinates, battery telemetry, and client user-agent metrics, with instant Nodemailer dispatches to linked safety guardians.
-4. **Guardian Command Center**: Custom panel where guardians can accept ward permissions, audit active SOS alarms, and locate monitored users on live maps.
-5. **AI Safety Companion**: Conversational assistant powered by Google Gemini (with pre-programmed local fallback rules in case keys are not set) generating immediate guidance for walking alone or escaping dangerous locations.
-6. **Nearby Safe Places**: Direct client queries to the OpenStreetMap Overpass API mapping police shelters, hospitals, pharmacies, and fuel stations within 5km, calculating Haversine distances and linking navigation routes.
-7. **Admin Moderation Portal**: Visualizes system registrations and alerts statistics, changes user role authorization, and moderates/deletes fake incident reports.
-8. **In-App Notifications**: Internal MongoDB collection recording SOS alerts, guardian request updates, and resolution flags.
+1. **Authentication & Multi-Role Hub**: Secure Register, Login, JWT access tokens, HTTP-only Refresh Tokens. Users can hold multiple roles simultaneously (User, Guardian, Admin) without needing separate accounts, switching instantly via the workspace dropdown.
+2. **Interactive Safety Intelligence Map**: Advanced mapping powered by Leaflet and Leaflet MarkerCluster.
+   - **Live Global Disaster Alerts**: Automatically pulls real-time earthquake, flood, and cyclone alerts via the **GDACS GeoJSON API**.
+   - **Local Hazard Pins**: User-reported incidents for Harassment, Theft, Stalking, Poor Lighting, Unsafe Area, and Road Issues (MongoDB).
+   - **Dynamic Filtering**: Filter by category and time (24h, 7d, 30d, All Time).
+3. **Advanced Safe Places Network**: Live integration with **OpenStreetMap Overpass API**.
+   - Automatically maps police shelters, hospitals, pharmacies, women's help centers, and fuel stations within a highly accurate 5km radius using the Haversine formula.
+   - Extracts rich metadata including phone numbers, websites, opening hours, and operators.
+   - Provides instant walking navigation links and clickable call buttons.
+4. **Emergency SOS System**: One-click SOS broadcaster logging high-accuracy user coordinates, battery telemetry, and client user-agent metrics, with instant Nodemailer dispatches to linked safety guardians.
+5. **Guardian Command Center**: Custom panel where guardians can accept ward permissions, audit active SOS alarms, and locate monitored users on live maps.
+6. **AI Safety Companion**: Conversational assistant powered by Google Gemini (with pre-programmed local fallback rules in case keys are not set) generating immediate guidance for walking alone or escaping dangerous locations.
+7. **Admin Moderation Portal**: Visualizes system registrations and alerts statistics, manages user roles, and moderates fake incident reports.
+8. **In-App Notifications**: Real-time synchronized notifications with optimistic UI updates and zero stale caching.
+9. **Premium AMOLED Theming**: 
+   - **Deep Dark Mode**: Custom AMOLED-inspired charcoal/black aesthetics with soft purple/blue radiant glows.
+   - **Light Mode**: High-contrast, clean, and bright visibility.
+   - **System Mode**: Dynamically follows the user's OS preference (`prefers-color-scheme`) in real-time.
 
 ---
 
@@ -32,14 +42,13 @@ SafeHer/
 │   └── server.js           # Server entry point
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # Navbar, Sidebar, Map, and ComingSoonCard
-│   │   ├── context/        # Auth Context provider
-│   │   ├── hooks/          # useAuth and useGeolocation
-│   │   ├── layouts/        # MainLayout and DashboardLayout
+│   │   ├── components/     # Navbar, Sidebar, InteractiveMap, etc.
+│   │   ├── context/        # Auth and Theme Context providers
+│   │   ├── hooks/          # useAuth and useGeolocation (with high-accuracy fallbacks)
 │   │   ├── pages/          # Dashboards, Maps, AI chats, and auth screens
-│   │   ├── services/       # Axios wrappers and token refresh interceptors
+│   │   ├── services/       # Axios wrappers and API clients
 │   │   ├── App.jsx         # App router configurations
-│   │   └── index.css       # Tailwind directives and glassmorphic card stylings
+│   │   └── index.css       # Tailwind directives and semantic CSS variables
 │   ├── tailwind.config.js
 │   ├── vercel.json         # SPA router redirects
 │   └── vite.config.js
@@ -55,7 +64,7 @@ SafeHer/
 - MongoDB (Local instance or Atlas string)
 
 ### 1. Installation
-In the root directory, install all dependencies for both frontend, backend, and root concurrent configurations with a single command:
+In the root directory, install all dependencies for both frontend and backend:
 ```bash
 npm run install:all
 ```
@@ -76,8 +85,9 @@ EMAIL_PORT=587
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_email_app_password
 FRONTEND_URL=http://localhost:5173
+ADMIN_EMAIL=your_super_admin@email.com
 ```
-*Note: If `GEMINI_API_KEY`, `EMAIL_USER`, or `CLOUDINARY_*` are left blank, SafeHer AI automatically falls back to development simulators (printing emails to the console, saving images locally, and running rule-based keyword safety advisors) so the app remains fully functional.*
+*Note: If `GEMINI_API_KEY`, `EMAIL_USER`, or `CLOUDINARY_*` are left blank, SafeHer AI automatically falls back to development simulators (printing emails to the console, saving images locally, and running rule-based keyword safety advisors).*
 
 ### 3. Run the Development Servers
 From the root directory, launch both dev servers concurrently:
@@ -107,24 +117,3 @@ npm run dev
 5. Set Start Command: `npm start`.
 6. Set environment variables from your `backend/.env` file.
 7. Deploy.
-
----
-
-## 🔮 Post-MVP Feature Roadmap (Coming Soon Section)
-
-SafeHer AI includes 15 fully-styled premium preview cards representing upcoming safety tools:
-1. **AI Route Safety Prediction**: Analyze paths using lighting and crowd densities.
-2. **AI Safety Score Engine**: Predictive safety grades utilizing historical crime records.
-3. **Safety Heatmap**: Visual hot-zone hazard grids.
-4. **Safe Walk Mode**: Automatic 30s check-ins with warning triggers.
-5. **Live Guardian Tracking**: Encrypted live tracking coordinates stream.
-6. **Real-time Socket Notifications**: High-speed alarm broadcasts using WebSockets.
-7. **Advanced Analytics Dashboard**: Graphical trend metrics chart.
-8. **Predictive Crime Detection**: Pre-incident hot-zone ML predictions.
-9. **Crowd Density Detection**: Satellite-assisted crowd levels estimates.
-10. **Lighting Condition Analysis**: Computer-vision analysis of street light coverage.
-11. **Smart Route Comparison**: Side-by-side safe route mapping.
-12. **Push Notifications**: Mobile screen emergency push alerts.
-13. **Voice Activated SOS**: Hands-free distress-word alarm triggers.
-14. **Wearable Device Integration**: Smartwatch panic buttons.
-15. **Offline Emergency Mode**: Mesh-network coordinate alerts without internet.

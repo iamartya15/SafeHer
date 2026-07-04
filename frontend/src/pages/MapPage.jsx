@@ -9,18 +9,50 @@ export const MapPage = () => {
   const { latitude, longitude, loading: geoLoading } = useGeolocation();
 
   const [incidents, setIncidents] = useState([]);
+  const [gdacsEvents, setGdacsEvents] = useState([]);
   const [filteredIncidents, setFilteredIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [timeFilter, setTimeFilter] = useState('7d'); // '24h', '7d', '30d', 'all'
 
   const fetchIncidents = async () => {
     setLoading(true);
     try {
+      // 1. Fetch MongoDB incidents
       const res = await incidentService.getIncidents();
+      let localIncidents = [];
       if (res.success) {
+        localIncidents = res.reports;
         setIncidents(res.reports);
-        setFilteredIncidents(res.reports);
       }
+
+      // 2. Fetch GDACS Global Disasters
+      let globalEvents = [];
+      try {
+        const gdacsRes = await fetch('https://www.gdacs.org/datareport/resources/JRC/gdacs_geojson.json');
+        if (gdacsRes.ok) {
+          const data = await gdacsRes.json();
+          if (data && data.features) {
+            globalEvents = data.features.map(f => ({
+              _id: f.properties.eventid || Math.random().toString(),
+              isGDACS: true,
+              category: f.properties.eventtype,
+              description: f.properties.htmldescription || f.properties.description,
+              address: f.properties.country || 'Global Region',
+              createdAt: f.properties.todate || new Date().toISOString(),
+              location: {
+                type: 'Point',
+                coordinates: [f.geometry.coordinates[0], f.geometry.coordinates[1]]
+              }
+            }));
+            setGdacsEvents(globalEvents);
+          }
+        }
+      } catch (gdacsErr) {
+        console.error('Failed to fetch GDACS data (CORS or network error):', gdacsErr);
+      }
+
+      applyFilters(localIncidents, globalEvents, selectedCategory, timeFilter);
     } catch (err) {
       console.error(err);
       toast.error('Failed to load incident reports.');
@@ -29,29 +61,63 @@ export const MapPage = () => {
     }
   };
 
+  const applyFilters = (local = incidents, global = gdacsEvents, cat = selectedCategory, time = timeFilter) => {
+    let combined = [...local, ...global];
+
+    // Time filter
+    if (time !== 'all') {
+      const now = new Date().getTime();
+      const thresholds = {
+        '24h': 24 * 60 * 60 * 1000,
+        '7d': 7 * 24 * 60 * 60 * 1000,
+        '30d': 30 * 24 * 60 * 60 * 1000
+      };
+      const limit = thresholds[time];
+      combined = combined.filter(inc => {
+        const incTime = new Date(inc.createdAt).getTime();
+        return (now - incTime) <= limit;
+      });
+    }
+
+    // Category filter
+    if (cat !== 'All') {
+      if (cat === 'Global Disaster') {
+        combined = combined.filter(inc => inc.isGDACS);
+      } else {
+        combined = combined.filter(inc => !inc.isGDACS && inc.category === cat);
+      }
+    }
+
+    setFilteredIncidents(combined);
+  };
+
+  // Trigger filters when state changes
+  useEffect(() => {
+    applyFilters();
+  }, [selectedCategory, timeFilter]);
+
   useEffect(() => {
     fetchIncidents();
   }, []);
 
-  // Filter logic
-  useEffect(() => {
-    if (selectedCategory === 'All') {
-      setFilteredIncidents(incidents);
-    } else {
-      setFilteredIncidents(
-        incidents.filter((inc) => inc.category === selectedCategory)
-      );
-    }
-  }, [selectedCategory, incidents]);
+  // Removed old filter logic inside useEffect directly, now handled by applyFilters
 
   const categories = [
     'All',
+    'Global Disaster',
     'Harassment',
     'Theft',
     'Stalking',
     'Poor Lighting',
     'Unsafe Area',
     'Road Issue'
+  ];
+
+  const timeOptions = [
+    { id: '24h', label: 'Last 24h' },
+    { id: '7d', label: 'Last 7 Days' },
+    { id: '30d', label: 'Last 30 Days' },
+    { id: 'all', label: 'All Time' }
   ];
 
   return (
@@ -76,21 +142,41 @@ export const MapPage = () => {
         </button>
       </div>
 
-      {/* Category filter bar */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all ${
-              selectedCategory === cat
-                ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
-                : 'bg-slate-900/50 border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-600'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+      {/* Filters Row */}
+      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        {/* Category filter bar */}
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none flex-1 w-full md:w-auto">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all shrink-0 ${
+                selectedCategory === cat
+                  ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
+                  : 'bg-slate-900/50 border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-600'
+              }`}
+            >
+              {cat === 'Global Disaster' ? '🌍 ' : ''}{cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Time filter */}
+        <div className="flex gap-1 bg-slate-900/50 border border-slate-700/50 rounded-lg p-1 shrink-0">
+          {timeOptions.map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => setTimeFilter(opt.id)}
+              className={`px-3 py-1.5 text-[10px] font-bold rounded-md transition-colors ${
+                timeFilter === opt.id
+                  ? 'bg-slate-700 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Main Map Container */}

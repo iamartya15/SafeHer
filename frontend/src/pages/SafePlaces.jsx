@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
-import { MapPin, Compass, Shield, HeartPulse, Pill, Fuel, Navigation, Loader2 } from 'lucide-react';
+import { MapPin, Compass, Shield, HeartPulse, Pill, Fuel, Navigation, Phone, Globe, Clock, User, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 // Distance calculation using Haversine formula
@@ -74,6 +74,10 @@ export const SafePlaces = () => {
             name,
             address,
             amenity: item.tags.amenity,
+            phone: item.tags.phone || item.tags['contact:phone'] || null,
+            website: item.tags.website || item.tags['contact:website'] || null,
+            openingHours: item.tags.opening_hours || null,
+            operator: item.tags.operator || null,
             lat: item.lat,
             lng: item.lon,
             distance // in km
@@ -189,30 +193,66 @@ export const SafePlaces = () => {
                         </span>
                       </div>
 
-                      {/* Info details */}
-                      <div className="space-y-1">
-                        <h4 className="text-sm font-bold text-white leading-tight truncate">{place.name}</h4>
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold uppercase">
-                          {details.label}
-                        </span>
-                        <p className="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                          📍 {place.address}
-                        </p>
+                    {/* Info details */}
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold text-white leading-tight truncate">{place.name}</h4>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-800 text-slate-400 font-semibold uppercase">
+                        {details.label}
+                      </span>
+                      <p className="text-[11px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                        📍 {place.address}
+                      </p>
+                      
+                      {/* Rich Metadata Section */}
+                      <div className="mt-3 space-y-1.5 pt-2 border-t border-white/5">
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                          <Clock className="w-3 h-3 text-slate-500 shrink-0" />
+                          <span className="truncate">{place.openingHours || <span className="italic opacity-50">Not Available</span>}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                          <User className="w-3 h-3 text-slate-500 shrink-0" />
+                          <span className="truncate">{place.operator || <span className="italic opacity-50">Operator Unknown</span>}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                          <Phone className="w-3 h-3 text-slate-500 shrink-0" />
+                          {place.phone ? (
+                            <a href={`tel:${place.phone}`} className="text-blue-400 hover:underline">{place.phone}</a>
+                          ) : (
+                            <span className="italic opacity-50">Not Available</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                          <Globe className="w-3 h-3 text-slate-500 shrink-0" />
+                          {place.website ? (
+                            <a href={place.website} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline truncate">{place.website}</a>
+                          ) : (
+                            <span className="italic opacity-50">Not Available</span>
+                          )}
+                        </div>
                       </div>
                     </div>
+                  </div>
 
-                    {/* Action Button */}
-                    <div className="mt-5 pt-4 border-t border-white/5">
+                  {/* Action Button */}
+                  <div className="mt-5 pt-4 border-t border-white/5 flex gap-2">
+                    <a
+                      href={directionsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 btn-secondary py-2 flex items-center justify-center gap-1 text-xs hover:bg-purple-600 hover:text-white hover:border-purple-500/20 transition-all font-semibold"
+                    >
+                      <Navigation className="w-3.5 h-3.5" />
+                      <span>Directions</span>
+                    </a>
+                    {place.phone && (
                       <a
-                        href={directionsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full btn-secondary py-2 flex items-center justify-center gap-1 text-xs hover:bg-purple-600 hover:text-white hover:border-purple-500/20 transition-all font-semibold"
+                        href={`tel:${place.phone}`}
+                        className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg flex items-center justify-center transition-colors border border-slate-700"
                       >
-                        <Navigation className="w-3.5 h-3.5" />
-                        <span>Get Walking Directions</span>
+                        <Phone className="w-3.5 h-3.5" />
                       </a>
-                    </div>
+                    )}
+                  </div>
                   </div>
                 );
               })}
