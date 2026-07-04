@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: getBaseUrl(),
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   withCredentials: true, // For HTTP-only cookie transfers
   headers: {
     'Content-Type': 'application/json'
