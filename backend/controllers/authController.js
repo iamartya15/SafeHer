@@ -44,19 +44,20 @@ const register = async (req, res, next) => {
       verificationTokenExpires
     });
 
-    await user.save();
-
     const message = isDev
       ? 'Registration successful! Development mode: Account auto-verified. Logging you in...'
       : 'Registration successful! Please check your email to verify your account.';
 
+    let accessToken, refreshToken;
+
     // In dev mode: generate tokens and return user data for auto-login
     if (isDev) {
-      const { accessToken, refreshToken } = generateTokens(user._id);
+      const tokens = generateTokens(user._id);
+      accessToken = tokens.accessToken;
+      refreshToken = tokens.refreshToken;
 
       // Save refresh token in user document
       user.refreshToken = refreshToken;
-      await user.save();
 
       // Set refresh token in cookie
       res.cookie('refreshToken', refreshToken, {
@@ -65,9 +66,15 @@ const register = async (req, res, next) => {
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000
       });
+    }
 
+    // Single database write for both Dev and Production modes
+    await user.save();
+
+    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+
+    if (isDev) {
       // Send verification email in background (don't block response)
-      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
       sendMail({
         to: user.email,
         subject: 'Verify your email - SafeHer AI',
@@ -94,8 +101,6 @@ const register = async (req, res, next) => {
     }
 
     // Production: just send success message, require email verification
-    // Send verification email
-    const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #c026d3; text-align: center;">Welcome to SafeHer AI</h2>
@@ -111,17 +116,15 @@ const register = async (req, res, next) => {
       </div>
     `;
 
-    try {
-      await sendMail({
-        to: user.email,
-        subject: 'Verify your email - SafeHer AI',
-        text: `Welcome to SafeHer. Please verify your email by opening: ${verificationUrl}`,
-        html: emailHtml
-      });
-    } catch (mailErr) {
+    // Send verification email in background (don't block response)
+    sendMail({
+      to: user.email,
+      subject: 'Verify your email - SafeHer AI',
+      text: `Welcome to SafeHer. Please verify your email by opening: ${verificationUrl}`,
+      html: emailHtml
+    }).catch((mailErr) => {
       console.error('Mail delivery failed during registration:', mailErr.message);
-      throw mailErr;
-    }
+    });
 
     res.status(201).json({
       success: true,
@@ -186,7 +189,6 @@ const login = async (req, res, next) => {
     if (!user.isVerified && isDev) {
       // In local dev, auto-verify if they haven't to avoid blocking
       user.isVerified = true;
-      await user.save();
     } else if (!user.isVerified) {
       return res.status(403).json({
         success: false,
@@ -196,7 +198,7 @@ const login = async (req, res, next) => {
 
     const { accessToken, refreshToken } = generateTokens(user._id);
 
-    // Save refresh token in user document
+    // Save refresh token in user document (and isVerified if it was set in dev)
     user.refreshToken = refreshToken;
     await user.save();
 
@@ -318,11 +320,14 @@ const forgotPassword = async (req, res, next) => {
       </div>
     `;
 
-    await sendMail({
+    // Send reset email in background (don't block response)
+    sendMail({
       to: user.email,
       subject: 'Reset Password - SafeHer AI',
       text: `Reset your password by visiting: ${resetUrl}`,
       html: emailHtml
+    }).catch((mailErr) => {
+      console.error('Mail delivery failed during forgot password:', mailErr.message);
     });
 
     res.status(200).json({ success: true, message: 'Password reset link sent to your email.' });
