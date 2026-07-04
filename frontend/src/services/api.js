@@ -48,12 +48,14 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     // Check if this is an authentication route (login, register, forgot/reset password, email verification)
+    // NOTE: originalRequest.url is RELATIVE to baseURL (e.g. '/auth/login'), NOT the full URL
     const isAuthRoute = originalRequest.url && (
-      originalRequest.url.includes('/api/auth/login') ||
-      originalRequest.url.includes('/api/auth/register') ||
-      originalRequest.url.includes('/api/auth/forgot-password') ||
-      originalRequest.url.includes('/api/auth/reset-password') ||
-      originalRequest.url.includes('/api/auth/verify-email')
+      originalRequest.url.includes('/auth/login') ||
+      originalRequest.url.includes('/auth/register') ||
+      originalRequest.url.includes('/auth/forgot-password') ||
+      originalRequest.url.includes('/auth/reset-password') ||
+      originalRequest.url.includes('/auth/verify-email') ||
+      originalRequest.url.includes('/auth/logout')
     );
 
     // Check if error is 401, not already retried, and not an auth route

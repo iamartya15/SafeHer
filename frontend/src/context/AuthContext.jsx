@@ -31,6 +31,8 @@ export const AuthProvider = ({ children }) => {
       const data = await authService.login(credentials);
       if (data.success && data.user) {
         setUser(data.user);
+        // Persist user in localStorage (authService also does this, but be explicit)
+        localStorage.setItem('user', JSON.stringify(data.user));
       }
       return data;
     } finally {
@@ -52,8 +54,15 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       await authService.logout();
-      setUser(null);
+    } catch (err) {
+      console.error('Logout error:', err);
+      // Even if the server call fails, clear local storage manually
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
     } finally {
+      // Always clear in-memory user state
+      setUser(null);
       setLoading(false);
     }
   };
