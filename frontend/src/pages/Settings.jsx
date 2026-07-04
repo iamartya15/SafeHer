@@ -17,8 +17,8 @@ import { toast } from 'react-hot-toast';
 
 // ─── Reusable section wrapper ────────────────────────────────────────────────
 const SettingsSection = ({ icon: Icon, title, description, children }) => (
-  <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
-    <div className="px-6 py-4 border-b border-white/5 flex items-center gap-3">
+  <div className="glass-card rounded-2xl overflow-hidden">
+    <div className="px-6 py-4 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border-color)' }}>
       <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
         <Icon className="w-4 h-4" />
       </div>
@@ -27,15 +27,16 @@ const SettingsSection = ({ icon: Icon, title, description, children }) => (
         {description && <p className="text-[11px] mt-0.5" style={{ color: 'var(--text-secondary)' }}>{description}</p>}
       </div>
     </div>
-    <div className="divide-y divide-white/5">{children}</div>
+    <div>{children}</div>
   </div>
 );
 
 // ─── Row inside a section ─────────────────────────────────────────────────────
 const SettingsRow = ({ label, description, children, onClick }) => (
   <div
-    className={`flex items-center justify-between px-6 py-4 gap-4 ${onClick ? 'cursor-pointer hover:bg-white/5 transition-colors' : ''}`}
+    className={`flex items-center justify-between px-6 py-4 gap-4 transition-colors ${onClick ? 'cursor-pointer' : ''}`}
     onClick={onClick}
+    style={{ borderBottom: '1px solid var(--border-muted)' }}
   >
     <div className="min-w-0">
       <span className="text-sm font-medium block" style={{ color: 'var(--text-primary)' }}>{label}</span>
@@ -51,10 +52,8 @@ const Toggle = ({ enabled, onChange }) => (
     role="switch"
     aria-checked={enabled}
     onClick={() => onChange(!enabled)}
-    className={`relative w-10 h-5.5 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-      enabled ? 'bg-purple-600' : 'bg-slate-700'
-    }`}
-    style={{ width: 40, height: 22 }}
+    className="relative rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+    style={{ width: 40, height: 22, backgroundColor: enabled ? '#9333ea' : 'var(--input-border)' }}
   >
     <span
       className="absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200"
@@ -67,12 +66,13 @@ const Toggle = ({ enabled, onChange }) => (
 const ThemePill = ({ mode, label, icon: Icon, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`flex flex-col items-center gap-2 px-4 py-3 rounded-xl border text-xs font-semibold transition-all duration-200 ${
-      active
-        ? 'border-purple-500 bg-purple-500/15 text-purple-400 shadow-lg shadow-purple-500/10'
-        : 'border-white/10 bg-white/5 hover:border-purple-500/30 hover:text-white'
-    }`}
-    style={{ color: active ? undefined : 'var(--text-secondary)' }}
+    className="flex flex-col items-center gap-2 px-4 py-3 rounded-xl text-xs font-semibold transition-all duration-200"
+    style={{
+      border: active ? '1px solid #9333ea' : '1px solid var(--border-color)',
+      backgroundColor: active ? 'rgba(147, 51, 234, 0.12)' : 'var(--hover-bg)',
+      color: active ? '#a855f7' : 'var(--text-secondary)',
+      boxShadow: active ? '0 4px 12px rgba(147, 51, 234, 0.15)' : 'none',
+    }}
     aria-pressed={active}
   >
     <Icon className="w-5 h-5" />
@@ -188,7 +188,7 @@ export const Settings = () => {
           label="Display Language"
           description="Currently only English is supported. More languages coming soon."
         >
-          <span className="text-xs px-2 py-1 rounded bg-slate-800 border border-white/10 font-medium" style={{ color: 'var(--text-secondary)' }}>
+          <span className="text-xs px-2 py-1 rounded font-medium" style={{ backgroundColor: 'var(--badge-bg)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
             English (en)
           </span>
         </SettingsRow>
@@ -200,7 +200,7 @@ export const Settings = () => {
           <span className="text-xs font-mono" style={{ color: 'var(--text-secondary)' }}>{user?.email}</span>
         </SettingsRow>
         <SettingsRow label="Account ID" description="Your unique SafeHer user identifier.">
-          <code className="text-[10px] font-mono px-2 py-1 rounded bg-slate-800 border border-white/10 max-w-[120px] truncate block" style={{ color: 'var(--text-secondary)' }}>
+          <code className="text-[10px] font-mono px-2 py-1 rounded max-w-[120px] truncate block" style={{ backgroundColor: 'var(--badge-bg)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
             {user?.id}
           </code>
         </SettingsRow>

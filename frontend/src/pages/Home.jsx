@@ -20,7 +20,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-slate-950">
+    <div className="min-h-screen overflow-x-hidden">
       
       {/* 1. Hero Section */}
       <section className="relative pt-24 pb-16 px-4 md:px-8 max-w-7xl mx-auto flex flex-col items-center text-center">

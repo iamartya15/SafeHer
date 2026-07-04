@@ -1,6 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../context/ThemeContext';
 import { getAvatarSrc } from '../utils/avatar';
 import {
   LayoutDashboard,
@@ -14,16 +13,10 @@ import {
   ShieldPlus,
   LogOut,
   Settings,
-  Sun,
-  Moon,
-  Monitor
 } from 'lucide-react';
-
-const THEME_ICONS = { dark: Moon, light: Sun, system: Monitor };
 
 export const Sidebar = () => {
   const { user, logout, activeWorkspace, setActiveWorkspace } = useAuth();
-  const { theme, cycleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -61,13 +54,11 @@ export const Sidebar = () => {
     navigate('/');
   };
 
-  const ThemeIcon = THEME_ICONS[theme] || Moon;
-
   return (
-    <aside className="w-64 border-r min-h-[calc(100vh-57px)] hidden md:flex flex-col p-4 gap-4 select-none backdrop-blur-lg"
+    <aside className="w-64 min-h-[calc(100vh-57px)] hidden md:flex flex-col p-4 gap-4 select-none backdrop-blur-lg"
       style={{
         background: 'var(--bg-card)',
-        borderColor: 'var(--border-muted)',
+        borderRight: '1px solid var(--border-muted)',
       }}
     >
       {/* Profile Section */}
@@ -105,8 +96,8 @@ export const Sidebar = () => {
             }}
             className="w-full rounded-xl px-3 py-2.5 text-xs font-semibold focus:outline-none focus:border-purple-500/50 cursor-pointer transition-colors"
             style={{
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-color)',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--input-border)',
               color: 'var(--text-primary)',
             }}
           >
@@ -130,35 +121,33 @@ export const Sidebar = () => {
               aria-current={active ? 'page' : undefined}
               className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${
                 active
-                  ? 'bg-gradient-to-r from-purple-600/30 to-fuchsia-600/30 text-fuchsia-400 border-l-4 border-fuchsia-500 shadow-inner'
-                  : 'hover:bg-white/5'
+                  ? 'text-fuchsia-400 border-l-4 border-fuchsia-500 shadow-inner'
+                  : ''
               }`}
-              style={{ color: active ? undefined : 'var(--text-secondary)' }}
+              style={{
+                color: active ? undefined : 'var(--text-secondary)',
+                backgroundColor: active ? 'rgba(147, 51, 234, 0.15)' : undefined,
+              }}
+              onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'var(--hover-bg)'; }}
+              onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
-              <Icon className={`w-4 h-4 transition-colors ${active ? 'text-fuchsia-400' : 'group-hover:text-purple-400'}`} />
+              <Icon className={`w-4 h-4 transition-colors ${active ? 'text-fuchsia-400' : 'group-hover:text-purple-400'}`}
+                style={{ color: active ? undefined : undefined }}
+              />
               <span>{displayName}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Footer Actions */}
-      <div className="space-y-1 pt-2 border-t" style={{ borderColor: 'var(--border-muted)' }}>
-        {/* Theme Toggle */}
-        <button
-          onClick={cycleTheme}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-white/5"
-          style={{ color: 'var(--text-secondary)' }}
-          title={`Theme: ${theme} (click to cycle)`}
-        >
-          <ThemeIcon className="w-4 h-4" />
-          <span className="capitalize">{theme === 'system' ? 'System Theme' : `${theme.charAt(0).toUpperCase() + theme.slice(1)} Mode`}</span>
-        </button>
-
-        {/* Logout */}
+      {/* Footer — Logout Only (theme is now in Navbar) */}
+      <div className="pt-2" style={{ borderTop: '1px solid var(--border-muted)' }}>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-950/20 text-red-400 hover:text-red-300"
+          className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors text-red-500 hover:text-red-400"
+          style={{ backgroundColor: 'transparent' }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.06)'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
