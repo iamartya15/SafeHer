@@ -139,15 +139,21 @@ export const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const navLinks = [
+  const allNavLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Map', path: '/map', protected: true },
-    { name: 'Nearby Places', path: '/nearby', protected: true },
-    { name: 'SOS', path: '/sos', protected: true },
-    { name: 'AI Assistant', path: '/ai', protected: true },
-    { name: 'Guardian', path: '/guardian', protected: true },
+    { name: 'Map', path: '/map', protected: true, roles: ['user'] },
+    { name: 'Nearby Places', path: '/nearby', protected: true, roles: ['user'] },
+    { name: 'SOS', path: '/sos', protected: true, roles: ['user'] },
+    { name: 'AI Assistant', path: '/ai', protected: true, roles: ['user'] },
+    { name: 'Guardian', path: '/guardian', protected: true, roles: ['user', 'guardian'] },
     { name: 'Coming Soon', path: '/coming-soon' },
   ];
+
+  const navLinks = allNavLinks.filter(link => {
+    if (!link.protected) return true;
+    if (!isAuthenticated) return false;
+    return link.roles ? link.roles.includes(user?.role) : true;
+  });
 
   // Notification list shared between desktop dropdown and mobile
   const NotificationList = () => (
@@ -279,18 +285,20 @@ export const Navbar = () => {
             {/* Auth-specific links */}
             {isAuthenticated ? (
               <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
-                <Link
-                  to="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive('/dashboard')
-                      ? 'bg-purple-600/20 text-fuchsia-400 border border-purple-500/20'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                  }`}
-                >
-                  <LayoutDashboard className="w-4 h-4 text-purple-400 shrink-0" />
-                  Dashboard
-                </Link>
+                {user?.role === 'user' && (
+                  <Link
+                    to="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      isActive('/dashboard')
+                        ? 'bg-purple-600/20 text-fuchsia-400 border border-purple-500/20'
+                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-4 h-4 text-purple-400 shrink-0" />
+                    Dashboard
+                  </Link>
+                )}
                 {user?.role === 'admin' && (
                   <Link
                     to="/admin"

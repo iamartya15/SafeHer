@@ -25,6 +25,7 @@ import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
 import ComingSoon from './pages/ComingSoon';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 
 function App() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -36,34 +37,25 @@ function App() {
           {/* Public Page Routes */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+            <Route path="/reset-password" element={<PublicRoute><ResetPassword /></PublicRoute>} />
+            <Route path="/verify-email" element={<PublicRoute><VerifyEmail /></PublicRoute>} />
             <Route path="/coming-soon" element={<ComingSoon />} />
           </Route>
 
           {/* Protected Dashboard Routes */}
           <Route element={<DashboardLayout />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/sos" element={<SosAlerts />} />
-            <Route path="/map" element={<MapPage />} />
-            <Route path="/report-incident" element={<ReportIncident />} />
-            <Route path="/nearby" element={<SafePlaces />} />
-            <Route path="/ai" element={<AIAssistant />} />
-            <Route path="/guardian" element={<GuardianDashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            
-            {/* Admin only route */}
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminDashboard />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Dashboard /></ProtectedRoute>} />
+            <Route path="/sos" element={<ProtectedRoute allowedRoles={['user']}><SosAlerts /></ProtectedRoute>} />
+            <Route path="/map" element={<ProtectedRoute allowedRoles={['user']}><MapPage /></ProtectedRoute>} />
+            <Route path="/report-incident" element={<ProtectedRoute allowedRoles={['user']}><ReportIncident /></ProtectedRoute>} />
+            <Route path="/nearby" element={<ProtectedRoute allowedRoles={['user']}><SafePlaces /></ProtectedRoute>} />
+            <Route path="/ai" element={<ProtectedRoute allowedRoles={['user']}><AIAssistant /></ProtectedRoute>} />
+            <Route path="/guardian" element={<ProtectedRoute allowedRoles={['user', 'guardian']}><GuardianDashboard /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><Profile /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
           </Route>
 
           {/* Fallback redirect */}

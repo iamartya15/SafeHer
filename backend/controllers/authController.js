@@ -30,12 +30,15 @@ const register = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    const assignedRole = (email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) ? 'admin' : (role || 'user');
+
     const user = new User({
       name,
       email,
       password,
       phone,
-      role: role || 'user',
+      role: assignedRole,
       isVerified: true  // Auto-verify all users — email verification disabled for now
     });
 
@@ -124,6 +127,11 @@ const login = async (req, res, next) => {
     // Email verification disabled — allow all users to login directly
     if (!user.isVerified) {
       user.isVerified = true; // Auto-fix any unverified legacy users
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim() && user.role !== 'admin') {
+      user.role = 'admin';
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -442,6 +450,12 @@ const googleLogin = async (req, res, next) => {
         avatar: picture || defaultAvatar,
         isVerified: true
       });
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim() && user.role !== 'admin') {
+      console.log('[GOOGLE AUTH BACKEND] Auto-linking Admin role for this Google account.');
+      user.role = 'admin';
     }
 
     console.log('[GOOGLE AUTH BACKEND] Generating Access/Refresh tokens...');

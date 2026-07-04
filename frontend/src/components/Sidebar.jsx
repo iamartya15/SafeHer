@@ -19,16 +19,18 @@ export const Sidebar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'SOS Center', path: '/sos', icon: ShieldAlert },
-    { name: 'Safety Map', path: '/map', icon: Map },
-    { name: 'Report Incident', path: '/report-incident', icon: PlusCircle },
-    { name: 'Safe Places', path: '/nearby', icon: MapPin },
-    { name: 'AI Companion', path: '/ai', icon: Bot },
-    { name: 'Guardian Dashboard', path: '/guardian', icon: HeartHandshake },
-    { name: 'Profile Settings', path: '/profile', icon: User }
+  const allMenuItems = [
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['user'] },
+    { name: 'SOS Center', path: '/sos', icon: ShieldAlert, roles: ['user'] },
+    { name: 'Safety Map', path: '/map', icon: Map, roles: ['user'] },
+    { name: 'Report Incident', path: '/report-incident', icon: PlusCircle, roles: ['user'] },
+    { name: 'Safe Places', path: '/nearby', icon: MapPin, roles: ['user'] },
+    { name: 'AI Companion', path: '/ai', icon: Bot, roles: ['user'] },
+    { name: 'Guardian Dashboard', path: '/guardian', icon: HeartHandshake, roles: ['user', 'guardian'] },
+    { name: 'Profile Settings', path: '/profile', icon: User, roles: ['user', 'guardian', 'admin'] }
   ];
+
+  const menuItems = allMenuItems.filter(item => item.roles.includes(user?.role));
 
   return (
     <aside className="w-64 glass-card border-r border-white/5 min-h-[calc(100vh-57px)] hidden md:flex flex-col p-4 gap-6 select-none bg-slate-900/40 backdrop-blur-lg">

@@ -7,22 +7,36 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Sync user state from localStorage on mount
+  // Sync user state from localStorage and verify session on mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const token = localStorage.getItem('accessToken');
-    
-    if (savedUser && token) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (err) {
-        console.error('Failed to parse local user data:', err);
-        // Clear corrupt storage
-        localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
+    const verifySession = async () => {
+      const savedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('accessToken');
+      
+      if (savedUser && token) {
+        try {
+          setUser(JSON.parse(savedUser));
+          const data = await authService.getProfile();
+          if (data.success && data.user) {
+            setUser(data.user);
+            localStorage.setItem('user', JSON.stringify(data.user));
+          }
+        } catch (err) {
+          console.error('Session verification failed on mount:', err);
+          if (err.response?.status !== 401) {
+            try {
+              setUser(JSON.parse(savedUser));
+            } catch (parseErr) {
+              localStorage.removeItem('user');
+              localStorage.removeItem('accessToken');
+            }
+          }
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    verifySession();
   }, []);
 
   const login = async (credentials) => {

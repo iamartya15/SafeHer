@@ -7,8 +7,6 @@ import {
   AlertTriangle,
   Activity,
   Trash2,
-  Edit2,
-  CheckCircle,
   Loader2,
   PieChart,
   UserCheck
@@ -21,34 +19,41 @@ export const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [incidents, setIncidents] = useState([]);
   const [sosLogs, setSosLogs] = useState([]);
+  const [guardianConnections, setGuardianConnections] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('stats'); // stats, users, reports, sos
+  const [activeTab, setActiveTab] = useState('stats'); // stats, users, guardians, reports, sos
 
   const loadData = async () => {
     setLoading(true);
     try {
       // Load Stats
       const statsRes = await adminService.getAdminStats();
-      if (statsRes.success) {
-        setStats(statsRes.stats);
+      if (statsRes.success && statsRes.data) {
+        setStats(statsRes.data);
       }
 
       // Load Users
       const usersRes = await adminService.getAdminUsers();
-      if (usersRes.success) {
-        setUsers(usersRes.users);
+      if (usersRes.success && usersRes.data) {
+        setUsers(usersRes.data);
       }
 
       // Load Reports
       const reportsRes = await incidentService.getIncidents();
       if (reportsRes.success) {
-        setIncidents(reportsRes.reports);
+        setIncidents(reportsRes.data || reportsRes.reports || []);
       }
 
       // Load SOS Logs
       const sosRes = await adminService.getSOSLogs();
-      if (sosRes.success) {
-        setSosLogs(sosRes.logs);
+      if (sosRes.success && sosRes.data) {
+        setSosLogs(sosRes.data);
+      }
+
+      // Load Guardian Connections
+      const guardianRes = await adminService.getGuardianConnections();
+      if (guardianRes.success && guardianRes.data) {
+        setGuardianConnections(guardianRes.data);
       }
     } catch (err) {
       console.error('Failed to load admin logs:', err);
@@ -74,6 +79,50 @@ export const AdminDashboard = () => {
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || 'Failed to update role.', { id: toastId });
+    }
+  };
+
+  const handleToggleBlock = async (userId, isBlocked) => {
+    const toastId = toast.loading(`${isBlocked ? 'Activating' : 'Suspending'} user account...`);
+    try {
+      const res = await adminService.blockUser(userId);
+      if (res.success) {
+        toast.success(res.message, { id: toastId });
+        loadData();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to change suspension state.', { id: toastId });
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user? This will also remove all their guardian connections. This action cannot be undone.')) return;
+    const toastId = toast.loading('Deleting user account...');
+    try {
+      const res = await adminService.deleteUser(userId);
+      if (res.success) {
+        toast.success('User account deleted successfully.', { id: toastId });
+        loadData();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to delete user.', { id: toastId });
+    }
+  };
+
+  const handleRemoveConnection = async (connId) => {
+    if (!window.confirm('Are you sure you want to disconnect this guardian relationship?')) return;
+    const toastId = toast.loading('Removing guardian connection...');
+    try {
+      const res = await adminService.removeGuardianConnection(connId);
+      if (res.success) {
+        toast.success('Guardian connection removed successfully.', { id: toastId });
+        loadData();
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to remove guardian connection.', { id: toastId });
     }
   };
 
@@ -111,6 +160,7 @@ export const AdminDashboard = () => {
         {[
           { id: 'stats', label: 'Dashboard Statistics', icon: PieChart },
           { id: 'users', label: 'User Directory', icon: Users },
+          { id: 'guardians', label: 'Guardian Links', icon: UserCheck },
           { id: 'reports', label: 'Incident Moderator', icon: AlertTriangle },
           { id: 'sos', label: 'Emergency SOS Logs', icon: ShieldAlert }
         ].map((tab) => {
@@ -168,17 +218,19 @@ export const AdminDashboard = () => {
               </div>
 
               {/* Incidents by Category */}
-              <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
-                <h3 className="text-base font-bold text-white">Incidents Category Distribution</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-6 gap-4">
-                  {Object.entries(stats.categories).map(([category, val]) => (
-                    <div key={category} className="bg-slate-950/40 p-4 rounded-xl border border-white/5 text-center">
-                      <span className="text-[10px] text-slate-400 font-medium block truncate">{category}</span>
-                      <span className="text-2xl font-extrabold text-white mt-1 block">{val}</span>
-                    </div>
-                  ))}
+              {stats.categories && (
+                <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+                  <h3 className="text-base font-bold text-white">Incidents Category Distribution</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-4">
+                    {Object.entries(stats.categories).map(([category, val]) => (
+                      <div key={category} className="bg-slate-950/40 p-4 rounded-xl border border-white/5 text-center">
+                        <span className="text-[10px] text-slate-400 font-medium block truncate">{category}</span>
+                        <span className="text-2xl font-extrabold text-white mt-1 block">{val}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -209,7 +261,16 @@ export const AdminDashboard = () => {
                             className="w-8 h-8 rounded-full object-cover border border-purple-500/20"
                             onError={(e) => { e.target.src = getAvatarSrc('', u.name); }}
                           />
-                          <span className="font-bold text-white">{u.name}</span>
+                          <div>
+                            <span className="font-bold text-white flex items-center gap-1.5">
+                              {u.name}
+                              {u.isBlocked && (
+                                <span className="text-[9px] px-1 py-px bg-red-500/20 border border-red-500/30 text-red-400 rounded uppercase font-extrabold tracking-wider">
+                                  Suspended
+                                </span>
+                              )}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-6 py-4 font-mono">{u.email}</td>
                         <td className="px-6 py-4 font-mono">{u.phone || 'N/A'}</td>
@@ -228,21 +289,111 @@ export const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <select
-                            value={u.role}
-                            onChange={(e) => handleRoleChange(u._id, u.role, e.target.value)}
-                            className="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-slate-200 focus:outline-none focus:border-purple-500 text-[11px]"
-                          >
-                            <option value="user">User</option>
-                            <option value="guardian">Guardian</option>
-                            <option value="admin">Admin</option>
-                          </select>
+                          <div className="flex items-center justify-end gap-2">
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u._id, u.role, e.target.value)}
+                              className="bg-slate-900 border border-slate-700 rounded px-2.5 py-1 text-slate-200 focus:outline-none focus:border-purple-500 text-[11px] h-8"
+                            >
+                              <option value="user">User</option>
+                              <option value="guardian">Guardian</option>
+                              <option value="admin">Admin</option>
+                            </select>
+                            
+                            <button
+                              onClick={() => handleToggleBlock(u._id, u.isBlocked)}
+                              className={`px-2.5 py-1 text-[10px] font-bold rounded border h-8 transition-colors ${
+                                u.isBlocked
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                  : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20 hover:bg-yellow-500/20'
+                              }`}
+                            >
+                              {u.isBlocked ? 'Activate' : 'Suspend'}
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteUser(u._id)}
+                              className="p-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 transition-colors h-8 w-8 flex items-center justify-center"
+                              title="Delete Account"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {/* GUARDIANS TAB */}
+          {activeTab === 'guardians' && (
+            <div className="glass-card rounded-2xl border border-white/5 overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/5 bg-slate-900/60">
+                <h3 className="text-sm font-bold text-white">Active Guardian-Ward Connections</h3>
+              </div>
+              {guardianConnections.length === 0 ? (
+                <div className="p-10 text-center text-slate-500">No active guardian links registered.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-slate-950/40 border-b border-white/5 text-slate-400 font-medium uppercase tracking-wider text-[10px]">
+                        <th className="px-6 py-3">Ward (User)</th>
+                        <th className="px-6 py-3">Ward Contact</th>
+                        <th className="px-6 py-3">Guardian</th>
+                        <th className="px-6 py-3">Guardian Contact</th>
+                        <th className="px-6 py-3">Relationship</th>
+                        <th className="px-6 py-3">Status</th>
+                        <th className="px-6 py-3 text-right">Moderator Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 text-slate-300">
+                      {guardianConnections.map((conn) => (
+                        <tr key={conn._id} className="hover:bg-white/5 transition-colors">
+                          <td className="px-6 py-4 font-bold text-white">
+                            {conn.userId?.name || 'Deleted User'}
+                          </td>
+                          <td className="px-6 py-4 font-mono">
+                            {conn.userId?.email || 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 font-bold text-purple-300">
+                            {conn.guardianId?.name || 'Deleted User'}
+                          </td>
+                          <td className="px-6 py-4 font-mono">
+                            {conn.guardianEmail}
+                          </td>
+                          <td className="px-6 py-4">
+                            {conn.relationship}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              conn.status === 'approved'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10'
+                                : conn.status === 'pending'
+                                ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/10 animate-pulse'
+                                : 'bg-slate-700/30 text-slate-400'
+                            }`}>
+                              {conn.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleRemoveConnection(conn._id)}
+                              className="p-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded hover:bg-red-500/20 transition-colors"
+                              title="Disconnect Guardian"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           )}
 
@@ -371,4 +522,5 @@ export const AdminDashboard = () => {
     </div>
   );
 };
+
 export default AdminDashboard;

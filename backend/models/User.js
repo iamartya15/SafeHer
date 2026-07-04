@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'guardian', 'admin'],
       default: 'user'
     },
+    isBlocked: {
+      type: Boolean,
+      default: false
+    },
     phone: {
       type: String,
       trim: true
