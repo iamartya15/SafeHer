@@ -32,18 +32,7 @@ const register = async (req, res, next) => {
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
     const isDev = process.env.NODE_ENV !== 'production';
-     
-    console.log({
-      name,
-      email,
-      password,
-      phone,
-      role: role || 'user',
-      isVerified: isDev ? true : false,
-      verificationToken,
-      verificationTokenExpires
-    })
-    
+
     const user = new User({
       name,
       email,
@@ -57,6 +46,54 @@ const register = async (req, res, next) => {
 
     await user.save();
 
+    const message = isDev
+      ? 'Registration successful! Development mode: Account auto-verified. Logging you in...'
+      : 'Registration successful! Please check your email to verify your account.';
+
+    // In dev mode: generate tokens and return user data for auto-login
+    if (isDev) {
+      const { accessToken, refreshToken } = generateTokens(user._id);
+
+      // Save refresh token in user document
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      // Set refresh token in cookie
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false, // not production
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      });
+
+      // Send verification email in background (don't block response)
+      const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+      sendMail({
+        to: user.email,
+        subject: 'Verify your email - SafeHer AI',
+        text: `Welcome to SafeHer. Please verify your email by opening: ${verificationUrl}`,
+        html: `<p>Welcome ${name}! Verify at: <a href="${verificationUrl}">${verificationUrl}</a></p>`
+      }).catch((mailErr) => {
+        console.warn('Dev: Mail delivery skipped/failed:', mailErr.message);
+      });
+
+      return res.status(201).json({
+        success: true,
+        message,
+        accessToken,
+        refreshToken,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          avatar: user.avatar
+        }
+      });
+    }
+
+    // Production: just send success message, require email verification
     // Send verification email
     const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
     const emailHtml = `
@@ -74,7 +111,6 @@ const register = async (req, res, next) => {
       </div>
     `;
 
-    // Try sending email, fail silently/gracefully if it's development mode
     try {
       await sendMail({
         to: user.email,
@@ -84,12 +120,8 @@ const register = async (req, res, next) => {
       });
     } catch (mailErr) {
       console.error('Mail delivery failed during registration:', mailErr.message);
-      if (!isDev) throw mailErr;
+      throw mailErr;
     }
-
-    const message = isDev
-      ? 'Registration successful! Development mode: Account auto-verified. You can log in immediately.'
-      : 'Registration successful! Please check your email to verify your account.';
 
     res.status(201).json({
       success: true,

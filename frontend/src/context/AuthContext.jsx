@@ -44,6 +44,10 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     try {
       const data = await authService.register(userData);
+      // In dev mode, backend returns tokens + user — set state for immediate auto-login
+      if (data.success && data.user && data.accessToken) {
+        setUser(data.user);
+      }
       return data;
     } finally {
       setLoading(false);

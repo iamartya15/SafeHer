@@ -2,6 +2,14 @@ import api from './api';
 
 export const register = async (userData) => {
   const response = await api.post('/auth/register', userData);
+  // In dev mode, backend returns tokens + user for immediate auto-login
+  if (response.data.success && response.data.accessToken && response.data.user) {
+    localStorage.setItem('accessToken', response.data.accessToken);
+    if (response.data.refreshToken) {
+      localStorage.setItem('refreshToken', response.data.refreshToken);
+    }
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+  }
   return response.data;
 };
 

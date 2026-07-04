@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { Shield, Mail, Lock, User, Phone, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export const Register = () => {
   const { register: signup } = useAuth();
+  const navigate = useNavigate();
   
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
@@ -33,7 +34,13 @@ export const Register = () => {
       const res = await signup(data);
       if (res.success) {
         toast.success(res.message || 'Registration successful!');
-        setRegisteredEmail(data.email);
+        // Dev mode: backend returns tokens → auto-login, go to dashboard
+        if (res.accessToken && res.user) {
+          navigate('/dashboard', { replace: true });
+        } else {
+          // Production: show email verification screen
+          setRegisteredEmail(data.email);
+        }
       }
     } catch (err) {
       console.error(err);
