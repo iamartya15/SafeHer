@@ -37,12 +37,15 @@ const ThemeToggleButton = ({ theme, cycleTheme }) => {
   return (
     <button
       onClick={cycleTheme}
-      className="relative p-2 rounded-full transition-colors"
-      style={{ color: 'var(--text-secondary)' }}
+      className="relative p-2 rounded-full transition-all duration-300 hover:bg-white/5 focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:outline-none"
+      style={{
+        color: theme === 'dark' ? '#c084fc' : theme === 'light' ? '#f59e0b' : '#38bdf8',
+        backgroundColor: 'var(--hover-bg)'
+      }}
       aria-label={meta.tip}
       title={meta.tip}
     >
-      <span key={theme} className="theme-icon-enter inline-flex">
+      <span key={theme} className="theme-icon-enter inline-flex items-center justify-center">
         <Icon className="w-[18px] h-[18px]" />
       </span>
     </button>
@@ -101,12 +104,16 @@ export const Navbar = () => {
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
+  const pendingUpdateRef = useRef(false);
+
   // ─── Notifications ───────────────────────────────────────────────
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
     try {
       const res = await chatService.getNotifications();
-      if (res.success) setNotifications(res.notifications);
+      if (res.success && !pendingUpdateRef.current) {
+        setNotifications(res.notifications);
+      }
     } catch (err) {
       console.error('Failed to load notifications:', err);
     }
@@ -130,23 +137,33 @@ export const Navbar = () => {
     setShowNotifications(willOpen);
     setShowProfileMenu(false);
     if (willOpen && unreadCount > 0) {
+      pendingUpdateRef.current = true;
       setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       try { await chatService.markAllNotificationsRead(); }
       catch (err) { console.error('Failed to auto-mark read:', err); }
+      finally {
+        setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
+      }
     }
   };
 
   const handleMarkAllRead = async () => {
+    pendingUpdateRef.current = true;
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     try { await chatService.markAllNotificationsRead(); }
     catch (err) { console.error('Failed to mark all read:', err); }
+    finally {
+      setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
+    }
   };
 
   const handleNotificationClick = async (notif) => {
     try {
       if (!notif.read) {
-        await chatService.markNotificationRead(notif._id);
+        pendingUpdateRef.current = true;
         setNotifications((prev) => prev.map((n) => (n._id === notif._id ? { ...n, read: true } : n)));
+        await chatService.markNotificationRead(notif._id);
+        setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
       }
       setShowNotifications(false);
       setMobileMenuOpen(false);
