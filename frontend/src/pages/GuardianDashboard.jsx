@@ -19,8 +19,10 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
+import { useAuth } from '../hooks/useAuth';
 
 export const GuardianDashboard = () => {
+  const { user } = useAuth();
   const [monitoredUsers, setMonitoredUsers] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [guardiansList, setGuardiansList] = useState([]); 
@@ -179,7 +181,7 @@ export const GuardianDashboard = () => {
       </div>
 
       {/* 1. Emergency Alerts Header (Visible only when alerts are active) */}
-      {activeAlerts.length > 0 && (
+      {(user?.role === 'guardian' || user?.role === 'admin') && activeAlerts.length > 0 && (
         <div className="space-y-4">
           {activeAlerts.map((ward) => {
             const mapsUrl = ward.latestSos.location?.coordinates
@@ -245,7 +247,8 @@ export const GuardianDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           
           {/* A. People You Protect Section */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'guardian' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-purple-400" />
@@ -326,9 +329,11 @@ export const GuardianDashboard = () => {
               </div>
             )}
           </div>
+          )}
 
           {/* B. Connected Guardians Section */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'user' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <HeartHandshake className="w-5 h-5 text-purple-400" />
@@ -388,9 +393,11 @@ export const GuardianDashboard = () => {
               </div>
             )}
           </div>
+          )}
 
           {/* C. History Logs */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'guardian' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-purple-400" />
               <h3 className="text-base font-bold text-white">Emergency History Logs</h3>
@@ -421,6 +428,7 @@ export const GuardianDashboard = () => {
               )}
             </div>
           </div>
+          )}
 
         </div>
 
@@ -428,7 +436,8 @@ export const GuardianDashboard = () => {
         <div className="space-y-6">
           
           {/* A. Pending Requests Received */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'guardian' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <h3 className="text-base font-bold text-white flex items-center justify-between">
               <span>Pending Requests</span>
               {pendingRequests.length > 0 && (
@@ -475,9 +484,11 @@ export const GuardianDashboard = () => {
               )}
             </div>
           </div>
+          )}
 
           {/* B. Add Guardian Form */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'user' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="space-y-1">
               <h3 className="text-base font-bold text-white">Add safety guardian</h3>
               <p className="text-[10px] text-slate-400">Invite a guardian by their registered SafeHer account email.</p>
@@ -535,9 +546,11 @@ export const GuardianDashboard = () => {
               </button>
             </form>
           </div>
+          )}
 
           {/* C. Sent Invitations Status */}
-          <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
+          {(user?.role === 'user' || user?.role === 'admin') && (
+            <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <h3 className="text-base font-bold text-white">Sent Invitations Status</h3>
             <div className="space-y-3">
               {loading ? (
@@ -585,6 +598,7 @@ export const GuardianDashboard = () => {
               )}
             </div>
           </div>
+          )}
 
         </div>
 

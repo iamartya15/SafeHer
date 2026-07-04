@@ -53,7 +53,7 @@ function App() {
             <Route path="/report-incident" element={<ProtectedRoute allowedRoles={['user']}><ReportIncident /></ProtectedRoute>} />
             <Route path="/nearby" element={<ProtectedRoute allowedRoles={['user']}><SafePlaces /></ProtectedRoute>} />
             <Route path="/ai" element={<ProtectedRoute allowedRoles={['user']}><AIAssistant /></ProtectedRoute>} />
-            <Route path="/guardian" element={<ProtectedRoute allowedRoles={['user', 'guardian']}><GuardianDashboard /></ProtectedRoute>} />
+            <Route path="/guardian" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><GuardianDashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><Profile /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
           </Route>

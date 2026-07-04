@@ -145,7 +145,7 @@ export const Navbar = () => {
     { name: 'Nearby Places', path: '/nearby', protected: true, roles: ['user'] },
     { name: 'SOS', path: '/sos', protected: true, roles: ['user'] },
     { name: 'AI Assistant', path: '/ai', protected: true, roles: ['user'] },
-    { name: 'Guardian', path: '/guardian', protected: true, roles: ['user', 'guardian'] },
+    { name: 'Guardian', path: '/guardian', protected: true, roles: ['user', 'guardian', 'admin'] },
     { name: 'Coming Soon', path: '/coming-soon' },
   ];
 

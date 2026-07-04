@@ -26,7 +26,8 @@ export const Sidebar = () => {
     { name: 'Report Incident', path: '/report-incident', icon: PlusCircle, roles: ['user'] },
     { name: 'Safe Places', path: '/nearby', icon: MapPin, roles: ['user'] },
     { name: 'AI Companion', path: '/ai', icon: Bot, roles: ['user'] },
-    { name: 'Guardian Dashboard', path: '/guardian', icon: HeartHandshake, roles: ['user', 'guardian'] },
+    { name: 'Admin Dashboard', path: '/admin', icon: ShieldPlus, roles: ['admin'] },
+    { name: 'Guardian Command Center', path: '/guardian', icon: HeartHandshake, roles: ['user', 'guardian', 'admin'] },
     { name: 'Profile Settings', path: '/profile', icon: User, roles: ['user', 'guardian', 'admin'] }
   ];
 
@@ -74,20 +75,6 @@ export const Sidebar = () => {
             </Link>
           );
         })}
-
-        {user?.role === 'admin' && (
-          <Link
-            to="/admin"
-            className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group mt-4 border border-dashed ${
-              isActive('/admin')
-                ? 'bg-fuchsia-600/20 text-fuchsia-400 border-fuchsia-500'
-                : 'text-slate-400 border-slate-700/50 hover:bg-fuchsia-500/5 hover:text-fuchsia-400 hover:border-fuchsia-500/50'
-            }`}
-          >
-            <ShieldPlus className="w-4 h-4 text-fuchsia-400" />
-            <span>Admin Center</span>
-          </Link>
-        )}
       </div>
 
       {/* Footer Info */}

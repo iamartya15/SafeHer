@@ -91,6 +91,12 @@ const updateUserRole = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'You cannot change your own role', data: null });
     }
 
+    // Protect Super Admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
+      return res.status(403).json({ success: false, message: 'Super Administrator role cannot be modified.', data: null });
+    }
+
     user.role = role;
     await user.save();
 
@@ -116,6 +122,12 @@ const toggleBlockUser = async (req, res, next) => {
 
     if (user._id.toString() === req.user.id) {
       return res.status(400).json({ success: false, message: 'You cannot suspend your own account', data: null });
+    }
+
+    // Protect Super Admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
+      return res.status(403).json({ success: false, message: 'Super Administrator account cannot be suspended.', data: null });
     }
 
     user.isBlocked = !user.isBlocked;
@@ -149,6 +161,12 @@ const deleteUser = async (req, res, next) => {
 
     if (user._id.toString() === req.user.id) {
       return res.status(400).json({ success: false, message: 'You cannot delete your own account', data: null });
+    }
+
+    // Protect Super Admin
+    const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
+      return res.status(403).json({ success: false, message: 'Super Administrator account cannot be deleted.', data: null });
     }
 
     await User.findByIdAndDelete(req.params.id);
