@@ -120,6 +120,16 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 
+
+app.get("/", (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Welcome to SafeHer AI Backend",
+    status: "Running"
+  });
+});
+
+
 // Health check and root route
 app.get('/api', (req, res) => {
   res.status(200).json({
@@ -130,9 +140,15 @@ app.get('/api', (req, res) => {
   });
 });
 
+
+
+
 // Handle 404 routes
 app.use((req, res, next) => {
-  res.status(404).json({ success: false, message: 'API endpoint not found' });
+  res.status(404).json({ 
+    success: false, 
+    message: 'API endpoint not found' 
+  });
 });
 
 // Centralized Error Handler
@@ -141,5 +157,5 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`SafeHer AI Server listening in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  console.log(`SafeHer AI Server listening in http://localhost:${PORT}`);
 });

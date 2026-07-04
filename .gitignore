@@ -1,6 +1,8 @@
 # Dependencies
-node_modules/
+/node_modules
 **/node_modules/
+
+package-lock.json
 
 # Environment files
 .env
@@ -24,6 +26,23 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Uploads and temporary files
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Build
+dist/
+frontend/dist/
+
+# User uploads
 backend/public/uploads/
-backend/public/temp/
+
+# Logs
+*.log
+

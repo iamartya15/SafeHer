@@ -5,7 +5,7 @@ const getBaseUrl = () => {
       return import.meta.env.VITE_API_URL;
     }
   }
-  return 'http://localhost:5001/api';
+  return 'http://localhost:5000/api';
 };
 
 import axios from 'axios';
@@ -55,11 +55,11 @@ api.interceptors.response.use(
 
     // Check if this is an authentication route (login, register, forgot/reset password, email verification)
     const isAuthRoute = originalRequest.url && (
-      originalRequest.url.includes('/auth/login') ||
-      originalRequest.url.includes('/auth/register') ||
-      originalRequest.url.includes('/auth/forgot-password') ||
-      originalRequest.url.includes('/auth/reset-password') ||
-      originalRequest.url.includes('/auth/verify-email')
+      originalRequest.url.includes('/api/auth/login') ||
+      originalRequest.url.includes('/api/auth/register') ||
+      originalRequest.url.includes('/api/auth/forgot-password') ||
+      originalRequest.url.includes('/api/auth/reset-password') ||
+      originalRequest.url.includes('/api/auth/verify-email')
     );
 
     // Check if error is 401, not already retried, and not an auth route
