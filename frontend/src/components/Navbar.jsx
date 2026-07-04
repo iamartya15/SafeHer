@@ -7,7 +7,7 @@ import * as chatService from '../services/chatService';
 import { getAvatarSrc } from '../utils/avatar';
 
 export const Navbar = () => {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated, activeWorkspace, setActiveWorkspace } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -141,18 +141,35 @@ export const Navbar = () => {
 
   const allNavLinks = [
     { name: 'Home', path: '/' },
-    { name: 'Map', path: '/map', protected: true, roles: ['user'] },
+    { name: 'Dashboard', path: '/dashboard', protected: true, roles: ['user'] },
+    { name: 'SOS Center', path: '/sos', protected: true, roles: ['user'] },
+    { name: 'Safety Map', path: '/map', protected: true, roles: ['user'] },
+    { name: 'Report Incident', path: '/report-incident', protected: true, roles: ['user'] },
     { name: 'Nearby Places', path: '/nearby', protected: true, roles: ['user'] },
-    { name: 'SOS', path: '/sos', protected: true, roles: ['user'] },
-    { name: 'AI Assistant', path: '/ai', protected: true, roles: ['user'] },
-    { name: 'Guardian', path: '/guardian', protected: true, roles: ['user', 'guardian', 'admin'] },
-    { name: 'Coming Soon', path: '/coming-soon' },
+    { name: 'AI Companion', path: '/ai', protected: true, roles: ['user'] },
+    { name: 'Admin Dashboard', path: '/admin', protected: true, roles: ['admin'] },
+    { name: 'Guardian Command Center', path: '/guardian', protected: true, roles: ['guardian', 'admin'] },
+    { name: 'Profile Settings', path: '/profile', protected: true, roles: ['user', 'guardian', 'admin'] },
+    { name: 'Coming Soon', path: '/coming-soon' }
   ];
+
+  const userRoles = user?.roles && user?.roles.length > 0 ? user.roles : [user?.role || 'user'];
 
   const navLinks = allNavLinks.filter(link => {
     if (!link.protected) return true;
     if (!isAuthenticated) return false;
-    return link.roles ? link.roles.includes(user?.role) : true;
+    
+    if (link.roles) {
+      if (link.roles.includes(activeWorkspace)) {
+        if (link.path === '/admin' && activeWorkspace !== 'admin') return false;
+        return true;
+      }
+      if (activeWorkspace === 'user' && link.path === '/guardian') {
+        return userRoles.includes('guardian');
+      }
+      return false;
+    }
+    return true;
   });
 
   // Notification list shared between desktop dropdown and mobile
@@ -255,9 +272,32 @@ export const Navbar = () => {
                 <div className="overflow-hidden">
                   <p className="text-sm font-bold text-white truncate">{user.name}</p>
                   <span className="text-[10px] text-purple-400 font-semibold uppercase tracking-wide">
-                    {user.role === 'admin' ? 'Administrator' : user.role === 'guardian' ? 'Guardian' : 'SafeHer User'}
+                    {activeWorkspace === 'admin' ? 'Administrator' : activeWorkspace === 'guardian' ? 'Guardian' : 'SafeHer User'}
                   </span>
                 </div>
+              </div>
+            )}
+
+            {/* Mobile Workspace Selector Dropdown */}
+            {isAuthenticated && userRoles.length > 1 && (
+              <div className="mb-4 px-3">
+                <label className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block mb-1">Select Workspace</label>
+                <select
+                  value={activeWorkspace}
+                  onChange={(e) => {
+                    const ws = e.target.value;
+                    setActiveWorkspace(ws);
+                    setMobileMenuOpen(false);
+                    if (ws === 'user') navigate('/dashboard');
+                    else if (ws === 'guardian') navigate('/guardian');
+                    else if (ws === 'admin') navigate('/admin');
+                  }}
+                  className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-purple-500/50 cursor-pointer"
+                >
+                  {userRoles.includes('user') && <option value="user">User Dashboard</option>}
+                  {userRoles.includes('guardian') && <option value="guardian">Guardian Command</option>}
+                  {userRoles.includes('admin') && <option value="admin">Admin Dashboard</option>}
+                </select>
               </div>
             )}
 
@@ -265,6 +305,7 @@ export const Navbar = () => {
             <nav className="space-y-1">
               {navLinks.map((link) => {
                 if (link.protected && !isAuthenticated) return null;
+                const displayName = (activeWorkspace === 'user' && link.path === '/guardian') ? 'Guardian Dashboard' : link.name;
                 return (
                   <Link
                     key={link.name}
@@ -276,7 +317,7 @@ export const Navbar = () => {
                         : 'text-slate-300 hover:bg-white/5 hover:text-white'
                     }`}
                   >
-                    {link.name}
+                    {displayName}
                   </Link>
                 );
               })}
@@ -285,46 +326,13 @@ export const Navbar = () => {
             {/* Auth-specific links */}
             {isAuthenticated ? (
               <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
-                {user?.role === 'user' && (
-                  <Link
-                    to="/dashboard"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive('/dashboard')
-                        ? 'bg-purple-600/20 text-fuchsia-400 border border-purple-500/20'
-                        : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                    }`}
-                  >
-                    <LayoutDashboard className="w-4 h-4 text-purple-400 shrink-0" />
-                    Dashboard
-                  </Link>
-                )}
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                      isActive('/admin')
-                        ? 'bg-fuchsia-600/20 text-fuchsia-400 border border-fuchsia-500/20'
-                        : 'text-slate-300 hover:bg-white/5 hover:text-fuchsia-400'
-                    }`}
-                  >
-                    <Shield className="w-4 h-4 text-fuchsia-400 shrink-0" />
-                    Admin Panel
-                  </Link>
-                )}
-                <Link
-                  to="/profile"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    isActive('/profile')
-                      ? 'bg-purple-600/20 text-fuchsia-400 border border-purple-500/20'
-                      : 'text-slate-300 hover:bg-white/5 hover:text-white'
-                  }`}
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
                 >
-                  <User className="w-4 h-4 text-blue-400 shrink-0" />
-                  Profile Settings
-                </Link>
+                  <LogOut className="w-4 h-4 shrink-0" />
+                  Sign Out
+                </button>
               </div>
             ) : (
               <div className="mt-4 pt-4 border-t border-white/10 space-y-3">

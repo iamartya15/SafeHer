@@ -53,10 +53,13 @@ const restrictTo = (...roles) => {
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRoles = req.user.roles && req.user.roles.length > 0 ? req.user.roles : [req.user.role];
+    const hasAccess = roles.some(role => userRoles.includes(role));
+
+    if (!hasAccess) {
       return res.status(403).json({
         success: false,
-        message: `Role (${req.user.role}) is not authorized to access this resource`
+        message: `Your account roles (${userRoles.join(', ')}) are not authorized to access this resource`
       });
     }
 

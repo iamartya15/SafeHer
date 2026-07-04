@@ -9,6 +9,8 @@ import { getAvatarSrc } from '../utils/avatar';
 export const Profile = () => {
   const { user, updateProfile, updateAvatarState } = useAuth();
   
+  const userRoles = user?.roles && user?.roles.length > 0 ? user.roles : [user?.role || 'user'];
+  const [actAsGuardian, setActAsGuardian] = useState(userRoles.includes('guardian'));
   const [loading, setLoading] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
 
@@ -27,7 +29,19 @@ export const Profile = () => {
     setLoading(true);
     const toastId = toast.loading('Syncing profile details...');
     try {
-      const res = await updateProfile(data);
+      const selectedRoles = ['user'];
+      if (userRoles.includes('admin')) {
+        selectedRoles.push('admin');
+      }
+      if (actAsGuardian) {
+        selectedRoles.push('guardian');
+      }
+
+      const res = await updateProfile({
+        name: data.name,
+        phone: data.phone,
+        roles: selectedRoles
+      });
       if (res.success) {
         toast.success('Profile details updated successfully!', { id: toastId });
       }
@@ -179,6 +193,23 @@ export const Profile = () => {
                   {...register('phone')}
                 />
               </div>
+            </div>
+
+            {/* Roles Option */}
+            <div className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/5 mt-2">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider">Account Workspaces</h4>
+              <label className="flex items-center gap-3 cursor-pointer text-xs text-slate-300 select-none">
+                <input
+                  type="checkbox"
+                  checked={actAsGuardian}
+                  onChange={(e) => setActAsGuardian(e.target.checked)}
+                  className="w-4 h-4 rounded border-slate-700 bg-slate-950 text-purple-600 focus:ring-purple-500/20"
+                />
+                <div>
+                  <span className="font-bold text-white block">Also act as a Safety Guardian</span>
+                  <span className="text-[10px] text-slate-400 block mt-0.5">Enabling this grants access to the Guardian Command Center to protect others and receive emergency alerts.</span>
+                </div>
+              </label>
             </div>
 
             {/* Submit */}

@@ -32,6 +32,7 @@ const register = async (req, res, next) => {
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
     const assignedRole = (email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) ? 'admin' : (role || 'user');
+    const assignedRoles = assignedRole === 'admin' ? ['admin', 'guardian'] : [assignedRole];
 
     const user = new User({
       name,
@@ -39,6 +40,7 @@ const register = async (req, res, next) => {
       password,
       phone,
       role: assignedRole,
+      roles: assignedRoles,
       isVerified: true  // Auto-verify all users — email verification disabled for now
     });
 
@@ -130,8 +132,11 @@ const login = async (req, res, next) => {
     }
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
-    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim() && user.role !== 'admin') {
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
       user.role = 'admin';
+      user.roles = ['admin', 'guardian'];
+    } else if (!user.roles || user.roles.length === 0) {
+      user.roles = [user.role || 'user'];
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);
@@ -157,8 +162,10 @@ const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        roles: user.roles,
         phone: user.phone,
-        avatar: user.avatar
+        avatar: user.avatar,
+        isVerified: user.isVerified
       }
     });
   } catch (error) {
@@ -318,11 +325,24 @@ const getMe = async (req, res) => {
  * Update Profile
  */
 const updateProfile = async (req, res, next) => {
-  const { name, phone } = req.body;
+  const { name, phone, roles } = req.body;
   try {
     const user = await User.findById(req.user.id);
     if (name) user.name = name;
     if (phone) user.phone = phone;
+
+    if (roles && Array.isArray(roles)) {
+      const filteredRoles = roles.filter(r => ['user', 'guardian'].includes(r));
+      if (user.roles.includes('admin')) {
+        filteredRoles.push('admin');
+      }
+      if (filteredRoles.length > 0) {
+        user.roles = [...new Set(filteredRoles)];
+        if (!user.roles.includes(user.role)) {
+          user.role = user.roles[0];
+        }
+      }
+    }
 
     await user.save();
     res.status(200).json({
@@ -333,6 +353,7 @@ const updateProfile = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        roles: user.roles,
         phone: user.phone,
         avatar: user.avatar
       }
@@ -453,9 +474,12 @@ const googleLogin = async (req, res, next) => {
     }
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
-    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim() && user.role !== 'admin') {
+    if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
       console.log('[GOOGLE AUTH BACKEND] Auto-linking Admin role for this Google account.');
       user.role = 'admin';
+      user.roles = ['admin', 'guardian'];
+    } else if (!user.roles || user.roles.length === 0) {
+      user.roles = [user.role || 'user'];
     }
 
     console.log('[GOOGLE AUTH BACKEND] Generating Access/Refresh tokens...');
@@ -494,8 +518,10 @@ const googleLogin = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        roles: user.roles,
         phone: user.phone,
-        avatar: user.avatar
+        avatar: user.avatar,
+        isVerified: user.isVerified
       }
     });
 

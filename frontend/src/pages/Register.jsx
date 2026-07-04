@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -12,6 +12,22 @@ export const Register = () => {
   
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+
+  const containerRef = useRef(null);
+  const [buttonWidth, setButtonWidth] = useState(320);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const handleResize = () => {
+      const rect = containerRef.current.getBoundingClientRect();
+      const padding = 64; // subtracted padding p-8 (2 * 32)
+      const width = rect.width - padding;
+      setButtonWidth(Math.max(200, Math.min(400, Math.floor(width))));
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const {
     register,
@@ -90,7 +106,7 @@ export const Register = () => {
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl -z-10" />
 
-      <div className="w-full max-w-md glass-card rounded-2xl p-8 border border-white/5 shadow-2xl space-y-6">
+      <div ref={containerRef} className="w-full max-w-md glass-card rounded-2xl p-8 border border-white/5 shadow-2xl space-y-6">
         
         {/* Header */}
         <div className="text-center space-y-2">
@@ -246,7 +262,7 @@ export const Register = () => {
             theme="filled_black"
             text="continue_with"
             shape="rectangular"
-            width="384"
+            width={buttonWidth.toString()}
           />
         </div>
 

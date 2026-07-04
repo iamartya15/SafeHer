@@ -6,6 +6,23 @@ export const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeWorkspace, setActiveWorkspaceState] = useState(() => {
+    return localStorage.getItem('activeWorkspace') || 'user';
+  });
+
+  const setActiveWorkspace = (workspace) => {
+    setActiveWorkspaceState(workspace);
+    localStorage.setItem('activeWorkspace', workspace);
+  };
+
+  useEffect(() => {
+    if (user) {
+      const userRoles = user.roles && user.roles.length > 0 ? user.roles : [user.role || 'user'];
+      if (!userRoles.includes(activeWorkspace)) {
+        setActiveWorkspace(userRoles[0]);
+      }
+    }
+  }, [user, activeWorkspace]);
 
   // Sync user state from localStorage and verify session on mount
   useEffect(() => {
@@ -122,6 +139,8 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         updateAvatarState,
+        activeWorkspace,
+        setActiveWorkspace,
         isAuthenticated: !!user
       }}
     >

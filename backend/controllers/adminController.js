@@ -98,6 +98,9 @@ const updateUserRole = async (req, res, next) => {
     }
 
     user.role = role;
+    if (user.roles && !user.roles.includes(role)) {
+      user.roles.push(role);
+    }
     await user.save();
 
     res.status(200).json({

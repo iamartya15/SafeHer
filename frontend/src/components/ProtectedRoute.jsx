@@ -23,9 +23,12 @@ export const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   }
 
   // Check if role-based authorization is configured
-  if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
-    // Redirect back to dashboard if user has invalid permissions
-    return <Navigate to="/dashboard" replace />;
+  const userRoles = user.roles && user.roles.length > 0 ? user.roles : [user.role || 'user'];
+  const hasAllowedRole = allowedRoles.some(role => userRoles.includes(role));
+  if (allowedRoles.length > 0 && !hasAllowedRole) {
+    // Redirect back to allowed pages if user has invalid permissions
+    const fallbackPath = userRoles.includes('admin') ? '/admin' : userRoles.includes('guardian') ? '/guardian' : '/dashboard';
+    return <Navigate to={fallbackPath} replace />;
   }
 
   return children;

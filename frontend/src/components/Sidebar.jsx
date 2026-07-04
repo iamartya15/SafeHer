@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getAvatarSrc } from '../utils/avatar';
 import {
@@ -14,8 +14,9 @@ import {
 } from 'lucide-react';
 
 export const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, activeWorkspace, setActiveWorkspace } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const isActive = (path) => location.pathname === path;
 
@@ -27,11 +28,27 @@ export const Sidebar = () => {
     { name: 'Safe Places', path: '/nearby', icon: MapPin, roles: ['user'] },
     { name: 'AI Companion', path: '/ai', icon: Bot, roles: ['user'] },
     { name: 'Admin Dashboard', path: '/admin', icon: ShieldPlus, roles: ['admin'] },
-    { name: 'Guardian Command Center', path: '/guardian', icon: HeartHandshake, roles: ['user', 'guardian', 'admin'] },
+    { name: 'Guardian Command Center', path: '/guardian', icon: HeartHandshake, roles: ['guardian', 'admin'] },
     { name: 'Profile Settings', path: '/profile', icon: User, roles: ['user', 'guardian', 'admin'] }
   ];
 
-  const menuItems = allMenuItems.filter(item => item.roles.includes(user?.role));
+  const userRoles = user?.roles && user?.roles.length > 0 ? user.roles : [user?.role || 'user'];
+  const hasMultipleWorkspaces = userRoles.length > 1;
+
+  // Filter navigation items dynamically based on current active workspace
+  const menuItems = allMenuItems.filter((item) => {
+    // If it belongs to active workspace, show it
+    if (item.roles.includes(activeWorkspace)) {
+      // Admin dashboard is only for admin workspace
+      if (item.path === '/admin' && activeWorkspace !== 'admin') return false;
+      return true;
+    }
+    // In User workspace, show Guardian Command Center (labeled Guardian) only if user possesses guardian role
+    if (activeWorkspace === 'user' && item.path === '/guardian') {
+      return userRoles.includes('guardian');
+    }
+    return false;
+  });
 
   return (
     <aside className="w-64 glass-card border-r border-white/5 min-h-[calc(100vh-57px)] hidden md:flex flex-col p-4 gap-6 select-none bg-slate-900/40 backdrop-blur-lg">
@@ -49,15 +66,38 @@ export const Sidebar = () => {
         <div className="overflow-hidden">
           <h4 className="text-sm font-bold text-white truncate">{user?.name}</h4>
           <span className="text-[10px] text-purple-400 font-semibold tracking-wider uppercase block">
-            {user?.role === 'admin' ? 'Administrator' : user?.role === 'guardian' ? 'Guardian' : 'SafeHer User'}
+            {activeWorkspace === 'admin' ? 'Administrator' : activeWorkspace === 'guardian' ? 'Guardian' : 'SafeHer User'}
           </span>
         </div>
       </div>
+
+      {/* Role / Workspace Switcher */}
+      {hasMultipleWorkspaces && (
+        <div className="space-y-1 px-1">
+          <label className="text-[9px] font-extrabold text-slate-500 uppercase tracking-widest block">Select Workspace</label>
+          <select
+            value={activeWorkspace}
+            onChange={(e) => {
+              const ws = e.target.value;
+              setActiveWorkspace(ws);
+              if (ws === 'user') navigate('/dashboard');
+              else if (ws === 'guardian') navigate('/guardian');
+              else if (ws === 'admin') navigate('/admin');
+            }}
+            className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2.5 text-xs font-semibold text-white focus:outline-none focus:border-purple-500/50 cursor-pointer transition-colors"
+          >
+            {userRoles.includes('user') && <option value="user">User Dashboard</option>}
+            {userRoles.includes('guardian') && <option value="guardian">Guardian Command</option>}
+            {userRoles.includes('admin') && <option value="admin">Admin Dashboard</option>}
+          </select>
+        </div>
+      )}
 
       {/* Navigation List */}
       <div className="flex flex-col gap-1.5 flex-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const displayName = (activeWorkspace === 'user' && item.path === '/guardian') ? 'Guardian Dashboard' : item.name;
           return (
             <Link
               key={item.name}
@@ -71,7 +111,7 @@ export const Sidebar = () => {
               <Icon className={`w-4 h-4 transition-colors ${
                 isActive(item.path) ? 'text-fuchsia-400' : 'text-slate-400 group-hover:text-purple-400'
               }`} />
-              <span>{item.name}</span>
+              <span>{displayName}</span>
             </Link>
           );
         })}
