@@ -203,10 +203,17 @@ export const SosAlerts = () => {
             
             <div className="space-y-3">
               {loading ? (
-                <div className="text-slate-500 text-xs py-4 text-center">Loading contacts...</div>
+                <div className="flex items-center justify-center py-6 gap-2 text-slate-500 text-xs">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading contacts...
+                </div>
               ) : guardians.length === 0 ? (
-                <div className="p-4 border border-dashed border-white/5 text-center text-xs text-slate-500 rounded-xl">
-                  No verified contacts. Visit the Guardian dashboard to invite contacts.
+                <div className="empty-state">
+                  <HeartHandshake className="w-8 h-8 text-slate-600" />
+                  <div>
+                    <p className="text-sm font-bold text-white">No verified guardians</p>
+                    <p className="text-xs text-slate-500 mt-1">Invite trusted contacts to receive your SOS alerts.</p>
+                  </div>
+                  <a href="/guardian" className="btn-primary text-xs py-2 px-4">Go to Guardian Center</a>
                 </div>
               ) : (
                 guardians.map((guard) => (
@@ -235,9 +242,17 @@ export const SosAlerts = () => {
 
             <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
               {loading ? (
-                <div className="text-slate-500 text-xs py-4 text-center">Loading logs...</div>
+                <div className="flex items-center justify-center py-6 gap-2 text-slate-500 text-xs">
+                  <Loader2 className="w-4 h-4 animate-spin" /> Loading logs...
+                </div>
               ) : sosHistory.length === 0 ? (
-                <div className="text-center text-xs text-slate-500 py-4">No logged entries.</div>
+                <div className="empty-state py-8">
+                  <div className="p-3 bg-slate-800 rounded-full"><ShieldAlert className="w-5 h-5 text-slate-600" /></div>
+                  <div>
+                    <p className="text-sm font-bold text-white">No emergency history</p>
+                    <p className="text-xs text-slate-500 mt-1">Your past SOS alerts will be listed here.</p>
+                  </div>
+                </div>
               ) : (
                 sosHistory.map((log) => (
                   <div key={log._id} className="p-3 bg-slate-950/40 border border-white/5 rounded-xl flex items-center justify-between text-xs">

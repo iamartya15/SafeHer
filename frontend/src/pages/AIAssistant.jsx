@@ -8,6 +8,7 @@ export const AIAssistant = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [fetchingHistory, setFetchingHistory] = useState(true);
+  const [confirmClear, setConfirmClear] = useState(false);
   const chatEndRef = useRef(null);
 
   const loadChatHistory = async () => {
@@ -59,12 +60,12 @@ export const AIAssistant = () => {
   };
 
   const handleClearHistory = async () => {
-    if (!window.confirm('Are you sure you want to clear your conversation history?')) return;
     const toastId = toast.loading('Clearing history...');
     try {
       const res = await chatService.clearChatHistory();
       if (res.success) {
         setMessages([]);
+        setConfirmClear(false);
         toast.success('History cleared successfully.', { id: toastId });
       }
     } catch (err) {
@@ -95,13 +96,21 @@ export const AIAssistant = () => {
         </div>
 
         {messages.length > 0 && (
-          <button
-            onClick={handleClearHistory}
-            className="btn-secondary py-1.5 px-3 flex items-center gap-1.5 text-xs text-red-400 border-red-500/10 hover:bg-red-500/5 hover:border-red-500/20"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Clear Chats</span>
-          </button>
+          confirmClear ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Clear all chats?</span>
+              <button onClick={handleClearHistory} className="btn-danger py-1.5 px-3 text-xs">Yes, clear</button>
+              <button onClick={() => setConfirmClear(false)} className="btn-secondary py-1.5 px-3 text-xs">Cancel</button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmClear(true)}
+              className="btn-secondary py-1.5 px-3 flex items-center gap-1.5 text-xs text-red-400 border-red-500/10 hover:bg-red-500/5 hover:border-red-500/20"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear Chats</span>
+            </button>
+          )
         )}
       </div>
 

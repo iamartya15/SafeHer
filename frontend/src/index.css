@@ -2,12 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ========================================
+   THEME CSS VARIABLES
+   data-theme="dark"  (default)
+   data-theme="light"
+   ======================================== */
+
+:root,
+[data-theme="dark"] {
+  --bg-base:      #020617;       /* slate-950 */
+  --bg-surface:   #0f172a;       /* slate-900 */
+  --bg-card:      rgba(30, 41, 59, 0.5);  /* slate-800/50 */
+  --bg-input:     rgba(15, 23, 42, 0.5);  /* slate-900/50 */
+  --border-color: rgba(255, 255, 255, 0.06);
+  --border-muted: rgba(255, 255, 255, 0.05);
+  --text-primary:   #f1f5f9;     /* slate-100 */
+  --text-secondary: #94a3b8;     /* slate-400 */
+  --text-muted:     #64748b;     /* slate-500 */
+  --text-placeholder: #475569;   /* slate-600 */
+  --scrollbar-thumb: #9333ea;    /* purple-600 */
+  --scrollbar-track: #0f172a;    /* slate-900 */
+  --input-bg:     rgba(15, 23, 42, 0.5);
+  --input-border: rgba(71, 85, 105, 0.5); /* slate-700/50 */
+  --card-shadow:  0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --body-gradient-1: rgba(192, 38, 211, 0.08);
+  --body-gradient-2: rgba(124, 58, 237, 0.08);
+}
+
+[data-theme="light"] {
+  --bg-base:      #f8fafc;       /* slate-50 */
+  --bg-surface:   #f1f5f9;       /* slate-100 */
+  --bg-card:      rgba(255, 255, 255, 0.8);
+  --bg-input:     rgba(248, 250, 252, 0.9);
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-muted: rgba(0, 0, 0, 0.06);
+  --text-primary:   #0f172a;     /* slate-900 */
+  --text-secondary: #475569;     /* slate-600 */
+  --text-muted:     #64748b;     /* slate-500 */
+  --text-placeholder: #94a3b8;   /* slate-400 */
+  --scrollbar-thumb: #9333ea;
+  --scrollbar-track: #e2e8f0;
+  --input-bg:     rgba(255, 255, 255, 0.9);
+  --input-border: rgba(148, 163, 184, 0.5);
+  --card-shadow:  0 4px 24px 0 rgba(0, 0, 0, 0.08);
+  --body-gradient-1: rgba(192, 38, 211, 0.04);
+  --body-gradient-2: rgba(124, 58, 237, 0.04);
+}
+
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 min-h-screen overflow-x-hidden;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(192, 38, 211, 0.08) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, rgba(124, 58, 237, 0.08) 0px, transparent 50%);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      radial-gradient(at 0% 0%, var(--body-gradient-1) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, var(--body-gradient-2) 0px, transparent 50%);
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   /* Custom Scrollbar */
@@ -16,24 +71,26 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    @apply bg-slate-900;
+    background: var(--scrollbar-track);
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-purple-600 rounded;
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-purple-500;
+    background: #a855f7;
   }
 }
 
 @layer components {
   /* Premium Glassmorphic Card */
   .glass-card {
-    background: rgba(30, 41, 59, 0.5);
+    background: var(--bg-card);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--card-shadow);
+    transition: background 0.3s ease, border-color 0.3s ease;
   }
 
   .glass-card-hover {
@@ -42,7 +99,11 @@
 
   /* Glass input elements */
   .glass-input {
-    @apply w-full bg-slate-900/50 border border-slate-700/50 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all duration-200;
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    @apply rounded-lg px-4 py-2.5 placeholder-slate-500 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-all duration-200;
+    color: var(--text-primary);
   }
 
   /* Premium Buttons */
@@ -55,7 +116,30 @@
   }
 
   .btn-secondary {
-    @apply bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/50 font-medium px-5 py-2.5 rounded-lg active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none;
+    background: var(--bg-surface);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    @apply font-medium px-5 py-2.5 rounded-lg active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-secondary:hover {
+    background: var(--bg-card);
+  }
+
+  /* Page header block — consistent across all pages */
+  .page-header h1 {
+    @apply text-2xl md:text-3xl font-extrabold tracking-tight;
+    color: var(--text-primary);
+  }
+  .page-header p {
+    @apply text-xs mt-1;
+    color: var(--text-secondary);
+  }
+
+  /* Empty state block */
+  .empty-state {
+    @apply flex flex-col items-center justify-center text-center py-12 px-6 gap-4;
+    border: 1px dashed var(--border-color);
+    @apply rounded-2xl;
   }
 
   /* SOS Pulsing Ring Animation */
@@ -70,14 +154,8 @@
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* Map marker styles */
@@ -92,35 +170,23 @@
 
 /* Custom Ping Animation (ping-slow) */
 @keyframes ping-slow {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  70%, 100% {
-    transform: scale(2);
-    opacity: 0;
-  }
+  0%         { transform: scale(1); opacity: 1; }
+  70%, 100%  { transform: scale(2); opacity: 0; }
 }
-
 .animate-ping-slow {
   animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* Mobile drawer slide-in animation */
 @keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);   opacity: 1; }
 }
 
-/* Focus outline accessibility styling */
+/* Focus outline accessibility */
 *:focus-visible {
-  @apply outline-none ring-2 ring-purple-500 ring-offset-2 ring-offset-slate-950;
+  @apply outline-none ring-2 ring-purple-500 ring-offset-2;
+  ring-offset-color: var(--bg-base);
 }
 
 /* Prevent body scroll when drawer is open */
@@ -128,7 +194,38 @@ body.drawer-open {
   overflow: hidden;
 }
 
-/* Smooth Scrolling */
-html {
-  scroll-behavior: smooth;
+/* Scrollbar none utility (for filter bars) */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Light theme overrides for specific components */
+[data-theme="light"] .glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.07);
+}
+[data-theme="light"] nav {
+  background: rgba(248, 250, 252, 0.9) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.06) !important;
+}
+[data-theme="light"] aside {
+  background: rgba(241, 245, 249, 0.95) !important;
+  border-right-color: rgba(0, 0, 0, 0.06) !important;
+}
+/* Light theme text overrides for hardcoded slate-* classes */
+[data-theme="light"] .text-slate-100,
+[data-theme="light"] .text-slate-200 { color: #0f172a !important; }
+[data-theme="light"] .text-slate-300 { color: #1e293b !important; }
+[data-theme="light"] .text-slate-400 { color: #475569 !important; }
+[data-theme="light"] .text-slate-500 { color: #64748b !important; }
+[data-theme="light"] .bg-slate-950   { background-color: #f8fafc !important; }
+[data-theme="light"] .bg-slate-900   { background-color: #f1f5f9 !important; }
+[data-theme="light"] .bg-slate-800   { background-color: #e2e8f0 !important; }
+[data-theme="light"] .bg-slate-950\/90 { background-color: rgba(248,250,252,0.92) !important; }
+[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(241,245,249,0.6) !important; }
+[data-theme="light"] .border-white\/5  { border-color: rgba(0,0,0,0.06) !important; }
+[data-theme="light"] .border-white\/10 { border-color: rgba(0,0,0,0.09) !important; }

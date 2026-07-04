@@ -124,9 +124,13 @@ export const Profile = () => {
 
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white leading-tight">{user?.name}</h3>
-            <span className="text-[9px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-semibold uppercase tracking-wider block w-fit mx-auto">
-              {user?.role}
-            </span>
+            <div className="flex flex-wrap gap-1 justify-center">
+              {userRoles.map((r) => (
+                <span key={r} className="text-[9px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 font-semibold uppercase tracking-wider">
+                  {r}
+                </span>
+              ))}
+            </div>
           </div>
 
           <div className="w-full text-left text-xs space-y-2 pt-4 border-t border-white/5 text-slate-400">
@@ -228,6 +232,11 @@ export const Profile = () => {
               )}
             </button>
           </form>
+
+          {/* Quick links */}
+          <div className="flex items-center gap-3 pt-2 border-t border-white/5">
+            <a href="/settings" className="text-xs text-purple-400 hover:underline">App Settings →</a>
+          </div>
 
         </div>
 

@@ -123,8 +123,9 @@ export const SafePlaces = () => {
 
       {/* Geolocation Status check */}
       {geoLoading ? (
-        <div className="glass-card rounded-2xl p-6 border border-white/5 flex items-center justify-center text-slate-400 text-xs">
-          <Loader2 className="w-5 h-5 animate-spin mr-1.5" /> Querying GPS satellites to check coordinates...
+        <div className="glass-card rounded-2xl p-8 border border-white/5 flex flex-col items-center justify-center gap-3 text-slate-400 text-xs">
+          <Loader2 className="w-6 h-6 animate-spin text-purple-500" />
+          <span>Querying GPS satellites to check coordinates...</span>
         </div>
       ) : geoError ? (
         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-300">
@@ -157,8 +158,12 @@ export const SafePlaces = () => {
               <span>Fetching Overpass shelter indexes...</span>
             </div>
           ) : filteredPlaces.length === 0 ? (
-            <div className="p-10 text-center border border-dashed border-white/5 rounded-2xl text-xs text-slate-500">
-              No places of this category found within a 5km radius.
+            <div className="empty-state">
+              <MapPin className="w-8 h-8 text-slate-600" />
+              <div>
+                <p className="text-sm font-bold text-white">No places found</p>
+                <p className="text-xs text-slate-500 mt-1">No {activeFilter !== 'all' ? activeFilter : ''} places found within a 5 km radius.</p>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

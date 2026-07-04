@@ -295,8 +295,13 @@ export const Dashboard = () => {
                   <Loader2 className="w-5 h-5 animate-spin mr-1.5" /> Loading incident reports...
                 </div>
               ) : incidents.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-500 border border-dashed border-white/5 rounded-xl">
-                  No incidents have been reported in this community yet.
+                <div className="empty-state">
+                  <div className="p-3 bg-slate-800 rounded-full"><AlertTriangle className="w-6 h-6 text-slate-500" /></div>
+                  <div>
+                    <p className="text-sm font-bold text-white">No community reports yet</p>
+                    <p className="text-xs text-slate-500 mt-1">Be the first to report a safety concern in your area.</p>
+                  </div>
+                  <Link to="/report-incident" className="btn-primary text-xs py-2 px-4">Report an Incident</Link>
                 </div>
               ) : (
                 incidents.map((rep) => (
@@ -373,8 +378,12 @@ export const Dashboard = () => {
                   <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> Loading history...
                 </div>
               ) : sosHistory.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-500 border border-dashed border-white/5 rounded-xl">
-                  You have not triggered any SOS alarms.
+                <div className="empty-state">
+                  <div className="p-3 bg-slate-800 rounded-full"><ShieldAlert className="w-5 h-5 text-slate-500" /></div>
+                  <div>
+                    <p className="text-sm font-bold text-white">No SOS history</p>
+                    <p className="text-xs text-slate-500 mt-1">You haven't triggered any emergency alerts.</p>
+                  </div>
                 </div>
               ) : (
                 sosHistory.map((log) => (

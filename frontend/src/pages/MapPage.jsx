@@ -96,9 +96,15 @@ export const MapPage = () => {
       {/* Main Map Container */}
       <div className="flex-grow rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative bg-slate-900">
         {loading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 z-50 text-slate-500 text-xs">
-            <Loader2 className="w-8 h-8 text-purple-500 animate-spin mb-2" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 z-50 gap-3 text-slate-500 text-xs">
+            <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
             <span>Synchronizing incident coordinates...</span>
+          </div>
+        ) : filteredIncidents.length === 0 && selectedCategory !== 'All' ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
+            <Layers className="w-10 h-10 text-slate-600" />
+            <p className="text-sm font-bold text-white">No {selectedCategory} incidents</p>
+            <p className="text-xs text-slate-500">Try selecting a different category filter.</p>
           </div>
         ) : null}
 

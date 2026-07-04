@@ -204,8 +204,8 @@ export const Home = () => {
               <Link to="/register" className="btn-primary w-full sm:w-auto text-sm py-3 px-8">
                 Create Account
               </Link>
-              <Link to="/coming-soon" className="btn-secondary w-full sm:w-auto text-sm py-3 px-8">
-                View Feature Roadmap
+              <Link to="/register" className="btn-secondary w-full sm:w-auto text-sm py-3 px-8">
+                Create Free Account
               </Link>
             </div>
           </div>

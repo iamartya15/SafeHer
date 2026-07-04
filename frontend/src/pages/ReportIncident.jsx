@@ -227,7 +227,7 @@ export const ReportIncident = () => {
 
                 {imagePreview && (
                   <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-white/10 shadow-lg">
-                    <img src={imagePreview} className="w-full h-full object-cover" />
+                    <img src={imagePreview} className="w-full h-full object-cover" alt="Incident preview" />
                   </div>
                 )}
               </div>
