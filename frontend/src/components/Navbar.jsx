@@ -2,7 +2,18 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Shield, Bell, Menu, X, LogOut, User, LayoutDashboard } from 'lucide-react';
+import {
+  Shield,
+  Bell,
+  Menu,
+  X,
+  LogOut,
+  User,
+  LayoutDashboard,
+  HeartHandshake,
+  ShieldPlus,
+  ChevronDown
+} from 'lucide-react';
 import * as chatService from '../services/chatService';
 import { getAvatarSrc } from '../utils/avatar';
 
@@ -14,7 +25,9 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dropdownRef = useRef(null);
+  const profileMenuRef = useRef(null);
   const hamburgerRef = useRef(null);
   const closeButtonRef = useRef(null);
 
@@ -54,11 +67,14 @@ export const Navbar = () => {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [mobileMenuOpen, showNotifications]);
 
-  // Close desktop notification dropdown on outside click
+  // Close desktop notification / profile dropdowns on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowNotifications(false);
+      }
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setShowProfileMenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -149,8 +165,7 @@ export const Navbar = () => {
     { name: 'AI Companion', path: '/ai', protected: true, roles: ['user'] },
     { name: 'Admin Dashboard', path: '/admin', protected: true, roles: ['admin'] },
     { name: 'Guardian Command Center', path: '/guardian', protected: true, roles: ['guardian', 'admin'] },
-    { name: 'Profile Settings', path: '/profile', protected: true, roles: ['user', 'guardian', 'admin'] },
-    { name: 'Coming Soon', path: '/coming-soon' }
+    { name: 'Profile Settings', path: '/profile', protected: true, roles: ['user', 'guardian', 'admin'] }
   ];
 
   const userRoles = user?.roles && user?.roles.length > 0 ? user.roles : [user?.role || 'user'];
@@ -323,18 +338,7 @@ export const Navbar = () => {
               })}
             </nav>
 
-            {/* Auth-specific links */}
-            {isAuthenticated ? (
-              <div className="mt-4 pt-4 border-t border-white/10 space-y-1">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
-                >
-                  <LogOut className="w-4 h-4 shrink-0" />
-                  Sign Out
-                </button>
-              </div>
-            ) : (
+            {!isAuthenticated && (
               <div className="mt-4 pt-4 border-t border-white/10 space-y-3">
                 <Link
                   to="/login"
@@ -433,38 +437,89 @@ export const Navbar = () => {
                 )}
               </div>
 
-              {/* Profile Links */}
-              <div className="flex items-center gap-3 pl-2 border-l border-white/10">
-                <Link
-                  to="/dashboard"
-                  className="p-2 hover:bg-slate-800 rounded-full text-slate-300 hover:text-white transition-colors"
-                  title="Dashboard"
+              {/* Profile Menu Trigger & Dropdown */}
+              <div className="relative" ref={profileMenuRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 focus:outline-none pl-2 border-l border-white/10"
+                  aria-label="Profile menu"
                 >
-                  <LayoutDashboard className="w-5 h-5" />
-                </Link>
-                {user?.role === 'admin' && (
-                  <Link
-                    to="/admin"
-                    className="text-xs px-2 py-1 rounded bg-fuchsia-600/20 text-fuchsia-400 border border-fuchsia-500/20 font-medium"
-                  >
-                    Admin
-                  </Link>
-                )}
-                <Link to="/profile" className="flex items-center gap-2">
                   <img
                     src={getAvatarSrc(user.avatar, user.name)}
                     alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover border border-purple-500/30"
+                    className="w-8 h-8 rounded-full object-cover border border-purple-500/30 hover:border-purple-500/80 transition-colors"
                     onError={(e) => { e.target.src = getAvatarSrc('', user.name); }}
                   />
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 hover:bg-red-950/30 text-slate-400 hover:text-red-400 rounded-full transition-colors"
-                  title="Logout"
-                >
-                  <LogOut className="w-5 h-5" />
+                  <ChevronDown className="w-3.5 h-3.5 text-slate-400 hover:text-white" />
                 </button>
+
+                {/* Profile Dropdown Box */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 mt-3 w-56 rounded-xl overflow-hidden border border-white/10 shadow-2xl z-50 bg-slate-900 text-xs py-1.5 space-y-1">
+                    
+                    {/* User Info Section */}
+                    <div className="px-4 py-2 border-b border-white/5 space-y-0.5">
+                      <p className="font-bold text-white truncate">{user.name}</p>
+                      <p className="text-[10px] text-slate-400 truncate">{user.email}</p>
+                    </div>
+
+                    {/* Links */}
+                    <Link
+                      to="/profile"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <User className="w-4 h-4 text-purple-400" />
+                      <span>Profile Settings</span>
+                    </Link>
+
+                    {/* Guardian Workspace Switch Option */}
+                    {userRoles.includes('guardian') && (
+                      <button
+                        onClick={() => {
+                          const target = activeWorkspace === 'guardian' ? 'user' : 'guardian';
+                          setActiveWorkspace(target);
+                          setShowProfileMenu(false);
+                          navigate(target === 'user' ? '/dashboard' : '/guardian');
+                        }}
+                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+                      >
+                        <HeartHandshake className="w-4 h-4 text-purple-400" />
+                        <span>Switch to {activeWorkspace === 'guardian' ? 'User Workspace' : 'Guardian Workspace'}</span>
+                      </button>
+                    )}
+
+                    {/* Admin Dashboard Option */}
+                    {userRoles.includes('admin') && activeWorkspace !== 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => {
+                          setActiveWorkspace('admin');
+                          setShowProfileMenu(false);
+                        }}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-slate-300 hover:bg-white/5 hover:text-white transition-colors animate-pulse"
+                      >
+                        <ShieldPlus className="w-4 h-4 text-fuchsia-400" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    )}
+
+                    <div className="border-t border-white/5 my-1" />
+
+                    {/* Logout Option */}
+                    <button
+                      onClick={() => {
+                        setShowProfileMenu(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-red-400 hover:bg-red-950/20 hover:text-red-300 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+
+                  </div>
+                )}
               </div>
             </>
           ) : (
