@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../hooks/useAuth';
 import * as authService from '../services/authService';
-import { User, Phone, Mail, Camera, Loader2, KeyRound } from 'lucide-react';
+import { User, Phone, Mail, Camera, Loader2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
 

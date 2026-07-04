@@ -78,7 +78,8 @@ export const GuardianDashboard = () => {
       }
     } catch (err) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Failed to send invite.');
+      const errMsg = err.response?.data?.message || err.message || 'Failed to send invite.';
+      toast.error(errMsg);
     } finally {
       setSubmitting(false);
     }

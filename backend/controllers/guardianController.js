@@ -4,6 +4,14 @@ const SOSAlert = require('../models/SOSAlert');
 const Notification = require('../models/Notification');
 const { sendMail } = require('../config/mail');
 
+/**
+ * Helper: fire-and-forget email — never blocks response or throws
+ */
+const sendMailAsync = (options) => {
+  sendMail(options).catch((err) => {
+    console.error('[Mail] Failed to send to', options.to, '—', err.message);
+  });
+};
 
 /**
  * Add a Guardian
@@ -11,50 +19,61 @@ const { sendMail } = require('../config/mail');
 const addGuardian = async (req, res, next) => {
   const { email, relationship } = req.body;
   try {
+    // Basic input validation
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ success: false, message: 'Valid email address is required' });
+    }
+
     const guardianEmail = email.toLowerCase().trim();
 
-    if (guardianEmail === req.user.email) {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(guardianEmail)) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid email address' });
+    }
+
+    if (guardianEmail === req.user.email.toLowerCase().trim()) {
       return res.status(400).json({ success: false, message: 'You cannot add yourself as a guardian' });
     }
 
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+
     // Check if relationship already exists
-    const existing = await Guardian.findOne({
-      userId: req.user.id,
-      guardianEmail
-    });
+    const existing = await Guardian.findOne({ userId: req.user.id, guardianEmail });
 
     if (existing) {
       if (existing.status === 'approved') {
         return res.status(400).json({ success: false, message: 'This contact is already your guardian' });
       }
+
       if (existing.status === 'pending') {
-        // Resend invitation email for pending request
+        // Resend invitation for pending request — fire emails in background
         const guardianUser = await User.findOne({ email: guardianEmail });
         if (guardianUser) {
           await Notification.create({
             recipientId: guardianUser._id,
-            title: 'New Guardian Request',
-            message: `${req.user.name} has requested you to be their safety guardian.`,
+            title: 'Guardian Request Reminder',
+            message: `${req.user.name} has reminded you to accept their safety guardian request.`,
             type: 'guardian_request'
           });
-          await sendMail({
+          sendMailAsync({
             to: guardianEmail,
-            subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
+            subject: `Guardian Request Reminder from ${req.user.name} - SafeHer AI`,
             text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
             html: `
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                <h2 style="color: #c026d3; text-align: center;">New Guardian Request</h2>
+                <h2 style="color: #c026d3; text-align: center;">Guardian Request Reminder</h2>
                 <p>Hello ${guardianUser.name},</p>
                 <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
                 <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+                  <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
                 </div>
               </div>
             `
           });
         } else {
-          await sendMail({
+          sendMailAsync({
             to: guardianEmail,
             subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
             text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
@@ -62,10 +81,11 @@ const addGuardian = async (req, res, next) => {
               <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
                 <h2 style="color: #c026d3; text-align: center;">SafeHer AI Guardian Invitation</h2>
                 <p>Hello,</p>
-                <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</n                <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
+                <p><strong>${req.user.name}</strong> has invited you to be their safety guardian on SafeHer AI.</p>
+                <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
                 <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+                  <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
                 </div>
               </div>
             `
@@ -73,12 +93,12 @@ const addGuardian = async (req, res, next) => {
         }
         return res.status(200).json({ success: true, message: 'Guardian invite resent successfully.', request: existing });
       }
-      // If status is 'rejected', we allow re-invitation by resetting status and updating relationship
+
+      // If status is 'rejected' — reset and re-invite
       existing.status = 'pending';
       existing.relationship = relationship || 'Contact';
       await existing.save();
 
-      // Check if the guardian is registered as a user
       const guardianUser = await User.findOne({ email: guardianEmail });
       if (guardianUser) {
         existing.guardianId = guardianUser._id;
@@ -91,8 +111,7 @@ const addGuardian = async (req, res, next) => {
           type: 'guardian_request'
         });
 
-        // Send notification email
-        await sendMail({
+        sendMailAsync({
           to: guardianEmail,
           subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
           text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
@@ -103,14 +122,13 @@ const addGuardian = async (req, res, next) => {
               <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
               <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+                <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
               </div>
             </div>
           `
         });
       } else {
-        // Send email invitation to register
-        await sendMail({
+        sendMailAsync({
           to: guardianEmail,
           subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
           text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
@@ -122,23 +140,19 @@ const addGuardian = async (req, res, next) => {
               <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
               <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
               <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+                <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
               </div>
             </div>
           `
         });
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Guardian invite resent successfully.',
-        request: existing
-      });
+      return res.status(200).json({ success: true, message: 'Guardian invite resent successfully.', request: existing });
     }
 
-    // Check if the guardian is registered as a user
+    // New invitation
     const guardianUser = await User.findOne({ email: guardianEmail });
-    
+
     const newRequest = await Guardian.create({
       userId: req.user.id,
       guardianEmail,
@@ -147,7 +161,6 @@ const addGuardian = async (req, res, next) => {
       status: 'pending'
     });
 
-    // Notify guardian if registered
     if (guardianUser) {
       await Notification.create({
         recipientId: guardianUser._id,
@@ -156,8 +169,7 @@ const addGuardian = async (req, res, next) => {
         type: 'guardian_request'
       });
 
-      // Send email to registered guardian
-      await sendMail({
+      sendMailAsync({
         to: guardianEmail,
         subject: `New Guardian Request from ${req.user.name} - SafeHer AI`,
         text: `Hello ${guardianUser.name}, ${req.user.name} has requested you to be their safety guardian on SafeHer. Please log in to accept.`,
@@ -168,14 +180,13 @@ const addGuardian = async (req, res, next) => {
             <p><strong>${req.user.name}</strong> has requested you to be their safety guardian on SafeHer AI.</p>
             <p>As a guardian, you will receive alerts and real-time location updates if they ever trigger an SOS emergency.</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
+              <a href="${frontendUrl}/guardian" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">View Request on Dashboard</a>
             </div>
           </div>
         `
       });
     } else {
-      // Send email invitation to register
-      await sendMail({
+      sendMailAsync({
         to: guardianEmail,
         subject: `Invitation to be a Safety Guardian for ${req.user.name} on SafeHer AI`,
         text: `Hello, ${req.user.name} has invited you to be their safety guardian on SafeHer. Please sign up to accept.`,
@@ -187,7 +198,7 @@ const addGuardian = async (req, res, next) => {
             <p>SafeHer AI helps keep women safe by tracking their live location during emergencies and providing real-time AI security guidance.</p>
             <p>Since you don't have an account yet, please register using this email to accept their safety guardian request.</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register & Accept Request</a>
+              <a href="${frontendUrl}/register" style="background-color: #c026d3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">Register &amp; Accept Request</a>
             </div>
           </div>
         `
@@ -196,9 +207,9 @@ const addGuardian = async (req, res, next) => {
 
     res.status(201).json({
       success: true,
-      message: guardianUser 
-        ? 'Guardian request sent successfully.' 
-        : 'Guardian is not yet registered. An invitation has been sent, and they will be linked once registered.',
+      message: guardianUser
+        ? 'Guardian request sent successfully.'
+        : 'Guardian not yet registered. Invitation sent — they will be linked once they sign up.',
       request: newRequest
     });
   } catch (error) {
@@ -213,12 +224,8 @@ const getGuardians = async (req, res, next) => {
   try {
     const list = await Guardian.find({ userId: req.user.id })
       .populate('guardianId', 'name email phone avatar role');
-    
-    res.status(200).json({
-      success: true,
-      count: list.length,
-      guardians: list
-    });
+
+    res.status(200).json({ success: true, count: list.length, guardians: list });
   } catch (error) {
     next(error);
   }
@@ -229,15 +236,11 @@ const getGuardians = async (req, res, next) => {
  */
 const getGuardianRequests = async (req, res, next) => {
   try {
-    // Find requests where guardianEmail matches current user's email and status is pending
-    // Also update guardianId in the record if it is not set (backfill on register)
+    // Backfill guardianId for any pending requests that matched by email but missing ObjectId
     await Guardian.updateMany(
-      { 
-        guardianEmail: req.user.email, 
-        $or: [
-          { guardianId: { $exists: false } },
-          { guardianId: null }
-        ] 
+      {
+        guardianEmail: req.user.email,
+        $or: [{ guardianId: { $exists: false } }, { guardianId: null }]
       },
       { guardianId: req.user._id }
     );
@@ -247,11 +250,7 @@ const getGuardianRequests = async (req, res, next) => {
       status: 'pending'
     }).populate('userId', 'name email phone avatar');
 
-    res.status(200).json({
-      success: true,
-      count: requests.length,
-      requests
-    });
+    res.status(200).json({ success: true, count: requests.length, requests });
   } catch (error) {
     next(error);
   }
@@ -261,7 +260,7 @@ const getGuardianRequests = async (req, res, next) => {
  * Accept or Reject Guardian Request
  */
 const updateRequestStatus = async (req, res, next) => {
-  const { requestId, status } = req.body; // status: 'approved' or 'rejected'
+  const { requestId, status } = req.body;
   try {
     if (!['approved', 'rejected'].includes(status)) {
       return res.status(400).json({ success: false, message: 'Invalid status. Must be approved or rejected' });
@@ -272,16 +271,14 @@ const updateRequestStatus = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Guardian request not found' });
     }
 
-    // Check if the current user is the guardian
     if (request.guardianId?.toString() !== req.user.id && request.guardianEmail !== req.user.email) {
       return res.status(403).json({ success: false, message: 'Not authorized to respond to this request' });
     }
 
     request.status = status;
-    request.guardianId = req.user.id; // ensure ID is linked
+    request.guardianId = req.user.id;
     await request.save();
 
-    // Notify the user of the decision
     await Notification.create({
       recipientId: request.userId,
       title: `Guardian Request ${status === 'approved' ? 'Accepted' : 'Rejected'}`,
@@ -289,19 +286,14 @@ const updateRequestStatus = async (req, res, next) => {
       type: 'system'
     });
 
-    res.status(200).json({
-      success: true,
-      message: `Guardian request ${status} successfully.`,
-      request
-    });
+    res.status(200).json({ success: true, message: `Guardian request ${status} successfully.`, request });
   } catch (error) {
     next(error);
   }
 };
 
 /**
- * Get Users who have added the current user as an approved guardian (Monitored Users)
- * Includes their latest SOS status and location
+ * Get Users monitored by current user (approved guardianships)
  */
 const getMonitoredUsers = async (req, res, next) => {
   try {
@@ -315,9 +307,7 @@ const getMonitoredUsers = async (req, res, next) => {
         const user = link.userId;
         if (!user) return null;
 
-        // Find the user's latest SOS alert (active or resolved)
-        const latestSos = await SOSAlert.findOne({ userId: user._id })
-          .sort({ createdAt: -1 });
+        const latestSos = await SOSAlert.findOne({ userId: user._id }).sort({ createdAt: -1 });
 
         return {
           connectionId: link._id,
@@ -329,24 +319,21 @@ const getMonitoredUsers = async (req, res, next) => {
             phone: user.phone,
             avatar: user.avatar
           },
-          latestSos: latestSos ? {
-            id: latestSos._id,
-            status: latestSos.status,
-            location: latestSos.location,
-            batteryLevel: latestSos.batteryLevel,
-            createdAt: latestSos.createdAt
-          } : null
+          latestSos: latestSos
+            ? {
+                id: latestSos._id,
+                status: latestSos.status,
+                location: latestSos.location,
+                batteryLevel: latestSos.batteryLevel,
+                createdAt: latestSos.createdAt
+              }
+            : null
         };
       })
     );
 
-    const filtered = monitoredUsers.filter(item => item !== null);
-
-    res.status(200).json({
-      success: true,
-      count: filtered.length,
-      monitoredUsers: filtered
-    });
+    const filtered = monitoredUsers.filter((item) => item !== null);
+    res.status(200).json({ success: true, count: filtered.length, monitoredUsers: filtered });
   } catch (error) {
     next(error);
   }
@@ -362,7 +349,6 @@ const removeGuardianRelation = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Guardian relationship not found' });
     }
 
-    // Authorized if user is the ward or the guardian
     if (relation.userId.toString() !== req.user.id && relation.guardianId?.toString() !== req.user.id) {
       return res.status(403).json({ success: false, message: 'Not authorized to remove this relationship' });
     }

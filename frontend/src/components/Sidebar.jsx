@@ -10,7 +10,6 @@ import {
   Bot,
   User,
   HeartHandshake,
-  Settings,
   ShieldPlus
 } from 'lucide-react';
 
@@ -32,7 +31,7 @@ export const Sidebar = () => {
   ];
 
   return (
-    <aside className="w-64 glass-card border-r border-white/5 min-h-[calc(100-57px)] hidden md:flex flex-col p-4 gap-6 select-none bg-slate-900/40 backdrop-blur-lg">
+    <aside className="w-64 glass-card border-r border-white/5 min-h-[calc(100vh-57px)] hidden md:flex flex-col p-4 gap-6 select-none bg-slate-900/40 backdrop-blur-lg">
       
       {/* Profile Section */}
       <div className="flex items-center gap-3 p-2 bg-white/5 border border-white/5 rounded-xl">

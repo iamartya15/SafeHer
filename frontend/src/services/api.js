@@ -1,13 +1,12 @@
+import axios from 'axios';
+
 const getBaseUrl = () => {
   return import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 };
 
-import axios from 'axios';
-
 const api = axios.create({
   baseURL: getBaseUrl(),
-    // methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  withCredentials: true, // For HTTP-only cookie transfers
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -55,7 +54,8 @@ api.interceptors.response.use(
       originalRequest.url.includes('/auth/forgot-password') ||
       originalRequest.url.includes('/auth/reset-password') ||
       originalRequest.url.includes('/auth/verify-email') ||
-      originalRequest.url.includes('/auth/logout')
+      originalRequest.url.includes('/auth/logout') ||
+      originalRequest.url.includes('/auth/refresh-token')
     );
 
     // Check if error is 401, not already retried, and not an auth route
