@@ -128,6 +128,18 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshSession = async () => {
+    try {
+      const data = await authService.getProfile();
+      if (data.success && data.user) {
+        setUser(data.user);
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+    } catch (err) {
+      console.error('Failed to refresh session', err);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -139,6 +151,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateProfile,
         updateAvatarState,
+        refreshSession,
         activeWorkspace,
         setActiveWorkspace,
         isAuthenticated: !!user

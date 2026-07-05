@@ -22,7 +22,7 @@ import { getAvatarSrc } from '../utils/avatar';
 import { useAuth } from '../hooks/useAuth';
 
 export const GuardianDashboard = () => {
-  const { user } = useAuth();
+  const { user, refreshSession } = useAuth();
   const [monitoredUsers, setMonitoredUsers] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [guardiansList, setGuardiansList] = useState([]); 
@@ -135,6 +135,9 @@ export const GuardianDashboard = () => {
       const res = await guardianService.respondToRequest(requestId, status);
       if (res.success) {
         toast.success(`Request ${status === 'approved' ? 'approved' : 'rejected'} successfully.`, { id: toastId });
+        if (status === 'approved' && refreshSession) {
+          await refreshSession();
+        }
         loadData();
       }
     } catch (err) {
@@ -181,7 +184,7 @@ export const GuardianDashboard = () => {
       </div>
 
       {/* 1. Emergency Alerts Header (Visible only when alerts are active) */}
-      {(user?.role === 'guardian' || user?.role === 'admin') && activeAlerts.length > 0 && (
+      {activeAlerts.length > 0 && (
         <div className="space-y-4">
           {activeAlerts.map((ward) => {
             const mapsUrl = ward.latestSos.location?.coordinates
@@ -247,7 +250,7 @@ export const GuardianDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           
           {/* A. People You Protect Section */}
-          {(user?.role === 'guardian' || user?.role === 'admin') && (
+          {true && (
             <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -396,7 +399,7 @@ export const GuardianDashboard = () => {
           )}
 
           {/* C. History Logs */}
-          {(user?.role === 'guardian' || user?.role === 'admin') && (
+          {true && (
             <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <div className="flex items-center gap-2">
               <Clock className="w-5 h-5 text-purple-400" />
@@ -436,7 +439,7 @@ export const GuardianDashboard = () => {
         <div className="space-y-6">
           
           {/* A. Pending Requests Received */}
-          {(user?.role === 'guardian' || user?.role === 'admin') && (
+          {true && (
             <div className="glass-card rounded-2xl p-6 border border-white/5 space-y-4">
             <h3 className="text-base font-bold text-white flex items-center justify-between">
               <span>Pending Requests</span>

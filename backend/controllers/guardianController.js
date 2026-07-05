@@ -240,6 +240,20 @@ const updateRequestStatus = async (req, res, next) => {
     request.guardianId = req.user.id;
     await request.save();
 
+    // If accepted, upgrade the user to a guardian
+    if (status === 'approved') {
+      const guardianUser = await User.findById(req.user.id);
+      if (guardianUser) {
+        if (!guardianUser.roles.includes('guardian')) {
+          guardianUser.roles.push('guardian');
+        }
+        if (guardianUser.role === 'user') {
+          guardianUser.role = 'guardian';
+        }
+        await guardianUser.save();
+      }
+    }
+
     await Notification.create({
       recipientId: request.userId,
       title: `Guardian Request ${status === 'approved' ? 'Accepted' : 'Rejected'}`,
