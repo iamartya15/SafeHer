@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
+import { formatDate } from '../utils/dateFormatter';
 
 export const SosAlerts = () => {
   const { latitude, longitude, loading: geoLoading, error: geoError } = useGeolocation();
@@ -269,7 +270,7 @@ export const SosAlerts = () => {
                         {log.status}
                       </span>
                       <span className="text-[9px] text-slate-500 block mt-0.5">
-                        {new Date(log.createdAt).toLocaleDateString()}
+                        {formatDate(log.createdAt)}
                       </span>
                     </div>
                   </div>

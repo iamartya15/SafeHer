@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
+import { formatShortDateTime } from '../utils/dateFormatter';
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -505,7 +506,7 @@ export const AdminDashboard = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 font-mono text-[10px] text-slate-400">
-                              {new Date(log.createdAt).toLocaleString()}
+                              {formatShortDateTime(log.createdAt)}
                             </td>
                           </tr>
                         );

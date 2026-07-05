@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { sendMail } = require('../config/mail');
 const mongoose = require('mongoose');
+const { formatDateTime } = require('../utils/dateFormatter');
 
 /**
  * Trigger SOS Alert
@@ -48,7 +49,7 @@ const triggerSOS = async (req, res, next) => {
             <p style="margin: 5px 0;"><strong>User:</strong> ${req.user.name}</p>
             <p style="margin: 5px 0;"><strong>Phone:</strong> ${req.user.phone || 'Not provided'}</p>
             <p style="margin: 5px 0;"><strong>Battery Level:</strong> ${batteryLevel || 'Unknown'}%</p>
-            <p style="margin: 5px 0;"><strong>Timestamp:</strong> ${new Date(sos.createdAt).toLocaleString()}</p>
+            <p style="margin: 5px 0;"><strong>Timestamp:</strong> ${formatDateTime(sos.createdAt)}</p>
           </div>
 
           <p style="text-align: center; margin: 30px 0;">

@@ -20,6 +20,7 @@ import {
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
 import { useAuth } from '../hooks/useAuth';
+import { formatShortDateTime } from '../utils/dateFormatter';
 
 export const GuardianDashboard = () => {
   const { user, refreshSession } = useAuth();
@@ -219,7 +220,7 @@ export const GuardianDashboard = () => {
                       <ShieldAlert className="w-3.5 h-3.5 fill-red-500/10" /> EMERGENCY ACTIVE (Battery: {ward.latestSos.batteryLevel}%)
                     </p>
                     <span className="text-[10px] text-slate-400 block mt-1">
-                      Triggered: {new Date(ward.latestSos.createdAt).toLocaleString()}
+                      Triggered: {formatShortDateTime(ward.latestSos.createdAt)}
                     </span>
                   </div>
                 </div>
@@ -424,7 +425,7 @@ export const GuardianDashboard = () => {
                     </div>
                     <div className="text-right">
                       <span className="text-slate-500 block font-mono text-[10px]">Battery: {w.latestSos.batteryLevel}%</span>
-                      <span className="text-[9px] text-slate-400 block mt-0.5">{new Date(w.latestSos.createdAt).toLocaleString()}</span>
+                      <span className="text-[9px] text-slate-400 block mt-0.5">{formatShortDateTime(w.latestSos.createdAt)}</span>
                     </div>
                   </div>
                 ))

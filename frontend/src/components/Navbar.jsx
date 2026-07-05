@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import * as chatService from '../services/chatService';
 import { getAvatarSrc } from '../utils/avatar';
+import { formatTime } from '../utils/dateFormatter';
 
 /* ────────────────────────────────────────────────────────────────────────
    Theme Toggle — professional animated toggle beside the notification bell
@@ -244,7 +245,7 @@ export const Navbar = () => {
               <div className="flex justify-between items-start">
                 <span className="text-xs font-medium" style={{ color: !notif.read ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{notif.title}</span>
                 <span className="text-[9px] ml-2 shrink-0" style={{ color: 'var(--text-muted)' }}>
-                  {new Date(notif.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {formatTime(notif.createdAt)}
                 </span>
               </div>
               <p className="text-[11px] mt-1 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>{notif.message}</p>

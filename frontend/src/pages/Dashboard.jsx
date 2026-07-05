@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
+import { formatDate, formatTime } from '../utils/dateFormatter';
 
 export const Dashboard = () => {
   const { user } = useAuth();
@@ -325,7 +326,7 @@ export const Dashboard = () => {
                     <div className="text-right">
                       <span className="text-[10px] text-slate-300 font-mono block">📍 {rep.address}</span>
                       <span className="text-[9px] text-slate-500 block mt-0.5">
-                        {new Date(rep.createdAt).toLocaleDateString()}
+                        {formatDate(rep.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -414,7 +415,7 @@ export const Dashboard = () => {
                         {log.status}
                       </span>
                       <span className="text-[9px] text-slate-500 block mt-1">
-                        {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(log.createdAt)}
                       </span>
                     </div>
                   </div>

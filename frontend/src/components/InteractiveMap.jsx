@@ -4,6 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+import { formatShortDateTime } from '../utils/dateFormatter';
 
 // Fix for default marker icons missing in build bundlers
 const createPulseIcon = () => L.divIcon({
@@ -196,7 +197,7 @@ export const InteractiveMap = ({
             ${report.image ? `<img src="${report.image}" style="width: 100%; border-radius: 4px; margin-bottom: 6px;" />` : ''}
             <span style="font-size: 10px; color: #64748b; display:block;">📍 ${report.address || 'Reported Location'}</span>
             <span style="font-size: 9px; color: #94a3b8; display:block; margin-top: 2px;">
-              ${new Date(report.createdAt || report.timestamp).toLocaleString()}
+              ${formatShortDateTime(report.createdAt || report.timestamp)}
             </span>
           </div>
         `;
