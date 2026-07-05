@@ -16,6 +16,65 @@
 
 **SafeHer AI** is an enterprise-grade, location-aware emergency companion designed to provide immediate safety assistance, predictive alerts, and a real-time guardian monitoring network. By combining community-reported incidents, real-time disaster alerts (GDACS), local infrastructure data (OpenStreetMap Overpass API), and Google's Gemini AI, SafeHer creates a comprehensive safety shield.
 
+---
+
+## 🎥 Demo Video
+
+[Watch the Full Demo Video on YouTube](https://youtu.be/YOUR_VIDEO_LINK)
+
+![Project Walkthrough GIF](./frontend/public/demo.gif) *(Replace with actual GIF path)*
+
+---
+
+## 📸 Screenshots
+
+### Home
+![Home](./frontend/public/screenshots/home.png)
+
+### Register
+![Register](./frontend/public/screenshots/register.png)
+
+### Login
+![Login](./frontend/public/screenshots/login.png)
+
+### Dashboard
+![Dashboard](./frontend/public/screenshots/dashboard.png)
+
+### AI Assistant
+![AI Assistant](./frontend/public/screenshots/ai-assistant.png)
+
+### SOS
+![SOS](./frontend/public/screenshots/sos.png)
+
+### Guardian Dashboard
+![Guardian Dashboard](./frontend/public/screenshots/guardian-dashboard.png)
+
+### Safety Map
+![Safety Map](./frontend/public/screenshots/safety-map.png)
+
+### Safe Places
+![Safe Places](./frontend/public/screenshots/safe-places.png)
+
+### Incident Report
+![Incident Report](./frontend/public/screenshots/incident-report.png)
+
+### Notifications
+![Notifications](./frontend/public/screenshots/notifications.png)
+
+### Admin Dashboard
+![Admin Dashboard](./frontend/public/screenshots/admin-dashboard.png)
+
+### Settings
+![Settings](./frontend/public/screenshots/settings.png)
+
+### Dark Theme
+![Dark Theme](./frontend/public/screenshots/dark-theme.png)
+
+### Mobile View
+![Mobile View](./frontend/public/screenshots/mobile-view.png)
+
+---
+
 ## ✨ Core Features
 
 ### 🚨 Real-Time SOS System
