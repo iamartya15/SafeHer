@@ -25,6 +25,11 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { latitude, longitude, error: geoError, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
+  const [sosHistory, setSosHistory] = useState([]);
+  const [activeSos, setActiveSos] = useState(null);
+  const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const mountedRef = useRef(true);
 
   useEffect(() => {
