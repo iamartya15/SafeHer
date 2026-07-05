@@ -137,18 +137,6 @@ app.use('/api/sos', require('./routes/sosRoutes'));
 app.use('/api/guardians', require('./routes/guardianRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
-app.use('/api/notifications', require('./routes/notificationRoutes'));
-
-
-app.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Welcome to SafeHer AI Backend",
-    status: "Running"
-  });
-});
-
-
 // Health check and root route
 app.get('/api', (req, res) => {
   res.status(200).json({
@@ -159,15 +147,30 @@ app.get('/api', (req, res) => {
   });
 });
 
-
-
-
-// Handle 404 routes
-app.use((req, res, next) => {
+// Handle 404 for API routes
+app.use('/api', (req, res, next) => {
   res.status(404).json({ 
     success: false, 
     message: 'API endpoint not found' 
   });
+});
+
+// Serve frontend static files in production
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// All other GET requests not handled before will return the React app
+app.get('*', (req, res) => {
+  const indexPath = path.join(frontendPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(200).json({
+      success: true,
+      message: "Welcome to SafeHer AI Backend (Frontend not built yet)",
+      status: "Running"
+    });
+  }
 });
 
 // Centralized Error Handler
