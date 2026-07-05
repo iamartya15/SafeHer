@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const { sendMail } = require('../config/mail');
 const { uploadImage } = require('../config/cloudinary');
 const { OAuth2Client } = require('google-auth-library');
+const axios = require('axios');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -419,7 +420,7 @@ const googleLogin = async (req, res, next) => {
       });
       payload = ticket.getPayload();
     } else {
-      const response = await require('axios').get('https://www.googleapis.com/oauth2/v3/userinfo', {
+      const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${token}` }
       });
       payload = response.data;
