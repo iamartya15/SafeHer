@@ -22,8 +22,8 @@ export const clearChatHistory = async () => {
   const response = await api.delete('/chat/history');
   return response.data;
 };
-export const getNotifications = async () => {
-  const response = await api.get('/notifications');
+export const getNotifications = async (signal) => {
+  const response = await api.get(`/notifications?_t=${Date.now()}`, { signal });
   return response.data;
 };
 

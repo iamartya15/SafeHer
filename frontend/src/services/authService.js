@@ -31,14 +31,6 @@ export const login = async (credentials) => {
 };
 
 export const loginWithGoogle = async (idToken) => {
-  console.log('[GOOGLE AUTH SERVICE] loginWithGoogle called.');
-  console.log('[GOOGLE AUTH SERVICE] window.location.origin:', window.location.origin);
-  console.log('[GOOGLE AUTH SERVICE] import.meta.env.VITE_API_URL:', import.meta.env.VITE_API_URL);
-  console.log('[GOOGLE AUTH SERVICE] api.defaults.baseURL:', api.defaults.baseURL);
-  
-  const finalUrl = `${api.defaults.baseURL || ''}/auth/google`;
-  console.log('[GOOGLE AUTH SERVICE] Final URL used for POST /api/auth/google:', finalUrl);
-
   const response = await api.post('/auth/google', { idToken });
   if (response.data.success) {
     localStorage.setItem('accessToken', response.data.accessToken);

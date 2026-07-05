@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useNotifications } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
 import {
   Shield,
@@ -63,8 +64,8 @@ export const Navbar = () => {
   const location = useLocation();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const dropdownRef = useRef(null);
   const profileMenuRef = useRef(null);
@@ -105,66 +106,21 @@ export const Navbar = () => {
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
-  const pendingUpdateRef = useRef(false);
-
   // ─── Notifications ───────────────────────────────────────────────
-  const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) return;
-    try {
-      const res = await chatService.getNotifications();
-      if (res.success && !pendingUpdateRef.current) {
-        setNotifications(res.notifications);
-      }
-    } catch (err) {
-      console.error('Failed to load notifications:', err);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    fetchNotifications();
-    let interval = setInterval(fetchNotifications, 15000);
-    const onVis = () => {
-      if (document.hidden) clearInterval(interval);
-      else { fetchNotifications(); interval = setInterval(fetchNotifications, 15000); }
-    };
-    document.addEventListener('visibilitychange', onVis);
-    return () => { clearInterval(interval); document.removeEventListener('visibilitychange', onVis); };
-  }, [fetchNotifications]);
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleToggleNotifications = async () => {
-    const willOpen = !showNotifications;
-    setShowNotifications(willOpen);
+  
+  const handleToggleNotifications = () => {
+    setShowNotifications(!showNotifications);
     setShowProfileMenu(false);
-    if (willOpen && unreadCount > 0) {
-      pendingUpdateRef.current = true;
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      try { await chatService.markAllNotificationsRead(); }
-      catch (err) { console.error('Failed to auto-mark read:', err); }
-      finally {
-        setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
-      }
-    }
   };
 
   const handleMarkAllRead = async () => {
-    pendingUpdateRef.current = true;
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    try { await chatService.markAllNotificationsRead(); }
-    catch (err) { console.error('Failed to mark all read:', err); }
-    finally {
-      setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
-    }
+    await markAllRead();
   };
 
   const handleNotificationClick = async (notif) => {
     try {
       if (!notif.read) {
-        pendingUpdateRef.current = true;
-        setNotifications((prev) => prev.map((n) => (n._id === notif._id ? { ...n, read: true } : n)));
-        await chatService.markNotificationRead(notif._id);
-        setTimeout(() => { pendingUpdateRef.current = false; fetchNotifications(); }, 500);
+        await markRead(notif._id);
       }
       setShowNotifications(false);
       setMobileMenuOpen(false);

@@ -20,9 +20,11 @@ import {
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
 import { formatDate, formatTime } from '../utils/dateFormatter';
+import { useNotifications } from '../context/NotificationContext';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const { fetchNotifications } = useNotifications();
   const navigate = useNavigate();
   const { latitude, longitude, error: geoError, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
@@ -98,6 +100,7 @@ export const Dashboard = () => {
         toast.success('SOS Alert Dispatched! Guardians notified.', { id: loadToast });
         setActiveSos(res.sos);
         loadData();
+        fetchNotifications();
       }
     } catch (err) {
       console.error(err);
@@ -114,6 +117,7 @@ export const Dashboard = () => {
         toast.success('Emergency resolved successfully.', { id: loadToast });
         setActiveSos(null);
         loadData();
+        fetchNotifications();
       }
     } catch (err) {
       console.error(err);

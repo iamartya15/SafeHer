@@ -10,6 +10,9 @@ const getNotifications = async (req, res, next) => {
       .sort({ createdAt: -1 })
       .limit(50);
 
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     res.status(200).json({
       success: true,
       count: notifications.length,

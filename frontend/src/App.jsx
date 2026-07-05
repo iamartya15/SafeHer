@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Suspense, lazy } from 'react';
 import { AuthProvider } from './context/AuthContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
@@ -45,6 +46,7 @@ function App() {
     <ThemeProvider>
       <GoogleOAuthProvider clientId={googleClientId}>
         <AuthProvider>
+          <NotificationProvider>
           <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             {/* Public Page Routes */}
@@ -92,6 +94,7 @@ function App() {
             }
           }}
         />
+          </NotificationProvider>
         </AuthProvider>
       </GoogleOAuthProvider>
     </ThemeProvider>

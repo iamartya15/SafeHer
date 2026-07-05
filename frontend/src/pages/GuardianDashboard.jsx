@@ -21,9 +21,11 @@ import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
 import { useAuth } from '../hooks/useAuth';
 import { formatShortDateTime } from '../utils/dateFormatter';
+import { useNotifications } from '../context/NotificationContext';
 
 export const GuardianDashboard = () => {
   const { user, refreshSession } = useAuth();
+  const { fetchNotifications } = useNotifications();
   const [monitoredUsers, setMonitoredUsers] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [guardiansList, setGuardiansList] = useState([]); 
@@ -140,6 +142,7 @@ export const GuardianDashboard = () => {
           await refreshSession();
         }
         loadData();
+        fetchNotifications();
       }
     } catch (err) {
       console.error(err);
@@ -161,6 +164,7 @@ export const GuardianDashboard = () => {
       if (res.success) {
         toast.success(res.message || 'Action completed successfully.', { id: toastId });
         loadData();
+        fetchNotifications();
       }
     } catch (err) {
       console.error(err);
