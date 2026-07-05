@@ -31,7 +31,7 @@ const register = async (req, res, next) => {
     }
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
-    const assignedRole = (email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) ? 'admin' : (role || 'user');
+    const assignedRole = (email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) ? 'admin' : 'user';
     const assignedRoles = assignedRole === 'admin' ? ['admin', 'guardian'] : [assignedRole];
 
     const user = new User({
@@ -238,18 +238,29 @@ const logout = async (req, res, next) => {
  */
 const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
+  
+  const genericResponse = () => {
+    return res.status(200).json({ 
+      success: true, 
+      message: 'If an account with this email exists, a password reset link has been sent.' 
+    });
+  };
+
   try {
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ success: false, message: 'No user registered with this email' });
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return genericResponse();
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
-    user.resetPasswordTokenExpires = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.resetPasswordTokenExpires = Date.now() + 15 * 60 * 1000; // 15 mins
     await user.save();
 
-    const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    const baseUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '');
+    const resetUrl = `${baseUrl}/reset-password?token=${resetToken}`;
+    
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #c026d3; text-align: center;">Reset SafeHer Password</h2>
@@ -261,21 +272,22 @@ const forgotPassword = async (req, res, next) => {
         <p>Or copy this link to your browser:</p>
         <p style="word-break: break-all; color: #555;">${resetUrl}</p>
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-        <p style="font-size: 12px; color: #999; text-align: center;">This link will expire in 10 minutes. If you did not request a reset, please ignore this email.</p>
+        <p style="font-size: 12px; color: #999; text-align: center;">This link will expire in 15 minutes. If you did not request a reset, please ignore this email.</p>
       </div>
     `;
 
-    // Send reset email in background (don't block response)
-    sendMail({
-      to: user.email,
-      subject: 'Reset Password - SafeHer AI',
-      text: `Reset your password by visiting: ${resetUrl}`,
-      html: emailHtml
-    }).catch((mailErr) => {
-      console.error('Mail delivery failed during forgot password:', mailErr.message);
-    });
-
-    res.status(200).json({ success: true, message: 'Password reset link sent to your email.' });
+    try {
+      await sendMail({
+        to: user.email,
+        subject: 'Reset Password - SafeHer AI',
+        text: `Reset your password by visiting: ${resetUrl}`,
+        html: emailHtml
+      });
+      return genericResponse();
+    } catch (mailErr) {
+      console.error('[SMTP ERROR] Failed to send password reset email:', mailErr);
+      return genericResponse();
+    }
   } catch (error) {
     next(error);
   }
@@ -389,49 +401,44 @@ const uploadAvatar = async (req, res, next) => {
 };
 
 const googleLogin = async (req, res, next) => {
-  const { idToken } = req.body;
-  console.log('[GOOGLE AUTH BACKEND] Request received.');
-  console.log('[GOOGLE AUTH BACKEND] GOOGLE_CLIENT_ID from env:', process.env.GOOGLE_CLIENT_ID);
-  console.log('[GOOGLE AUTH BACKEND] Received ID Token (length):', idToken ? idToken.length : 0);
+  const token = req.body.idToken || req.body.token; // Support both names
   
-  if (!idToken) {
-    console.error('[GOOGLE AUTH BACKEND] Failure: Google ID Token is missing');
-    return res.status(400).json({ success: false, message: 'Google ID Token is required' });
+  if (!token) {
+    return res.status(400).json({ success: false, message: 'Google Token is required' });
   }
 
   try {
-    console.log('[GOOGLE AUTH BACKEND] Initializing OAuth2Client with client ID');
     const authClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     
-    console.log('[GOOGLE AUTH BACKEND] Verifying ID Token...');
-    const ticket = await authClient.verifyIdToken({
-      idToken,
-      audience: process.env.GOOGLE_CLIENT_ID
-    });
+    let payload;
 
-    const payload = ticket.getPayload();
-    console.log('[GOOGLE AUTH BACKEND] Token verified successfully. Payload audience:', payload.aud);
-    console.log('[GOOGLE AUTH BACKEND] Extracted user info:');
-    console.log('  - Email:', payload.email);
-    console.log('  - Name:', payload.name);
-    console.log('  - googleId (sub):', payload.sub);
-    console.log('  - Picture:', payload.picture);
+    if (token.split('.').length === 3) {
+      const ticket = await authClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } else {
+      const response = await require('axios').get('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      payload = response.data;
+    }
 
-    const { sub: googleId, email, name, picture } = payload;
+    if (!payload || !payload.email) {
+      return res.status(400).json({ success: false, message: 'Invalid Google token payload.' });
+    }
 
-    console.log('[GOOGLE AUTH BACKEND] Searching MongoDB for user...');
+    const { sub, email, name, picture } = payload;
+    const googleId = sub || payload.id;
+
     let user = await User.findOne({
       $or: [{ googleId }, { email }]
     });
 
     if (user) {
-      console.log('[GOOGLE AUTH BACKEND] Found existing user in MongoDB:', user._id);
-      console.log('  - Existing googleId:', user.googleId);
-      console.log('  - Existing email:', user.email);
-      console.log('  - Existing isVerified:', user.isVerified);
 
       if (user.googleId && user.googleId !== googleId) {
-        console.error('[GOOGLE AUTH BACKEND] Failure: Account already linked with a different Google account');
         return res.status(409).json({
           success: false,
           message: 'This account is already linked with another Google account.'
@@ -439,30 +446,23 @@ const googleLogin = async (req, res, next) => {
       }
 
       if (!user.googleId) {
-        console.log('[GOOGLE AUTH BACKEND] User does not have a googleId linked yet. Checking verification...');
         if (!user.isVerified) {
-          console.error('[GOOGLE AUTH BACKEND] Failure: Existing email is not verified');
           return res.status(400).json({
             success: false,
             message: 'An account with this email already exists but is not verified. Please log in with your password first.'
           });
         }
-        console.log('[GOOGLE AUTH BACKEND] Email is verified. Linking googleId to existing user.');
         user.googleId = googleId;
       }
 
       const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
       if (!user.avatar || user.avatar === defaultAvatar) {
-        console.log('[GOOGLE AUTH BACKEND] Current avatar is empty or default. Setting Google picture.');
         user.avatar = picture || defaultAvatar;
-      } else {
-        console.log('[GOOGLE AUTH BACKEND] Keeping existing avatar:', user.avatar);
       }
 
       user.isVerified = true;
 
     } else {
-      console.log('[GOOGLE AUTH BACKEND] No user found. Registering a new Google user...');
       const defaultAvatar = 'https://res.cloudinary.com/default-avatar.png';
       user = new User({
         name,
@@ -475,23 +475,18 @@ const googleLogin = async (req, res, next) => {
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
     if (user.email.toLowerCase().trim() === adminEmail.toLowerCase().trim()) {
-      console.log('[GOOGLE AUTH BACKEND] Auto-linking Admin role for this Google account.');
       user.role = 'admin';
       user.roles = ['admin', 'guardian'];
     } else if (!user.roles || user.roles.length === 0) {
       user.roles = [user.role || 'user'];
     }
 
-    console.log('[GOOGLE AUTH BACKEND] Generating Access/Refresh tokens...');
     const { accessToken, refreshToken } = generateTokens(user._id);
     user.refreshToken = refreshToken;
 
-    console.log('[GOOGLE AUTH BACKEND] Saving user document...');
     try {
       await user.save();
-      console.log('[GOOGLE AUTH BACKEND] User saved successfully in database.');
     } catch (dbError) {
-      console.error('[GOOGLE AUTH BACKEND] Database Save Failure:', dbError);
       if (dbError.code === 11000) {
         return res.status(400).json({
           success: false,
@@ -501,7 +496,6 @@ const googleLogin = async (req, res, next) => {
       throw dbError;
     }
 
-    console.log('[GOOGLE AUTH BACKEND] Setting cookies and sending successful response.');
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /guardian
+Disallow: /admin
+Disallow: /profile
+Disallow: /settings
+Disallow: /api
+
+Sitemap: https://safeher.ai/sitemap.xml

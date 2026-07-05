@@ -68,9 +68,10 @@ I am here to help you navigate safety situations.
  * Gets safety advice from Gemini API or falls back to rules
  * @param {string} prompt - User query
  * @param {Array} chatHistory - Past messages for context
+ * @param {string} locationContext - Hidden context containing user's location
  * @returns {Promise<string>}
  */
-const getSafetyAdvice = async (prompt, chatHistory = []) => {
+const getSafetyAdvice = async (prompt, chatHistory = [], locationContext = '') => {
   if (!prompt || typeof prompt !== 'string') {
     throw new Error('Prompt must be a non-empty string');
   }
@@ -91,7 +92,10 @@ const getSafetyAdvice = async (prompt, chatHistory = []) => {
         }
       });
 
-      const result = await chat.sendMessage(prompt);
+      // Inject locationContext if available
+      const finalPrompt = locationContext ? `${locationContext}\n\nUSER PROMPT: ${prompt}` : prompt;
+
+      const result = await chat.sendMessage(finalPrompt);
       const response = await result.response;
       return response.text();
     } catch (error) {

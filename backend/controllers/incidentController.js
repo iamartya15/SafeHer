@@ -1,5 +1,6 @@
 const IncidentReport = require('../models/IncidentReport');
 const { uploadImage } = require('../config/cloudinary');
+const mongoose = require('mongoose');
 
 /**
  * Create a new Incident Report
@@ -77,6 +78,9 @@ const getIncidents = async (req, res, next) => {
  */
 const getIncidentById = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Incident ID format' });
+    }
     const report = await IncidentReport.findById(req.params.id).populate('userId', 'name avatar email phone');
     
     if (!report) {
@@ -98,6 +102,9 @@ const getIncidentById = async (req, res, next) => {
 const updateIncident = async (req, res, next) => {
   const { category, description, latitude, longitude, address } = req.body;
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Incident ID format' });
+    }
     let report = await IncidentReport.findById(req.params.id);
 
     if (!report) {
@@ -141,6 +148,9 @@ const updateIncident = async (req, res, next) => {
  */
 const deleteIncident = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Incident ID format' });
+    }
     const report = await IncidentReport.findById(req.params.id);
 
     if (!report) {

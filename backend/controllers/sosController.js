@@ -3,6 +3,7 @@ const Guardian = require('../models/Guardian');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
 const { sendMail } = require('../config/mail');
+const mongoose = require('mongoose');
 
 /**
  * Trigger SOS Alert
@@ -96,6 +97,9 @@ const triggerSOS = async (req, res, next) => {
  */
 const resolveSOS = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid SOS ID format' });
+    }
     const sos = await SOSAlert.findOneAndUpdate(
       { _id: req.params.id, userId: req.user.id, status: 'active' },
       { status: 'resolved' },

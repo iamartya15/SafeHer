@@ -41,6 +41,9 @@ export const ResetPassword = () => {
       if (res.success) {
         setSuccess(true);
         toast.success('Password updated successfully!');
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
     } catch (err) {
       console.error(err);
@@ -104,9 +107,9 @@ export const ResetPassword = () => {
                     className={`glass-input pl-10 ${errors.password ? 'border-red-500/50 focus:border-red-500' : ''}`}
                     {...register('password', {
                       required: 'Password is required',
-                      minLength: {
-                        value: 6,
-                        message: 'Password must be at least 6 characters'
+                      pattern: {
+                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+                        message: 'Must be at least 8 chars, 1 uppercase, 1 lowercase, 1 number'
                       }
                     })}
                   />

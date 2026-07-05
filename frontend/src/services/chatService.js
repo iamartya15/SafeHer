@@ -1,8 +1,16 @@
 import api from './api';
 
-export const sendChatMessage = async (message) => {
-  const response = await api.post('/chat/message', { message });
-  return response.data;
+export const sendChatMessage = async (message, locationContext = '') => {
+  try {
+    const payload = { message };
+    if (locationContext) {
+      payload.locationContext = locationContext;
+    }
+    const response = await api.post('/chat/message', payload);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getChatHistory = async () => {

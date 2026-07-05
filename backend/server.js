@@ -15,6 +15,8 @@ const morgan = require('morgan');
 const path = require('path');
 const fs = require('fs');
 const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const xssClean = require('./middlewares/xssMiddleware');
 const connectDB = require('./config/db');
 const errorHandler = require('./middlewares/errorMiddleware');
 
@@ -81,6 +83,12 @@ app.use(
 // Request body parser
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data sanitization against XSS
+app.use(xssClean());
 
 // Setup Static Upload Folders
 const publicUploads = path.join(__dirname, 'public', 'uploads');

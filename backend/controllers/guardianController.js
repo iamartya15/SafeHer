@@ -3,6 +3,7 @@ const User = require('../models/User');
 const SOSAlert = require('../models/SOSAlert');
 const Notification = require('../models/Notification');
 const { sendMail } = require('../config/mail');
+const mongoose = require('mongoose');
 
 /**
  * Helper: fire-and-forget email — never blocks response or throws
@@ -200,6 +201,14 @@ const updateRequestStatus = async (req, res, next) => {
       });
     }
 
+    if (!mongoose.Types.ObjectId.isValid(requestId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Request ID format',
+        data: null
+      });
+    }
+
     const request = await Guardian.findById(requestId);
     if (!request) {
       return res.status(404).json({
@@ -304,6 +313,13 @@ const getMonitoredUsers = async (req, res, next) => {
  */
 const removeGuardianRelation = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid Guardian Relation ID format',
+        data: null
+      });
+    }
     const relation = await Guardian.findById(req.params.id);
     if (!relation) {
       return res.status(404).json({

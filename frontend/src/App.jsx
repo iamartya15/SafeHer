@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Suspense, lazy } from 'react';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { Toaster } from 'react-hot-toast';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { Loader2 } from 'lucide-react';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -15,19 +17,27 @@ import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import VerifyEmail from './pages/VerifyEmail';
-import Dashboard from './pages/Dashboard';
-import GuardianDashboard from './pages/GuardianDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import ReportIncident from './pages/ReportIncident';
-import MapPage from './pages/MapPage';
-import SafePlaces from './pages/SafePlaces';
-import SosAlerts from './pages/SosAlerts';
-import AIAssistant from './pages/AIAssistant';
 import Profile from './pages/Profile';
 import Settings from './pages/Settings';
 import ComingSoon from './pages/ComingSoon';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+
+// Lazy load heavy dashboard components to significantly reduce the main bundle size
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const GuardianDashboard = lazy(() => import('./pages/GuardianDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ReportIncident = lazy(() => import('./pages/ReportIncident'));
+const MapPage = lazy(() => import('./pages/MapPage'));
+const SafePlaces = lazy(() => import('./pages/SafePlaces'));
+const SosAlerts = lazy(() => import('./pages/SosAlerts'));
+const AIAssistant = lazy(() => import('./pages/AIAssistant'));
+
+const PageLoader = () => (
+  <div className="flex h-[calc(100vh-100px)] w-full items-center justify-center bg-slate-900/50">
+    <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+  </div>
+);
 
 function App() {
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -50,16 +60,16 @@ function App() {
 
             {/* Protected Dashboard Routes */}
             <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Dashboard /></ProtectedRoute>} />
-              <Route path="/sos" element={<ProtectedRoute allowedRoles={['user']}><SosAlerts /></ProtectedRoute>} />
-              <Route path="/map" element={<ProtectedRoute allowedRoles={['user']}><MapPage /></ProtectedRoute>} />
-              <Route path="/report-incident" element={<ProtectedRoute allowedRoles={['user']}><ReportIncident /></ProtectedRoute>} />
-              <Route path="/nearby" element={<ProtectedRoute allowedRoles={['user']}><SafePlaces /></ProtectedRoute>} />
-              <Route path="/ai" element={<ProtectedRoute allowedRoles={['user']}><AIAssistant /></ProtectedRoute>} />
-              <Route path="/guardian" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><GuardianDashboard /></ProtectedRoute>} />
+              <Route path="/dashboard" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><Dashboard /></Suspense></ProtectedRoute>} />
+              <Route path="/sos" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><SosAlerts /></Suspense></ProtectedRoute>} />
+              <Route path="/map" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><MapPage /></Suspense></ProtectedRoute>} />
+              <Route path="/report-incident" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><ReportIncident /></Suspense></ProtectedRoute>} />
+              <Route path="/nearby" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><SafePlaces /></Suspense></ProtectedRoute>} />
+              <Route path="/ai" element={<ProtectedRoute allowedRoles={['user']}><Suspense fallback={<PageLoader />}><AIAssistant /></Suspense></ProtectedRoute>} />
+              <Route path="/guardian" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><Suspense fallback={<PageLoader />}><GuardianDashboard /></Suspense></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><Profile /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute allowedRoles={['user', 'guardian', 'admin']}><Settings /></ProtectedRoute>} />
-              <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={['admin']}><Suspense fallback={<PageLoader />}><AdminDashboard /></Suspense></ProtectedRoute>} />
             </Route>
 
             {/* Fallback redirect */}

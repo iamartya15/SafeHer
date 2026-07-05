@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -8,7 +8,6 @@ import {
   ShieldAlert,
   MapPin,
   AlertTriangle,
-  Users,
   Compass,
   ArrowUpRight,
   RefreshCw,
@@ -26,36 +25,36 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const { latitude, longitude, error: geoError, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
-  const [sosHistory, setSosHistory] = useState([]);
-  const [incidents, setIncidents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [activeSos, setActiveSos] = useState(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const loadData = async () => {
     try {
-      // 1. Get SOS History
       const sosData = await sosService.getSOSHistory();
-      if (sosData.success) {
+      if (sosData.success && mountedRef.current) {
         setSosHistory(sosData.history.slice(0, 5));
       }
 
-      // 2. Get Active SOS status
       const activeSosData = await sosService.getActiveSOS();
-      if (activeSosData.success && activeSosData.hasActiveSos) {
+      if (activeSosData.success && activeSosData.hasActiveSos && mountedRef.current) {
         setActiveSos(activeSosData.sos);
-      } else {
+      } else if (mountedRef.current) {
         setActiveSos(null);
       }
 
-      // 3. Get Recent Incident Reports
       const incidentData = await incidentService.getIncidents();
-      if (incidentData.success) {
+      if (incidentData.success && mountedRef.current) {
         setIncidents(incidentData.reports.slice(0, 5));
       }
     } catch (err) {
-      console.error('Failed to load dashboard statistics:', err);
+      if (mountedRef.current) console.error('Failed to load dashboard statistics:', err);
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   };
 

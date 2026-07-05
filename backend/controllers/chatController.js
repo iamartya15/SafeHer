@@ -5,7 +5,7 @@ const { getSafetyAdvice } = require('../services/geminiService');
  * Send Message to Gemini AI Safety Assistant
  */
 const sendMessage = async (req, res, next) => {
-  const { message } = req.body;
+  const { message, locationContext } = req.body;
   try {
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ success: false, message: 'Message is required' });
@@ -18,7 +18,7 @@ const sendMessage = async (req, res, next) => {
     }
 
     // 2. Fetch safety advice from Gemini service
-    const advice = await getSafetyAdvice(message, chat.messages);
+    const advice = await getSafetyAdvice(message, chat.messages, locationContext);
 
     // 3. Save conversation exchanges to MongoDB
     chat.messages.push({ role: 'user', content: message });

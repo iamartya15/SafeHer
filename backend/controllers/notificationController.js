@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const mongoose = require('mongoose');
 
 /**
  * Get all notifications for logged-in user
@@ -24,6 +25,9 @@ const getNotifications = async (req, res, next) => {
  */
 const markAsRead = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Notification ID format' });
+    }
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, recipientId: req.user.id },
       { read: true },
@@ -67,6 +71,9 @@ const markAllAsRead = async (req, res, next) => {
  */
 const deleteNotification = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Notification ID format' });
+    }
     const notification = await Notification.findOneAndDelete({
       _id: req.params.id,
       recipientId: req.user.id

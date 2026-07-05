@@ -2,6 +2,7 @@ const User = require('../models/User');
 const IncidentReport = require('../models/IncidentReport');
 const SOSAlert = require('../models/SOSAlert');
 const Guardian = require('../models/Guardian');
+const mongoose = require('mongoose');
 
 /**
  * Get basic statistics for admin dashboard
@@ -81,6 +82,10 @@ const updateUserRole = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Invalid role', data: null });
     }
 
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid User ID format', data: null });
+    }
+
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found', data: null });
@@ -118,6 +123,9 @@ const updateUserRole = async (req, res, next) => {
  */
 const toggleBlockUser = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid User ID format', data: null });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found', data: null });
@@ -157,6 +165,9 @@ const toggleBlockUser = async (req, res, next) => {
  */
 const deleteUser = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid User ID format', data: null });
+    }
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found', data: null });
@@ -214,6 +225,9 @@ const getAllGuardians = async (req, res, next) => {
  */
 const removeGuardianConnection = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Connection ID format', data: null });
+    }
     const connection = await Guardian.findByIdAndDelete(req.params.id);
     if (!connection) {
       return res.status(404).json({ success: false, message: 'Guardian connection not found', data: null });
@@ -234,6 +248,9 @@ const removeGuardianConnection = async (req, res, next) => {
  */
 const deleteFakeReport = async (req, res, next) => {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ success: false, message: 'Invalid Report ID format', data: null });
+    }
     const report = await IncidentReport.findByIdAndDelete(req.params.id);
     if (!report) {
       return res.status(404).json({ success: false, message: 'Incident report not found', data: null });

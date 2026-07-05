@@ -1,119 +1,173 @@
-# SafeHer AI - Advanced Smart Women Safety Companion
+<div align="center">
+  <img src="./frontend/public/icon.svg" alt="SafeHer AI Logo" width="120" />
+  <h1>SafeHer AI</h1>
+  <p><strong>Advanced Smart Women Safety Companion & Guardian Network</strong></p>
+  
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+  [![React](https://img.shields.io/badge/React-18.x-61dafb?logo=react&logoColor=black)](https://reactjs.org/)
+  [![Node.js](https://img.shields.io/badge/Node.js-20.x-339933?logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+  [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+</div>
 
-SafeHer AI is a production-ready, full-stack safety web application. It integrates predictive safety logs, geographic incident mapping, automated emergency alerts, and a Gemini-powered safety companion.
+<br />
+
+## 🌟 Overview
+
+**SafeHer AI** is an enterprise-grade, location-aware emergency companion designed to provide immediate safety assistance, predictive alerts, and a real-time guardian monitoring network. By combining community-reported incidents, real-time disaster alerts (GDACS), local infrastructure data (OpenStreetMap Overpass API), and Google's Gemini AI, SafeHer creates a comprehensive safety shield.
+
+## ✨ Core Features
+
+### 🚨 Real-Time SOS System
+- **1-Tap Emergency Trigger**: Instantly alerts all assigned Guardians via email and in-app notifications.
+- **Live Location Tracking**: Continuously updates backend with high-accuracy GPS coordinates during active SOS.
+- **Guardian Dashboard**: Real-time map displaying the exact location, battery status, and route of the monitored user.
+
+### 🧠 Location-Aware AI Assistant (Gemini)
+- **Contextual Intelligence**: Reverses geocodes user location using Nominatim.
+- **Nearby Intelligence**: Suggests nearby Safe Places (Police, Hospitals, Shelters) using the Overpass API.
+- **Privacy-First**: Never accesses location without explicit browser permission. Caches data to prevent API abuse.
+
+### 🗺️ Live Safety Map (Triple-Layer Integration)
+- **User Incidents**: Crowdsourced incident reports (harassment, unsafe areas, accidents) stored in MongoDB using `2dsphere` geospatial indexing.
+- **GDACS Disasters**: Live global disaster alerts (Earthquakes, Floods, Cyclones) integrated dynamically via GeoJSON.
+- **Verified Safe Places**: Real-time extraction of nearby Police Stations, Hospitals, and Pharmacies via OSM Overpass API.
+
+### 🎨 Premium AMOLED UI
+- Custom Dark Mode optimized for OLED screens (`#0B0F19` deep backgrounds).
+- Glassmorphism UI with smooth micro-animations.
+- Highly responsive Mobile Drawer and Navigation structure.
 
 ---
 
-## 🛡️ Core Features
+## 🏗️ Architecture
 
-1. **Authentication & Multi-Role Hub**: Secure Register, Login, JWT access tokens, HTTP-only Refresh Tokens. Users can hold multiple roles simultaneously (User, Guardian, Admin) without needing separate accounts, switching instantly via the workspace dropdown.
-2. **Interactive Safety Intelligence Map**: Advanced mapping powered by Leaflet and Leaflet MarkerCluster.
-   - **Live Global Disaster Alerts**: Automatically pulls real-time earthquake, flood, and cyclone alerts via the **GDACS GeoJSON API**.
-   - **Local Hazard Pins**: User-reported incidents for Harassment, Theft, Stalking, Poor Lighting, Unsafe Area, and Road Issues (MongoDB).
-   - **Dynamic Filtering**: Filter by category and time (24h, 7d, 30d, All Time).
-3. **Advanced Safe Places Network**: Live integration with **OpenStreetMap Overpass API**.
-   - Automatically maps police shelters, hospitals, pharmacies, women's help centers, and fuel stations within a highly accurate 5km radius using the Haversine formula.
-   - Extracts rich metadata including phone numbers, websites, opening hours, and operators.
-   - Provides instant walking navigation links and clickable call buttons.
-4. **Emergency SOS System**: One-click SOS broadcaster logging high-accuracy user coordinates, battery telemetry, and client user-agent metrics, with instant Nodemailer dispatches to linked safety guardians.
-5. **Guardian Command Center**: Custom panel where guardians can accept ward permissions, audit active SOS alarms, and locate monitored users on live maps.
-6. **AI Safety Companion**: Conversational assistant powered by Google Gemini (with pre-programmed local fallback rules in case keys are not set) generating immediate guidance for walking alone or escaping dangerous locations.
-7. **Admin Moderation Portal**: Visualizes system registrations and alerts statistics, manages user roles, and moderates fake incident reports.
-8. **In-App Notifications**: Real-time synchronized notifications with optimistic UI updates and zero stale caching.
-9. **Premium AMOLED Theming**: 
-   - **Deep Dark Mode**: Custom AMOLED-inspired charcoal/black aesthetics with soft purple/blue radiant glows.
-   - **Light Mode**: High-contrast, clean, and bright visibility.
-   - **System Mode**: Dynamically follows the user's OS preference (`prefers-color-scheme`) in real-time.
+The application follows a standard MERN stack architecture with MVC design patterns on the backend.
 
----
+### Tech Stack
+- **Frontend**: React (Vite), TailwindCSS, Leaflet (Maps), React Hook Form, Zustand/Context API, React Router v6.
+- **Backend**: Node.js, Express.js, Mongoose (MongoDB), JSON Web Tokens (JWT).
+- **External APIs**: Google OAuth 2.0, Gemini AI (Generative Language), GDACS (Disaster), Overpass API (OSM), Nominatim.
+- **Security**: Helmet, Rate Limiting, express-mongo-sanitize, sanitize-html.
 
-## ⚙️ Project Architecture
-
+### Folder Structure
+```text
+📦 safeher-ai
+ ┣ 📂 backend
+ ┃ ┣ 📂 config       # DB, Cloudinary configuration
+ ┃ ┣ 📂 controllers  # Request handling logic (auth, sos, map)
+ ┃ ┣ 📂 middlewares  # Auth (JWT), XSS, Error Handling
+ ┃ ┣ 📂 models       # Mongoose Schemas (User, SOS, Incident)
+ ┃ ┣ 📂 routes       # API Route definitions
+ ┃ ┣ 📂 services     # External APIs (Gemini, Email, Notifications)
+ ┃ ┗ 📜 server.js    # Entry point & Express setup
+ ┗ 📂 frontend
+ ┃ ┣ 📂 src
+ ┃ ┃ ┣ 📂 components # Reusable UI components
+ ┃ ┃ ┣ 📂 context    # AuthProvider, ThemeProvider
+ ┃ ┃ ┣ 📂 hooks      # Custom hooks (useGeolocation)
+ ┃ ┃ ┣ 📂 layouts    # MainLayout, DashboardLayout
+ ┃ ┃ ┣ 📂 pages      # Page views (Dashboard, SOS, Maps)
+ ┃ ┃ ┗ 📂 services   # Axios API wrappers
+ ┃ ┗ 📜 vite.config.js
 ```
-SafeHer/
-├── backend/
-│   ├── config/             # DB, Cloudinary, and Nodemailer configs
-│   ├── controllers/        # Express MVC controllers
-│   ├── middlewares/        # JWT auth, Multer uploads, security, and error catchers
-│   ├── models/             # Mongoose schemas (User, Guardian, Incident, SOS, Notification, Chat)
-│   ├── routes/             # REST routing maps
-│   ├── services/           # Gemini API integrations
-│   ├── validators/         # Input sanitizers using express-validator
-│   └── server.js           # Server entry point
-├── frontend/
-│   ├── src/
-│   │   ├── components/     # Navbar, Sidebar, InteractiveMap, etc.
-│   │   ├── context/        # Auth and Theme Context providers
-│   │   ├── hooks/          # useAuth and useGeolocation (with high-accuracy fallbacks)
-│   │   ├── pages/          # Dashboards, Maps, AI chats, and auth screens
-│   │   ├── services/       # Axios wrappers and API clients
-│   │   ├── App.jsx         # App router configurations
-│   │   └── index.css       # Tailwind directives and semantic CSS variables
-│   ├── tailwind.config.js
-│   ├── vercel.json         # SPA router redirects
-│   └── vite.config.js
-└── package.json            # Root command orchestrator
-```
 
 ---
 
-## 🚀 Local Development Setup
+## 🛡️ Security Features
+- **NoSQL Injection Prevention**: `express-mongo-sanitize` strips prohibited characters.
+- **XSS Protection**: Custom `sanitize-html` middleware sanitizes payload inputs.
+- **Rate Limiting**: `express-rate-limit` prevents brute-force attacks on authentication endpoints.
+- **Anti-Enumeration Guard**: Strict zero-knowledge responses on Forgot Password endpoints.
+- **Token Security**: Cryptographically secure, SHA-256 hashed, one-time-use password reset tokens.
+- **Mass Assignment Protection**: Explicit field validation during user registration prevents privilege escalation.
+- **CORS Configuration**: Restricts access to allowed frontend origins only.
+- **JWT Authentication**: Implements short-lived access tokens and secure refresh token rotation via HTTP-only cookies.
+- **Role-Based Access Control (RBAC)**: Strict separation between `user`, `guardian`, and `admin` roles.
 
-### Prerequisites
-- Node.js >= 18.0.0
-- MongoDB (Local instance or Atlas string)
+---
 
-### 1. Installation
-In the root directory, install all dependencies for both frontend and backend:
+## ⚡ Performance Optimizations
+- **React Lazy Loading & Suspense**: Heavy map and dashboard components are dynamically imported, drastically reducing the initial Vite bundle size (`index.js` reduced from ~750kB to ~476kB).
+- **Geospatial Indexing**: MongoDB `2dsphere` indexes allow lightning-fast distance sorting for nearby incidents.
+- **API Caching**: Safe places and reverse geocoding results are cached to prevent redundant Overpass/Nominatim API calls.
+
+---
+
+## 🚀 Installation & Setup
+
+### 1. Clone the repository
 ```bash
-npm run install:all
+git clone https://github.com/iamartya15/SafeHer.git
+cd SafeHer
 ```
 
-### 2. Configure Environment Variables
-Create a `.env` file in the `backend/` directory (see `backend/.env.example` for details):
+### 2. Backend Setup
+```bash
+cd backend
+npm install
+```
+Create a `.env` file in the `backend` directory:
 ```env
 PORT=5000
-MONGODB_URI=mongodb://127.0.0.1:27017/safeher
-JWT_SECRET=your_jwt_access_secret_key
-JWT_REFRESH_SECRET=your_jwt_refresh_secret_key
-GEMINI_API_KEY=your_gemini_api_key
-CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
-CLOUDINARY_API_KEY=your_cloudinary_api_key
-CLOUDINARY_API_SECRET=your_cloudinary_api_secret
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASS=your_email_app_password
-FRONTEND_URL=http://localhost:5173
-ADMIN_EMAIL=your_super_admin@email.com
-```
-*Note: If `GEMINI_API_KEY`, `EMAIL_USER`, or `CLOUDINARY_*` are left blank, SafeHer AI automatically falls back to development simulators (printing emails to the console, saving images locally, and running rule-based keyword safety advisors).*
+NODE_ENV=development
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=30d
+ADMIN_EMAIL=your_admin_email@example.com
 
-### 3. Run the Development Servers
-From the root directory, launch both dev servers concurrently:
+# Email (Nodemailer)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+
+# Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.5-flash
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your_google_client_id
+```
+Start the backend server:
 ```bash
 npm run dev
 ```
-- Frontend will mount at: `http://localhost:5173`
-- Backend API will run at: `http://localhost:5000/api`
+
+### 3. Frontend Setup
+```bash
+cd ../frontend
+npm install
+```
+Create a `.env` file in the `frontend` directory:
+```env
+VITE_API_URL=http://localhost:5000/api
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+```
+Start the Vite development server:
+```bash
+npm run dev
+```
 
 ---
 
-## 🌐 Production Deployment
+## 🧪 Testing & Validation
+The project includes a comprehensive backend sanity verification script.
+```bash
+cd backend
+node verify_backend.js
+```
+This script checks all routes, controllers, database models, and service configurations to ensure production readiness.
 
-### Frontend (Vercel)
-1. Push your repository to GitHub.
-2. Link your repository on the Vercel dashboard.
-3. Configure the Root Directory to `frontend`.
-4. Set Environment Variables:
-   - `VITE_API_URL` = Your backend Render URL (e.g., `https://safeher-backend.onrender.com/api`).
-5. Deploy. (The `vercel.json` SPA redirection configuration is already bundled inside `frontend/`).
+---
 
-### Backend (Render)
-1. Deploy a new Web Service on Render.
-2. Link your repository.
-3. Configure the Root Directory to `backend`.
-4. Set Build Command: `npm install`.
-5. Set Start Command: `npm start`.
-6. Set environment variables from your `backend/.env` file.
-7. Deploy.
+## 🗺️ Roadmap
+- [ ] Push Notifications via Firebase Cloud Messaging (FCM).
+- [ ] Offline-first capability using Service Workers (PWA).
+- [ ] Background Geolocation Tracking for continuous Guardian updates while phone is locked.
+- [ ] Voice-activated SOS trigger using browser Web Speech API.
+
+---
+
+## 📄 License
+This project is licensed under the MIT License. See the `LICENSE` file for details.

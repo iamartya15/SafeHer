@@ -25,11 +25,11 @@ export const ForgotPassword = () => {
       const res = await forgotPassword(data.email);
       if (res.success) {
         setSuccess(true);
-        toast.success('Password reset link sent to your email!');
+        toast.success('Request processed successfully.');
       }
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.message || 'Failed to send reset link. Check your email.';
+      const msg = err.response?.data?.message || 'Failed to process request. Please try again.';
       setApiError(msg);
       toast.error(msg);
     } finally {
@@ -47,9 +47,9 @@ export const ForgotPassword = () => {
               <CheckCircle className="w-10 h-10" />
             </div>
             <div className="space-y-2">
-              <h2 className="text-2xl font-extrabold text-white">Reset Link Sent</h2>
+              <h2 className="text-2xl font-extrabold text-white">Request Processed</h2>
               <p className="text-sm text-slate-300">
-                Check your inbox for a password reset email from SafeHer AI.
+                If an account with this email exists, a password reset link has been sent to your inbox.
               </p>
             </div>
             <div className="pt-4">
