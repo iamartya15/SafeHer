@@ -64,6 +64,14 @@ const triggerSOS = async (req, res, next) => {
         </div>
       `;
 
+      // Create Notification Record for Guardian in DB FIRST (ensures DB write succeeds even if SMTP fails)
+      await Notification.create({
+        recipientId: guardianUser._id,
+        title: `🚨 EMERGENCY: SOS Alert from ${req.user.name}`,
+        message: `${req.user.name} has triggered an SOS alert. Battery: ${batteryLevel}%. Check their location immediately.`,
+        type: 'sos'
+      });
+
       // Dispatch Email
       await sendMail({
         to: guardianUser.email,
@@ -71,17 +79,12 @@ const triggerSOS = async (req, res, next) => {
         text: `EMERGENCY ALERT: ${req.user.name} has triggered SOS. Location: ${mapsUrl}. Phone: ${req.user.phone || 'N/A'}. Battery: ${batteryLevel || 'Unknown'}%`,
         html: emailHtml
       });
-
-      // Create Notification Record for Guardian in DB
-      await Notification.create({
-        recipientId: guardianUser._id,
-        title: `🚨 EMERGENCY: SOS Alert from ${req.user.name}`,
-        message: `${req.user.name} has triggered an SOS alert. Battery: ${batteryLevel}%. Check their location immediately.`,
-        type: 'sos'
-      });
     });
 
-    await Promise.all(emailPromises);
+    // Execute email dispatch in the background to ensure instant API response during emergencies
+    Promise.all(emailPromises).catch((err) => {
+      console.error('Background SOS Dispatch Error:', err);
+    });
 
     res.status(201).json({
       success: true,

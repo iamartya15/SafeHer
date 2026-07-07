@@ -173,6 +173,16 @@ export const Home = () => {
               quote: "The dashboard makes it simple to approve requests, check trip status, and view alert history on a clean dark UI.",
               author: "Ayush",
               role: "Trainer / Developer"
+            },
+            {
+              quote: "The AI companion is a game-changer. It helped me navigate a poorly lit area and even suggested a safer route home.",
+              author: "Swati",
+              role: "College Student"
+            },
+            {
+              quote: "I love the website so much! The SOS feature is a lifesaver, and the AI companion is like having a personal safety assistant.",
+              author: "Sahil",
+              role: "College Student"
             }
           ].map((testi, i) => (
             <div key={i} className="glass-card rounded-2xl p-6 border border-white/5 flex flex-col justify-between">

@@ -1,214 +1,307 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import * as incidentService from '../services/incidentService';
+import * as mapService from '../services/mapService';
 import InteractiveMap from '../components/InteractiveMap';
-import { MapPin, AlertCircle, RefreshCw, Layers, Loader2 } from 'lucide-react';
+import { Layers, Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import axios from 'axios';
 
 export const MapPage = () => {
-  const { latitude, longitude, loading: geoLoading } = useGeolocation();
+  const { latitude, longitude } = useGeolocation();
 
-  const [incidents, setIncidents] = useState([]);
-  const [gdacsEvents, setGdacsEvents] = useState([]);
-  const [filteredIncidents, setFilteredIncidents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [timeFilter, setTimeFilter] = useState('7d'); // '24h', '7d', '30d', 'all'
+  const [layers, setLayers] = useState({
+    incidents: true,
+    gdacs: false,
+    usgs: false,
+    safePlaces: false,
+    firms: false,
+    weather: false
+  });
+
+  const [data, setData] = useState({
+    incidents: [],
+    gdacs: [],
+    usgs: [],
+    safePlaces: [],
+    firms: [],
+    weather: []
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [bbox, setBbox] = useState(''); // "south,west,north,east"
+
+  const controllers = useRef({});
+
+  const abortRequest = (key) => {
+    if (controllers.current[key]) {
+      controllers.current[key].abort();
+    }
+    controllers.current[key] = new AbortController();
+    return controllers.current[key].signal;
+  };
 
   const fetchIncidents = async () => {
-    setLoading(true);
+    if (!layers.incidents) return;
     try {
-      // 1. Fetch MongoDB incidents
-      const res = await incidentService.getIncidents();
-      let localIncidents = [];
+      const res = await incidentService.getIncidents(); // doesn't use AbortController yet in service, but we assume it's fast
       if (res.success) {
-        localIncidents = res.reports;
-        setIncidents(res.reports);
+        setData(prev => ({
+          ...prev,
+          incidents: res.reports.map(r => ({
+            id: r._id,
+            type: 'incident',
+            category: r.category,
+            title: r.category,
+            description: r.description,
+            address: r.address,
+            timestamp: r.createdAt,
+            lat: r.location?.coordinates[1],
+            lng: r.location?.coordinates[0]
+          }))
+        }));
       }
-
-      // 2. Fetch GDACS Global Disasters
-      let globalEvents = [];
-      try {
-        const gdacsRes = await fetch('https://www.gdacs.org/datareport/resources/JRC/gdacs_geojson.json');
-        if (gdacsRes.ok) {
-          const data = await gdacsRes.json();
-          if (data && data.features) {
-            globalEvents = data.features.map(f => ({
-              _id: f.properties.eventid || Math.random().toString(),
-              isGDACS: true,
-              category: f.properties.eventtype,
-              description: f.properties.htmldescription || f.properties.description,
-              address: f.properties.country || 'Global Region',
-              createdAt: f.properties.todate || new Date().toISOString(),
-              location: {
-                type: 'Point',
-                coordinates: [f.geometry.coordinates[0], f.geometry.coordinates[1]]
-              }
-            }));
-            setGdacsEvents(globalEvents);
-          }
-        }
-      } catch (gdacsErr) {
-        console.error('Failed to fetch GDACS data (CORS or network error):', gdacsErr);
-      }
-
-      applyFilters(localIncidents, globalEvents, selectedCategory, timeFilter);
     } catch (err) {
-      console.error(err);
-      toast.error('Failed to load incident reports.');
-    } finally {
-      setLoading(false);
+      toast.error('Live data temporarily unavailable (Incidents)', { id: 'incidents-err' });
     }
   };
 
-  const applyFilters = (local = incidents, global = gdacsEvents, cat = selectedCategory, time = timeFilter) => {
-    let combined = [...local, ...global];
-
-    // Time filter
-    if (time !== 'all') {
-      const now = new Date().getTime();
-      const thresholds = {
-        '24h': 24 * 60 * 60 * 1000,
-        '7d': 7 * 24 * 60 * 60 * 1000,
-        '30d': 30 * 24 * 60 * 60 * 1000
-      };
-      const limit = thresholds[time];
-      combined = combined.filter(inc => {
-        const incTime = new Date(inc.createdAt).getTime();
-        return (now - incTime) <= limit;
-      });
-    }
-
-    // Category filter
-    if (cat !== 'All') {
-      if (cat === 'Global Disaster') {
-        combined = combined.filter(inc => inc.isGDACS);
-      } else {
-        combined = combined.filter(inc => !inc.isGDACS && inc.category === cat);
+  const fetchGdacs = async () => {
+    if (!layers.gdacs) return;
+    const signal = abortRequest('gdacs');
+    try {
+      const res = await mapService.getGdacs(signal);
+      if (res && res.data && res.data.features) {
+        setData(prev => ({
+          ...prev,
+          gdacs: res.data.features.map(f => ({
+            id: f.properties.eventid,
+            type: 'gdacs',
+            category: f.properties.eventtype,
+            title: f.properties.eventname || f.properties.eventtype,
+            description: f.properties.htmldescription || f.properties.description,
+            address: f.properties.country,
+            timestamp: f.properties.todate,
+            lat: f.geometry.coordinates[1],
+            lng: f.geometry.coordinates[0]
+          }))
+        }));
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) {
+        toast.error('Live data temporarily unavailable (GDACS)', { id: 'gdacs-err' });
       }
     }
-
-    setFilteredIncidents(combined);
   };
 
-  // Trigger filters when state changes
-  useEffect(() => {
-    applyFilters();
-  }, [selectedCategory, timeFilter]);
+  const fetchUsgs = async () => {
+    if (!layers.usgs) return;
+    const signal = abortRequest('usgs');
+    try {
+      const res = await mapService.getUsgs(signal);
+      if (res && res.data && res.data.features) {
+        setData(prev => ({
+          ...prev,
+          usgs: res.data.features.map(f => ({
+            id: f.id,
+            type: 'usgs',
+            category: 'Earthquake',
+            title: f.properties.title,
+            description: `Magnitude: ${f.properties.mag}`,
+            address: f.properties.place,
+            timestamp: new Date(f.properties.time).toISOString(),
+            lat: f.geometry.coordinates[1],
+            lng: f.geometry.coordinates[0]
+          }))
+        }));
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) {
+        toast.error('Live data temporarily unavailable (USGS)', { id: 'usgs-err' });
+      }
+    }
+  };
 
+  const fetchSafePlaces = async () => {
+    if (!layers.safePlaces || !bbox) return;
+    const signal = abortRequest('safePlaces');
+    try {
+      const res = await mapService.getSafePlaces(bbox, signal);
+      if (res && res.data && res.data.elements) {
+        setData(prev => ({
+          ...prev,
+          safePlaces: res.data.elements.map(e => ({
+            id: e.id,
+            type: 'safe_place',
+            category: e.tags?.amenity,
+            title: e.tags?.name || e.tags?.amenity,
+            description: e.tags?.amenity,
+            lat: e.lat || e.center?.lat,
+            lng: e.lon || e.center?.lon
+          }))
+        }));
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) {
+        toast.error('Live data temporarily unavailable (Safe Places)', { id: 'sp-err' });
+      }
+    }
+  };
+
+  const fetchFirms = async () => {
+    if (!layers.firms || !bbox) return;
+    const signal = abortRequest('firms');
+    try {
+      const res = await mapService.getFirms(bbox, signal);
+      if (res && res.success === false) {
+         toast.error(res.message, { id: 'firms-key-err' });
+         return;
+      }
+      if (res && res.data) {
+        // Parse basic CSV from NASA
+        const lines = res.data.split('\\n').slice(1);
+        const firmsList = [];
+        lines.forEach((l, i) => {
+           const parts = l.split(',');
+           if (parts.length >= 2) {
+             firmsList.push({
+               id: `firm-${i}`,
+               type: 'firms',
+               category: 'Wildfire',
+               title: 'NASA FIRMS Hotspot',
+               lat: parseFloat(parts[0]),
+               lng: parseFloat(parts[1])
+             });
+           }
+        });
+        setData(prev => ({ ...prev, firms: firmsList }));
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) {
+        toast.error('Live data temporarily unavailable (NASA FIRMS)', { id: 'firms-err' });
+      }
+    }
+  };
+
+  const fetchWeather = async () => {
+    if (!layers.weather || !latitude || !longitude) return;
+    const signal = abortRequest('weather');
+    try {
+      const res = await mapService.getWeather(latitude, longitude, signal);
+      if (res && res.success === false) {
+         toast.error(res.message, { id: 'weather-key-err' });
+         return;
+      }
+      if (res && res.data && res.data.weather) {
+        setData(prev => ({
+          ...prev,
+          weather: [{
+            id: 'weather-1',
+            type: 'weather',
+            category: res.data.weather[0].main,
+            title: res.data.weather[0].main,
+            description: res.data.weather[0].description,
+            address: res.data.name,
+            lat: res.data.coord.lat,
+            lng: res.data.coord.lon
+          }]
+        }));
+      }
+    } catch (err) {
+      if (!axios.isCancel(err)) {
+        toast.error('Live data temporarily unavailable (Weather)', { id: 'weather-err' });
+      }
+    }
+  };
+
+  // Setup Intervals
   useEffect(() => {
     fetchIncidents();
+    const incInt = setInterval(fetchIncidents, 15000);
+    return () => clearInterval(incInt);
+  }, [layers.incidents]);
+
+  useEffect(() => {
+    fetchGdacs();
+    const gdacsInt = setInterval(fetchGdacs, 300000); // 5 mins
+    return () => clearInterval(gdacsInt);
+  }, [layers.gdacs]);
+
+  useEffect(() => {
+    fetchUsgs();
+    const usgsInt = setInterval(fetchUsgs, 300000); // 5 mins
+    return () => clearInterval(usgsInt);
+  }, [layers.usgs]);
+
+  useEffect(() => {
+    fetchSafePlaces();
+    const spInt = setInterval(fetchSafePlaces, 1800000); // 30 mins
+    return () => clearInterval(spInt);
+  }, [layers.safePlaces, bbox]);
+
+  useEffect(() => {
+    fetchFirms();
+    const fInt = setInterval(fetchFirms, 600000); // 10 mins
+    return () => clearInterval(fInt);
+  }, [layers.firms, bbox]);
+
+  useEffect(() => {
+    fetchWeather();
+    const wInt = setInterval(fetchWeather, 600000); // 10 mins
+    return () => clearInterval(wInt);
+  }, [layers.weather, latitude, longitude]);
+
+  const toggleLayer = (layer) => {
+    setLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
+  };
+
+  const handleBoundsChange = useCallback((newBbox) => {
+    setBbox(newBbox);
   }, []);
 
-  // Removed old filter logic inside useEffect directly, now handled by applyFilters
-
-  const categories = [
-    'All',
-    'Global Disaster',
-    'Harassment',
-    'Theft',
-    'Stalking',
-    'Poor Lighting',
-    'Unsafe Area',
-    'Road Issue'
-  ];
-
-  const timeOptions = [
-    { id: '24h', label: 'Last 24h' },
-    { id: '7d', label: 'Last 7 Days' },
-    { id: '30d', label: 'Last 30 Days' },
-    { id: 'all', label: 'All Time' }
+  const mapData = [
+    ...(layers.incidents ? data.incidents : []),
+    ...(layers.gdacs ? data.gdacs : []),
+    ...(layers.usgs ? data.usgs : []),
+    ...(layers.safePlaces ? data.safePlaces : []),
+    ...(layers.firms ? data.firms : []),
+    ...(layers.weather ? data.weather : [])
   ];
 
   return (
-    <div className="space-y-6 flex flex-col h-[calc(100vh-100px)]">
-      
-      {/* Header Controls */}
+    <div className="space-y-4 flex flex-col h-[calc(100vh-100px)]">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight">
-            Safety Map Navigator
-          </h1>
-          <p className="text-slate-400 text-xs mt-1">Real-time localized hazards mapped by community reporters.</p>
-        </div>
-
-        <button
-          onClick={fetchIncidents}
-          disabled={loading}
-          className="btn-secondary py-2 px-4 flex items-center gap-1.5 text-xs font-semibold"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Reload Reports</span>
-        </button>
-      </div>
-
-      {/* Filters Row */}
-      <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-        {/* Category filter bar */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none flex-1 w-full md:w-auto">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 text-xs font-semibold rounded-full border transition-all shrink-0 ${
-                selectedCategory === cat
-                  ? 'bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20'
-                  : 'bg-slate-900/50 border-slate-700/50 text-slate-400 hover:text-white hover:border-slate-600'
-              }`}
-            >
-              {cat === 'Global Disaster' ? '🌍 ' : ''}{cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Time filter */}
-        <div className="flex gap-1 bg-slate-900/50 border border-slate-700/50 rounded-lg p-1 shrink-0">
-          {timeOptions.map(opt => (
-            <button
-              key={opt.id}
-              onClick={() => setTimeFilter(opt.id)}
-              className={`px-3 py-1.5 text-[10px] font-bold rounded-md transition-colors ${
-                timeFilter === opt.id
-                  ? 'bg-slate-700 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
+          <h1 className="text-2xl font-extrabold text-white tracking-tight">Intelligence Dashboard</h1>
+          <p className="text-slate-400 text-xs mt-1">Real-time localized hazards mapped by community & global intelligence.</p>
         </div>
       </div>
 
-      {/* Main Map Container */}
-      <div className="flex-grow rounded-2xl overflow-hidden border border-white/5 shadow-2xl relative bg-slate-900">
-        {loading ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950/80 z-50 gap-3 text-slate-500 text-xs">
-            <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
-            <span>Synchronizing incident coordinates...</span>
-          </div>
-        ) : filteredIncidents.length === 0 && selectedCategory !== 'All' ? (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
-            <Layers className="w-10 h-10 text-slate-600" />
-            <p className="text-sm font-bold text-white">No {selectedCategory} incidents</p>
-            <p className="text-xs text-slate-500">Try selecting a different category filter.</p>
-          </div>
-        ) : null}
+      {/* Layer Toggles */}
+      <div className="flex flex-wrap gap-2">
+        {Object.keys(layers).map((layer) => (
+          <button
+            key={layer}
+            onClick={() => toggleLayer(layer)}
+            className={`px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
+              layers[layer] 
+                ? 'bg-purple-600 text-white shadow-lg shadow-purple-500/30 border border-purple-500'
+                : 'bg-slate-800 text-slate-400 border border-slate-700 hover:text-white'
+            }`}
+          >
+            {layer === 'safePlaces' ? 'Safe Places (OSM)' : layer.toUpperCase()}
+          </button>
+        ))}
+      </div>
 
+      <div className="flex-grow rounded-2xl overflow-hidden border border-white/5 shadow-2xl bg-slate-900">
         <InteractiveMap
-          userLocation={
-            latitude && longitude ? { latitude, longitude } : null
-          }
-          incidents={filteredIncidents}
-          zoom={14}
+          userLocation={latitude && longitude ? { latitude, longitude } : null}
+          mapData={mapData}
+          zoom={12}
+          onBoundsChange={handleBoundsChange}
         />
       </div>
-      
-      {/* Footer warning */}
-      <div className="flex items-center gap-2 p-3 bg-purple-500/5 border border-purple-500/10 rounded-xl text-[10px] text-slate-400 font-medium">
-        <AlertCircle className="w-4 h-4 text-purple-400 shrink-0" />
-        <span>Use coordinates indicators responsibly. In case of immediate danger, head immediately to open businesses or call local police (100/112).</span>
-      </div>
-
     </div>
   );
 };

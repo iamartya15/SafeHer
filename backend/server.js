@@ -138,6 +138,7 @@ app.use('/api/guardians', require('./routes/guardianRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
+app.use('/api/map', require('./routes/mapRoutes'));
 // Health check and root route
 app.get('/api', (req, res) => {
   res.status(200).json({
