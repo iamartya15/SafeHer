@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as guardianService from '../services/guardianService';
 import {
@@ -7,15 +7,15 @@ import {
   Check,
   X,
   ShieldAlert,
-  MapPin,
+  
   Clock,
   Compass,
   Mail,
   Loader2,
   Trash2,
   HeartHandshake,
-  ShieldCheck,
-  AlertTriangle
+  
+  
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getAvatarSrc } from '../utils/avatar';
@@ -44,7 +44,7 @@ export const GuardianDashboard = () => {
     defaultValues: { email: '', relationship: 'Friend' }
   });
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (isLoadingRef.current) return;
     isLoadingRef.current = true;
     try {
@@ -71,7 +71,7 @@ export const GuardianDashboard = () => {
       setLoading(false);
       isLoadingRef.current = false;
     }
-  };
+  }, []);
 
   // Visibility-aware lightweight polling implementation
   useEffect(() => {
@@ -107,7 +107,7 @@ export const GuardianDashboard = () => {
       if (intervalId) clearInterval(intervalId);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, []);
+  }, [loadData]);
 
   // Add a ward/guardian connection
   const onSubmit = async (data) => {
@@ -502,7 +502,7 @@ export const GuardianDashboard = () => {
               <p className="text-[10px] text-slate-400">Invite a guardian by their registered SafeHer account email.</p>
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+            <form onSubmit={(e) => handleSubmit(onSubmit)(e)} className="space-y-3.5">
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email Address</label>
                 <div className="relative">

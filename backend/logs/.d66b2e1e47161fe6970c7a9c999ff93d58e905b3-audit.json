@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 7
+    },
+    "auditLog": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\.d66b2e1e47161fe6970c7a9c999ff93d58e905b3-audit.json",
+    "files": [
+        {
+            "date": 1784187322598,
+            "name": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\requests-2026-07-16.log",
+            "hash": "d9680a9a546b321e7d29ad4bce47a59b38927849e2a021f1a33ca5ad693fcbe1"
+        }
+    ],
+    "hashType": "sha256"
+}

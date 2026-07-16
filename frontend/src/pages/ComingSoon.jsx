@@ -23,25 +23,29 @@ export const ComingSoon = () => {
       title: 'AI Route Safety Prediction',
       description: 'AI will analyze multiple travel routes using historical incidents, crowd activity, lighting conditions, and community reports to recommend the safest route.',
       icon: Route,
-      gradient: 'from-purple-500/20 to-indigo-500/20'
+      gradient: 'from-purple-500/20 to-indigo-500/20',
+      eta: 'Q3 2026'
     },
     {
       title: 'AI Safety Score Engine',
       description: 'Future AI-powered safety score calculations utilizing historical crime registries, community reports, time parameters, weather, lighting indexes, and crowd densities.',
       icon: Gauge,
-      gradient: 'from-fuchsia-500/20 to-rose-500/20'
+      gradient: 'from-fuchsia-500/20 to-rose-500/20',
+      eta: 'Q4 2026'
     },
     {
       title: 'Safety Heatmap',
       description: 'Interactive graphical heatmap overlays generated from thousands of verified local community reports and historical alarms.',
       icon: Flame,
-      gradient: 'from-orange-500/20 to-red-500/20'
+      gradient: 'from-orange-500/20 to-red-500/20',
+      eta: 'Q1 2027'
     },
     {
       title: 'Safe Walk Mode',
       description: 'Automatic safety check-ins triggered every 30 seconds with intelligent SOS warnings in case checks are missed.',
       icon: Footprints,
-      gradient: 'from-emerald-500/20 to-teal-500/20'
+      gradient: 'from-emerald-500/20 to-teal-500/20',
+      eta: 'Q3 2026'
     },
     {
       title: 'Live Guardian Tracking',
@@ -133,6 +137,7 @@ export const ComingSoon = () => {
             description={r.description}
             icon={r.icon}
             gradient={r.gradient}
+            eta={r.eta}
           />
         ))}
       </div>

@@ -24,13 +24,13 @@ export const ResetPassword = () => {
   const {
     register,
     handleSubmit,
-    watch,
+    getValues,
     formState: { errors }
   } = useForm({
     defaultValues: { password: '', confirmPassword: '' }
   });
 
-  const watchPassword = watch('password');
+
 
   const onSubmit = async (data) => {
     if (!token) return;
@@ -131,7 +131,7 @@ export const ResetPassword = () => {
                     className={`glass-input pl-10 ${errors.confirmPassword ? 'border-red-500/50 focus:border-red-500' : ''}`}
                     {...register('confirmPassword', {
                       required: 'Confirm your password',
-                      validate: (value) => value === watchPassword || 'Passwords do not match'
+                      validate: (value) => value === getValues('password') || 'Passwords do not match'
                     })}
                   />
                 </div>

@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { logger } = require('../utils/logger');
 
 const isMailConfigured = 
   process.env.EMAIL_USER && 
@@ -22,13 +23,13 @@ if (isMailConfigured) {
   
   transporter.verify((error, success) => {
     if (error) {
-      console.error('Mail server verification failed:', error.message);
+      logger.error('Mail server verification failed:', error.message);
     } else {
-      console.log('Mail server is ready to send notifications.');
+      logger.info('Mail server is ready to send notifications.');
     }
   });
 } else {
-  console.warn('Mail transporter using DEV/MOCK mode. Emails will be logged to console.');
+  logger.warn('Mail transporter using DEV/MOCK mode. Emails will be logged to console.');
 }
 
 /**
@@ -52,27 +53,27 @@ const sendMail = async ({ to, subject, text, html }) => {
       });
       return true;
     } else {
-      console.log('\n========================================');
-      console.log(`[DEV EMAIL SENT]`);
-      console.log(`To: ${to}`);
-      console.log(`Subject: ${subject}`);
-      console.log(`Text: ${text}`);
+      logger.info('\n========================================');
+      logger.info(`[DEV EMAIL SENT]`);
+      logger.info(`To: ${to}`);
+      logger.info(`Subject: ${subject}`);
+      logger.info(`Text: ${text}`);
       
       // Extract and print any verification or reset links clearly in the console
       const linkMatch = html.match(/href="([^"]+)"/);
       if (linkMatch && linkMatch[1]) {
-        console.log(`\n👉 ACTION LINK: ${linkMatch[1]}\n`);
+        logger.info(`\n👉 ACTION LINK: ${linkMatch[1]}\n`);
       }
       
-      console.log('========================================\n');
+      logger.info('========================================\n');
       return true;
     }
   } catch (error) {
-    console.error(`Error sending email to ${to}:`, error.message);
+    logger.error(`Error sending email to ${to}: ${error.message}`);
     
     // Suppress mail exception in development mode so that registration and flow does not fail
     if (process.env.NODE_ENV !== 'production' || !isMailConfigured) {
-      console.warn(`[DEV FALLBACK] Suppressed mail send failure in development mode.`);
+      logger.warn(`[DEV FALLBACK] Suppressed mail send failure in development mode.`);
       return true;
     }
     throw error;

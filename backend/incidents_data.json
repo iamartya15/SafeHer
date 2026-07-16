@@ -1,0 +1,107 @@
+[
+  {
+    "category": "Harassment",
+    "description": "A college student reported being followed and verbally harassed by a man near the university campus during evening hours.",
+    "address": "North Campus, University of Delhi, Delhi 110007",
+    "latitude": 28.6946,
+    "longitude": 77.1729
+  },
+  {
+    "category": "Theft",
+    "description": "A woman had her handbag snatched by two men on a motorcycle while walking through a busy market area.",
+    "address": "Lajpat Nagar Central Market, Delhi 110024",
+    "latitude": 28.5663,
+    "longitude": 77.2407
+  },
+  {
+    "category": "Stalking",
+    "description": "A young professional reported a former acquaintance repeatedly appearing near her workplace and home, despite warnings.",
+    "address": "Nehru Place Market, New Delhi, Delhi 110019",
+    "latitude": 28.5471,
+    "longitude": 77.2514
+  },
+  {
+    "category": "Harassment",
+    "description": "A passenger reported inappropriate touching and verbal harassment by another commuter inside a crowded Delhi Metro train coach.",
+    "address": "Rajiv Chowk Metro Station, Connaught Place, New Delhi 110001",
+    "latitude": 28.6293,
+    "longitude": 77.2173
+  },
+  {
+    "category": "Theft",
+    "description": "A woman had her gold chain snatched by a motorcyclist while walking on a residential street in broad daylight.",
+    "address": "Linking Road, Bandra West, Mumbai, Maharashtra 400050",
+    "latitude": 19.0573,
+    "longitude": 72.8290
+  },
+  {
+    "category": "Harassment",
+    "description": "A group of men were reported to be catcalling and bothering women near a popular tourist spot.",
+    "address": "Gateway of India, Apollo Bunder, Colaba, Mumbai, Maharashtra 400001",
+    "latitude": 18.9219,
+    "longitude": 72.8347
+  },
+  {
+    "category": "Stalking",
+    "description": "A woman filed a complaint against a man who had been persistently trying to contact her and waiting outside her office.",
+    "address": "Nariman Point, Mumbai, Maharashtra 400021",
+    "latitude": 18.9248,
+    "longitude": 72.8248
+  },
+  {
+    "category": "Theft",
+    "description": "A woman's wallet was pickpocketed from her bag while she was shopping in a crowded street market.",
+    "address": "Crawford Market, Dhobi Talao, Mumbai, Maharashtra 400001",
+    "latitude": 18.9472,
+    "longitude": 72.8362
+  },
+  {
+    "category": "Harassment",
+    "description": "A female driver reported being verbally abused and intimidated by a male driver after a minor traffic disagreement.",
+    "address": "Outer Ring Road, Bellandur, Bengaluru, Karnataka 560103",
+    "latitude": 12.9234,
+    "longitude": 77.6798
+  },
+  {
+    "category": "Stalking",
+    "description": "A tech employee reported a former colleague repeatedly sending unwanted messages and attempting to meet her outside her office in Electronic City.",
+    "address": "Electronic City Phase 1, Bengaluru, Karnataka 560100",
+    "latitude": 12.8451,
+    "longitude": 77.6601
+  },
+  {
+    "category": "Theft",
+    "description": "A woman's phone was snatched by a person on a scooter while she was walking and using her phone on a busy street.",
+    "address": "MG Road, Bengaluru, Karnataka 560001",
+    "latitude": 12.9757,
+    "longitude": 77.6083
+  },
+  {
+    "category": "Harassment",
+    "description": "Women reported incidents of verbal harassment by loitering groups of men near a public park in the evening.",
+    "address": "KBR National Park, Jubilee Hills, Hyderabad, Telangana 500033",
+    "latitude": 17.4300,
+    "longitude": 78.4320
+  },
+  {
+    "category": "Theft",
+    "description": "A woman reported her mobile phone being snatched from her hand by an unknown assailant while she was walking near a historical monument.",
+    "address": "Charminar, Ghansi Bazaar, Hyderabad, Telangana 500002",
+    "latitude": 17.3616,
+    "longitude": 78.4747
+  },
+  {
+    "category": "Harassment",
+    "description": "Female students reported facing persistent eve-teasing and unwelcome advances from men near popular college hangout spots.",
+    "address": "Fergusson College Road (FC Road), Shivajinagar, Pune, Maharashtra 411004",
+    "latitude": 18.5229,
+    "longitude": 73.8390
+  },
+  {
+    "category": "Stalking",
+    "description": "A woman lodged a complaint against a man who was repeatedly following her from her workplace to her residence.",
+    "address": "Koregaon Park, Pune, Maharashtra 411001",
+    "latitude": 18.5367,
+    "longitude": 73.8967
+  }
+]

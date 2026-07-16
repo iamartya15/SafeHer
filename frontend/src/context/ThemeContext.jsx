@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-// Theme options: 'dark' | 'light' | 'system'
+// Theme options: 'dark' | 'light'
 const ThemeContext = createContext(null);
 
 const STORAGE_KEY = 'safeher-theme';

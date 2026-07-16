@@ -1,6 +1,7 @@
 const cloudinary = require('cloudinary').v2;
 const fs = require('fs');
 const path = require('path');
+const { logger } = require('../utils/logger');
 
 // Configure Cloudinary if credentials exist
 const isCloudinaryConfigured = 
@@ -14,9 +15,9 @@ if (isCloudinaryConfigured) {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
   });
-  console.log('Cloudinary Configured successfully.');
+  logger.info('Cloudinary Configured successfully.');
 } else {
-  console.warn('Cloudinary credentials missing. Falling back to local file storage for uploads.');
+  logger.warn('Cloudinary credentials missing. Falling back to local file storage for uploads.');
 }
 
 /**
@@ -40,7 +41,7 @@ const uploadImage = async (localFilePath, folder = 'safeher') => {
       try {
         fs.unlinkSync(localFilePath);
       } catch (err) {
-        console.error('Failed to delete temp file:', err);
+        logger.error(`Failed to delete temp file: ${err.message}`);
       }
       return {
         url: result.secure_url,
@@ -61,7 +62,7 @@ const uploadImage = async (localFilePath, folder = 'safeher') => {
       try {
         fs.unlinkSync(localFilePath);
       } catch (err) {
-        console.error('Failed to delete temp file:', err);
+        logger.error(`Failed to delete temp file: ${err.message}`);
       }
 
       const port = process.env.PORT || 5000;
@@ -73,7 +74,7 @@ const uploadImage = async (localFilePath, folder = 'safeher') => {
       };
     }
   } catch (error) {
-    console.error('Upload Error:', error);
+    logger.error(`Upload Error: ${error.message}`);
     // Attempt cleanup if file exists
     try {
       if (fs.existsSync(localFilePath)) {

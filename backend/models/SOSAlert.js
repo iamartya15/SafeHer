@@ -40,5 +40,7 @@ const sosAlertSchema = new mongoose.Schema(
 );
 
 sosAlertSchema.index({ location: '2dsphere' });
+sosAlertSchema.index({ status: 1, createdAt: -1 });
+sosAlertSchema.index({ userId: 1, status: 1 });
 
 module.exports = mongoose.model('SOSAlert', sosAlertSchema);

@@ -1,0 +1,25 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\.e1cd194fc4e03aae56ebd350f690b8c5bcca1963-audit.json",
+    "files": [
+        {
+            "date": 1783493458846,
+            "name": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\auth-2026-07-08.log",
+            "hash": "4e126febc778693b72510caee2d8bd34885a509e2a77d7bacf8ccc7ff1135462"
+        },
+        {
+            "date": 1783573403364,
+            "name": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\auth-2026-07-09.log",
+            "hash": "060d320e42ed82400aee6fda332a8163bf9d305df9960a58b792d640b3a1d318"
+        },
+        {
+            "date": 1784187322740,
+            "name": "C:\\Users\\amart\\OneDrive\\Documents\\SafeHer\\backend\\logs\\auth-2026-07-16.log",
+            "hash": "bcb84ff87025f2ba0786259ad4b2d5210ef7a5250de6c6763a8f46bb460e9bd8"
+        }
+    ],
+    "hashType": "sha256"
+}

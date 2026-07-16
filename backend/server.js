@@ -19,6 +19,10 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xssClean = require('./middlewares/xssMiddleware');
 const connectDB = require('./config/db');
 const errorHandler = require('./middlewares/errorMiddleware');
+const cookieParser = require('cookie-parser');
+const compression = require('compression');
+const { logger } = require('./utils/logger');
+const { sendSuccess } = require('./utils/responseHandler');
 
 // Initialize database
 connectDB();
@@ -33,25 +37,18 @@ app.use(
   })
 );
 
-// Logging middleware
+// Compress all responses
+app.use(compression());
+
+// Logging middleware with Winston
 if (process.env.NODE_ENV !== 'production') {
-  app.use(morgan('dev'));
+  app.use(morgan('dev', { stream: logger.stream }));
 } else {
-  app.use(morgan('combined'));
+  app.use(morgan('combined', { stream: logger.stream }));
 }
 
-// Cookie parser alternative for JWT in bodies, authorization headers, or parse simple cookie headers manually
-app.use((req, res, next) => {
-  req.cookies = {};
-  const rc = req.headers.cookie;
-  if (rc) {
-    rc.split(';').forEach((cookie) => {
-      const parts = cookie.split('=');
-      req.cookies[parts.shift().trim()] = decodeURI(parts.join('='));
-    });
-  }
-  next();
-});
+// Cookie parser
+app.use(cookieParser());
 
 // Setup CORS - allow credentials and multiple origins (dev/production)
 const allowedOrigins = [
@@ -139,11 +136,28 @@ app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/chat', require('./routes/chatRoutes'));
 app.use('/api/notifications', require('./routes/notificationRoutes'));
 app.use('/api/map', require('./routes/mapRoutes'));
-// Health check and root route
+// Health check and monitoring routes
+app.get('/api/health', (req, res) => {
+  sendSuccess(res, 'Backend is healthy', {
+    uptime: process.uptime(),
+    timestamp: Date.now()
+  });
+});
+
+app.get('/api/status', (req, res) => {
+  const dbState = require('mongoose').connection.readyState;
+  const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+  
+  sendSuccess(res, 'System Status', {
+    database: states[dbState] || 'unknown',
+    memoryUsage: process.memoryUsage(),
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
 app.get('/api', (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: 'SafeHer AI API Server is running.',
+  sendSuccess(res, 'SafeHer AI API Server is running.', {
     version: '1.0.0',
     environment: process.env.NODE_ENV || 'development'
   });
@@ -181,5 +195,5 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`SafeHer AI Server listening in http://localhost:${PORT}`);
+  logger.info(`SafeHer AI Server listening in http://localhost:${PORT}`);
 });

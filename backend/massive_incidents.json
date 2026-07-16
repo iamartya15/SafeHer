@@ -1,0 +1,1752 @@
+[
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the central market, Lucknow",
+    "latitude": 26.80849164400904,
+    "longitude": 80.902556245446
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the college gate, Ahmedabad",
+    "latitude": 23.074017007588356,
+    "longitude": 72.53366871032854
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the hospital corner, Chennai",
+    "latitude": 13.021409476036618,
+    "longitude": 80.31094590032076
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the metro station, Delhi",
+    "latitude": 28.680045269964953,
+    "longitude": 77.35693735684613
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the metro station, Pune",
+    "latitude": 18.47646650509161,
+    "longitude": 73.87868943323835
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the central market, Bengaluru",
+    "latitude": 13.085540562578316,
+    "longitude": 77.67338124361059
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the public park, Jaipur",
+    "latitude": 26.98191149500157,
+    "longitude": 75.7176705122553
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the IT park, Chennai",
+    "latitude": 13.078815139503359,
+    "longitude": 80.18593734797113
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the public park, Delhi",
+    "latitude": 28.59558038992373,
+    "longitude": 77.17903148110409
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the central market, Chennai",
+    "latitude": 13.0886744358648,
+    "longitude": 80.20386618496136
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the main highway, Bengaluru",
+    "latitude": 12.922811284837218,
+    "longitude": 77.57075230072581
+  },
+  {
+    "category": "Theft",
+    "description": "Mobile phone stolen from handbag in a crowded bus.",
+    "address": "Near the residential society, Pune",
+    "latitude": 18.52417173185544,
+    "longitude": 73.8580739914775
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the bus terminus, Hyderabad",
+    "latitude": 17.30647902682152,
+    "longitude": 78.43865380613987
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the main highway, Bengaluru",
+    "latitude": 13.047173095160806,
+    "longitude": 77.6961618653791
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.080075980151882,
+    "longitude": 80.21634056883289
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the metro station, Chennai",
+    "latitude": 13.163278026919471,
+    "longitude": 80.23511063164038
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the metro station, Hyderabad",
+    "latitude": 17.45543395974625,
+    "longitude": 78.45604323858979
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the shopping mall, Lucknow",
+    "latitude": 26.788870210544328,
+    "longitude": 80.89752057566619
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the IT park, Hyderabad",
+    "latitude": 17.477164081864377,
+    "longitude": 78.42294605304129
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the hospital corner, Pune",
+    "latitude": 18.518424423197683,
+    "longitude": 73.87096059916529
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the bus terminus, Jaipur",
+    "latitude": 26.963614746871936,
+    "longitude": 75.7846038272394
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the central market, Mumbai",
+    "latitude": 19.158653155323794,
+    "longitude": 72.92002622319563
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.578917758566938,
+    "longitude": 73.85202248318643
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the hospital corner, Delhi",
+    "latitude": 28.544168237541523,
+    "longitude": 77.23320808740404
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the public park, Mumbai",
+    "latitude": 19.025954954692853,
+    "longitude": 72.79789699471371
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the IT park, Chennai",
+    "latitude": 13.09456655602712,
+    "longitude": 80.24391098324378
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the shopping mall, Mumbai",
+    "latitude": 19.103110708897734,
+    "longitude": 72.93870988128432
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the main highway, Pune",
+    "latitude": 18.465222340931273,
+    "longitude": 73.90951781756993
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the metro station, Bengaluru",
+    "latitude": 12.915372879123975,
+    "longitude": 77.69396100018793
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 22.953666386092404,
+    "longitude": 72.64725720168914
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the public park, Mumbai",
+    "latitude": 18.98898721105177,
+    "longitude": 72.96427742842705
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the shopping mall, Hyderabad",
+    "latitude": 17.466677797529275,
+    "longitude": 78.44402978869333
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the hospital corner, Mumbai",
+    "latitude": 19.145426649591357,
+    "longitude": 72.84673399014616
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.92444922417381,
+    "longitude": 75.78001792807038
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.651189148654684,
+    "longitude": 88.29462451966288
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the public park, Bengaluru",
+    "latitude": 13.07766151272541,
+    "longitude": 77.65894284065035
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the central market, Delhi",
+    "latitude": 28.546542299436055,
+    "longitude": 77.19020358696807
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the hospital corner, Pune",
+    "latitude": 18.531746324602853,
+    "longitude": 73.91209216428479
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the bus terminus, Hyderabad",
+    "latitude": 17.367216253717316,
+    "longitude": 78.37413024648761
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.894735911051868,
+    "longitude": 75.72671888496471
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the IT park, Bengaluru",
+    "latitude": 13.036001736989531,
+    "longitude": 77.70123841722994
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the central market, Bengaluru",
+    "latitude": 12.935977697306733,
+    "longitude": 77.53452259451714
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the residential society, Chennai",
+    "latitude": 13.178499721316292,
+    "longitude": 80.3341095602158
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the residential society, Hyderabad",
+    "latitude": 17.494614714616734,
+    "longitude": 78.59519187118086
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the bus terminus, Mumbai",
+    "latitude": 19.141427984049667,
+    "longitude": 72.8489370179235
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the hospital corner, Kolkata",
+    "latitude": 22.655372928088834,
+    "longitude": 88.32484048847299
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the hospital corner, Kolkata",
+    "latitude": 22.626069600146803,
+    "longitude": 88.30828555290802
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the college gate, Lucknow",
+    "latitude": 26.859570384528507,
+    "longitude": 80.97713033874086
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 23.02125729205668,
+    "longitude": 72.64438291158987
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the shopping mall, Delhi",
+    "latitude": 28.47055007429884,
+    "longitude": 77.10737155374842
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the residential society, Bengaluru",
+    "latitude": 12.888868375103337,
+    "longitude": 77.57097444492071
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the central market, Ahmedabad",
+    "latitude": 23.097610780994394,
+    "longitude": 72.59193801478943
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the public park, Ahmedabad",
+    "latitude": 22.991603069118607,
+    "longitude": 72.6378559523806
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the hospital corner, Mumbai",
+    "latitude": 18.988527422075276,
+    "longitude": 72.85501954124385
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the college gate, Jaipur",
+    "latitude": 26.84274808998545,
+    "longitude": 75.77779400858739
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the hospital corner, Jaipur",
+    "latitude": 26.87749496635173,
+    "longitude": 75.74791004005034
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the public park, Kolkata",
+    "latitude": 22.47423445342073,
+    "longitude": 88.2872858687208
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the shopping mall, Mumbai",
+    "latitude": 19.03112232552568,
+    "longitude": 72.93445351658873
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the hospital corner, Jaipur",
+    "latitude": 26.96161413202132,
+    "longitude": 75.79211859716452
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the residential society, Hyderabad",
+    "latitude": 17.35137995640018,
+    "longitude": 78.54005099305338
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.5167366698611,
+    "longitude": 73.93081137235016
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the public park, Lucknow",
+    "latitude": 26.899184362594447,
+    "longitude": 80.98052320029039
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the hospital corner, Hyderabad",
+    "latitude": 17.358594815381057,
+    "longitude": 78.51563675947592
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Extremely poor visibility on this stretch of the road after sunset.",
+    "address": "Near the central market, Delhi",
+    "latitude": 28.729136878070143,
+    "longitude": 77.23217240306855
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the main highway, Lucknow",
+    "latitude": 26.79930268125964,
+    "longitude": 80.87695674488347
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the metro station, Lucknow",
+    "latitude": 26.80804326451138,
+    "longitude": 80.8938700980566
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the central market, Kolkata",
+    "latitude": 22.585859793287515,
+    "longitude": 88.32559864585654
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the public park, Hyderabad",
+    "latitude": 17.37255561141972,
+    "longitude": 78.57520356584013
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 22.996968622449156,
+    "longitude": 72.56817880798334
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the metro station, Chennai",
+    "latitude": 13.093026088752579,
+    "longitude": 80.26373765269233
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the residential society, Kolkata",
+    "latitude": 22.63442593632249,
+    "longitude": 88.39171436098441
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the bus terminus, Ahmedabad",
+    "latitude": 22.95148632953857,
+    "longitude": 72.61297005961856
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the shopping mall, Delhi",
+    "latitude": 28.544398268644176,
+    "longitude": 77.17527006577417
+  },
+  {
+    "category": "Theft",
+    "description": "Bag snatched by a person on a scooter who quickly fled the scene.",
+    "address": "Near the bus terminus, Jaipur",
+    "latitude": 26.876856117456274,
+    "longitude": 75.7870179999277
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the public park, Ahmedabad",
+    "latitude": 23.03353594446414,
+    "longitude": 72.50524526103979
+  },
+  {
+    "category": "Theft",
+    "description": "Bag snatched by a person on a scooter who quickly fled the scene.",
+    "address": "Near the metro station, Hyderabad",
+    "latitude": 17.35028585888235,
+    "longitude": 78.4498983204468
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the hospital corner, Jaipur",
+    "latitude": 26.953959083534798,
+    "longitude": 75.81408770429475
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the public park, Bengaluru",
+    "latitude": 12.952212757105368,
+    "longitude": 77.64942411426576
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.574936609386565,
+    "longitude": 73.8888937883731
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the college gate, Kolkata",
+    "latitude": 22.475091160952555,
+    "longitude": 88.4050866636335
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the metro station, Pune",
+    "latitude": 18.541887161256895,
+    "longitude": 73.82870899114666
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.59573295902999,
+    "longitude": 73.80519693660236
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.085081729489056,
+    "longitude": 80.18348927132818
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.056075685428556,
+    "longitude": 80.20775325199611
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.633068232478042,
+    "longitude": 88.43856018259744
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the hospital corner, Jaipur",
+    "latitude": 26.91100488978808,
+    "longitude": 75.80805364901154
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the college gate, Jaipur",
+    "latitude": 26.909983513539686,
+    "longitude": 75.80702601163648
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the shopping mall, Bengaluru",
+    "latitude": 13.063726195946906,
+    "longitude": 77.67929854489105
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the hospital corner, Kolkata",
+    "latitude": 22.579911575393115,
+    "longitude": 88.32146576507868
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the IT park, Lucknow",
+    "latitude": 26.866552171363953,
+    "longitude": 80.88434997773335
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the shopping mall, Hyderabad",
+    "latitude": 17.36024712433652,
+    "longitude": 78.56725001962903
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the bus terminus, Chennai",
+    "latitude": 12.984294549647828,
+    "longitude": 80.24175164445722
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the public park, Ahmedabad",
+    "latitude": 23.01542784557457,
+    "longitude": 72.59059318243598
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the main highway, Lucknow",
+    "latitude": 26.910779560337552,
+    "longitude": 80.92385742602572
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the college gate, Bengaluru",
+    "latitude": 12.998702925190251,
+    "longitude": 77.70464052859016
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the public park, Lucknow",
+    "latitude": 26.79916476189616,
+    "longitude": 81.00500409397009
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the IT park, Chennai",
+    "latitude": 13.093162164484546,
+    "longitude": 80.30122260868147
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the central market, Delhi",
+    "latitude": 28.6413541806646,
+    "longitude": 77.2529214649708
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the bus terminus, Mumbai",
+    "latitude": 19.155100471484438,
+    "longitude": 72.89538908138957
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the residential society, Ahmedabad",
+    "latitude": 23.05965987579237,
+    "longitude": 72.61766328906745
+  },
+  {
+    "category": "Theft",
+    "description": "Mobile phone stolen from handbag in a crowded bus.",
+    "address": "Near the shopping mall, Hyderabad",
+    "latitude": 17.383865799126625,
+    "longitude": 78.39323438311314
+  },
+  {
+    "category": "Road Issue",
+    "description": "No proper footpath, forcing pedestrians to walk on a busy, chaotic road.",
+    "address": "Near the public park, Bengaluru",
+    "latitude": 12.947691898308497,
+    "longitude": 77.48554518931134
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the residential society, Chennai",
+    "latitude": 13.096473568684129,
+    "longitude": 80.353516975065
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the IT park, Hyderabad",
+    "latitude": 17.310969011939044,
+    "longitude": 78.60111966242083
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the metro station, Pune",
+    "latitude": 18.472628516327678,
+    "longitude": 73.92972678743479
+  },
+  {
+    "category": "Road Issue",
+    "description": "No proper footpath, forcing pedestrians to walk on a busy, chaotic road.",
+    "address": "Near the central market, Bengaluru",
+    "latitude": 13.089360102640228,
+    "longitude": 77.57657013917462
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the public park, Bengaluru",
+    "latitude": 12.99077028618713,
+    "longitude": 77.6917060624898
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Extremely poor visibility on this stretch of the road after sunset.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.107963442009591,
+    "longitude": 80.29621437602107
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.909320610762563,
+    "longitude": 75.79500443512956
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the main highway, Jaipur",
+    "latitude": 26.977841286455664,
+    "longitude": 75.79066875650462
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the college gate, Kolkata",
+    "latitude": 22.570989007868683,
+    "longitude": 88.39030804211923
+  },
+  {
+    "category": "Theft",
+    "description": "Bag snatched by a person on a scooter who quickly fled the scene.",
+    "address": "Near the central market, Lucknow",
+    "latitude": 26.847165448925477,
+    "longitude": 81.00845587031937
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.66910509826068,
+    "longitude": 88.44509220865893
+  },
+  {
+    "category": "Theft",
+    "description": "Mobile phone stolen from handbag in a crowded bus.",
+    "address": "Near the hospital corner, Lucknow",
+    "latitude": 26.81918938873037,
+    "longitude": 80.92654325817294
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the shopping mall, Bengaluru",
+    "latitude": 12.92213031063885,
+    "longitude": 77.68630875032663
+  },
+  {
+    "category": "Theft",
+    "description": "Mobile phone stolen from handbag in a crowded bus.",
+    "address": "Near the central market, Pune",
+    "latitude": 18.501299266851998,
+    "longitude": 73.7835863161783
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the metro station, Hyderabad",
+    "latitude": 17.425317383647307,
+    "longitude": 78.47322506267244
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the shopping mall, Jaipur",
+    "latitude": 26.912890614897293,
+    "longitude": 75.79643830283918
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.54863327040921,
+    "longitude": 73.88797528715693
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the main highway, Lucknow",
+    "latitude": 26.91547044326929,
+    "longitude": 80.99009635533007
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the hospital corner, Bengaluru",
+    "latitude": 13.005876604329272,
+    "longitude": 77.63966528620404
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the IT park, Bengaluru",
+    "latitude": 12.974593127012914,
+    "longitude": 77.53823633325821
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the central market, Ahmedabad",
+    "latitude": 23.061618868219487,
+    "longitude": 72.6001470476066
+  },
+  {
+    "category": "Road Issue",
+    "description": "Broken road surface makes it extremely difficult for emergency vehicles to pass.",
+    "address": "Near the IT park, Delhi",
+    "latitude": 28.726995408302457,
+    "longitude": 77.27411525599159
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the metro station, Pune",
+    "latitude": 18.484413265242413,
+    "longitude": 73.91572898023347
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the central market, Chennai",
+    "latitude": 13.003535827954485,
+    "longitude": 80.21649091095395
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the residential society, Bengaluru",
+    "latitude": 13.04540371185498,
+    "longitude": 77.57406175698753
+  },
+  {
+    "category": "Theft",
+    "description": "Bag snatched by a person on a scooter who quickly fled the scene.",
+    "address": "Near the residential society, Jaipur",
+    "latitude": 26.853549627498477,
+    "longitude": 75.7967109664117
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the bus terminus, Kolkata",
+    "latitude": 22.65433536445008,
+    "longitude": 88.38315260453875
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the central market, Lucknow",
+    "latitude": 26.811180169104553,
+    "longitude": 80.93721698895777
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the IT park, Kolkata",
+    "latitude": 22.63663305353135,
+    "longitude": 88.41984203105791
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the bus terminus, Pune",
+    "latitude": 18.557531840580417,
+    "longitude": 73.92478298001618
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the public park, Ahmedabad",
+    "latitude": 22.97607260276326,
+    "longitude": 72.62782275854967
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the main highway, Bengaluru",
+    "latitude": 12.933521710094606,
+    "longitude": 77.67801159995699
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the bus terminus, Mumbai",
+    "latitude": 19.172354143585594,
+    "longitude": 72.85099500253202
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.653054454615408,
+    "longitude": 88.35795995788813
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the public park, Mumbai",
+    "latitude": 19.09616938883149,
+    "longitude": 72.8671968168618
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the college gate, Hyderabad",
+    "latitude": 17.400195585468445,
+    "longitude": 78.42962092160006
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the central market, Hyderabad",
+    "latitude": 17.42785308645712,
+    "longitude": 78.58773833763426
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the metro station, Chennai",
+    "latitude": 13.096652470021313,
+    "longitude": 80.26042575408486
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the IT park, Ahmedabad",
+    "latitude": 22.957183101637735,
+    "longitude": 72.55615428936194
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 22.994785885555743,
+    "longitude": 72.56319122544134
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the hospital corner, Delhi",
+    "latitude": 28.667230088227864,
+    "longitude": 77.27206613433295
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the shopping mall, Lucknow",
+    "latitude": 26.84658284913462,
+    "longitude": 80.9850120887888
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Extremely poor visibility on this stretch of the road after sunset.",
+    "address": "Near the bus terminus, Lucknow",
+    "latitude": 26.80821680536603,
+    "longitude": 80.95893961144944
+  },
+  {
+    "category": "Road Issue",
+    "description": "Broken road surface makes it extremely difficult for emergency vehicles to pass.",
+    "address": "Near the public park, Ahmedabad",
+    "latitude": 22.97724332197716,
+    "longitude": 72.56352015550017
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the IT park, Delhi",
+    "latitude": 28.698192123834488,
+    "longitude": 77.08205272880417
+  },
+  {
+    "category": "Road Issue",
+    "description": "No proper footpath, forcing pedestrians to walk on a busy, chaotic road.",
+    "address": "Near the main highway, Ahmedabad",
+    "latitude": 23.017191258610776,
+    "longitude": 72.61511322543451
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the residential society, Delhi",
+    "latitude": 28.759699048447413,
+    "longitude": 77.22256714092808
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the shopping mall, Lucknow",
+    "latitude": 26.86025498469621,
+    "longitude": 80.92141347277922
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the hospital corner, Bengaluru",
+    "latitude": 12.934856799836435,
+    "longitude": 77.70815990404817
+  },
+  {
+    "category": "Theft",
+    "description": "Mobile phone stolen from handbag in a crowded bus.",
+    "address": "Near the hospital corner, Delhi",
+    "latitude": 28.46810333166203,
+    "longitude": 77.35282119492541
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 23.067146449667312,
+    "longitude": 72.58449794680693
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the bus terminus, Kolkata",
+    "latitude": 22.54150105767319,
+    "longitude": 88.4382114751145
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the residential society, Ahmedabad",
+    "latitude": 22.9821414128322,
+    "longitude": 72.55567170876992
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the residential society, Lucknow",
+    "latitude": 26.866358855622433,
+    "longitude": 80.90582456544533
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the bus terminus, Hyderabad",
+    "latitude": 17.47923442170467,
+    "longitude": 78.55655598652905
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the central market, Jaipur",
+    "latitude": 26.962405528507595,
+    "longitude": 75.80376316727302
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the shopping mall, Pune",
+    "latitude": 18.548574453715716,
+    "longitude": 73.86648102942087
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the IT park, Kolkata",
+    "latitude": 22.641538479724566,
+    "longitude": 88.38520593326113
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the IT park, Pune",
+    "latitude": 18.540616532832995,
+    "longitude": 73.89189998164935
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Extremely poor visibility on this stretch of the road after sunset.",
+    "address": "Near the central market, Chennai",
+    "latitude": 13.017164272261576,
+    "longitude": 80.20839953672932
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the IT park, Hyderabad",
+    "latitude": 17.46537877669892,
+    "longitude": 78.580464845471
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.159821240916159,
+    "longitude": 80.25876023399906
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the college gate, Kolkata",
+    "latitude": 22.4991351784774,
+    "longitude": 88.39640155095192
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the residential society, Hyderabad",
+    "latitude": 17.414371940652735,
+    "longitude": 78.41758235991061
+  },
+  {
+    "category": "Road Issue",
+    "description": "Broken road surface makes it extremely difficult for emergency vehicles to pass.",
+    "address": "Near the college gate, Mumbai",
+    "latitude": 19.10398991311425,
+    "longitude": 72.809940172877
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the central market, Jaipur",
+    "latitude": 26.924411433463188,
+    "longitude": 75.82415737627169
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the main highway, Bengaluru",
+    "latitude": 12.976386414109033,
+    "longitude": 77.50744136577057
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the shopping mall, Hyderabad",
+    "latitude": 17.493548010950125,
+    "longitude": 78.3897788828163
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the bus terminus, Chennai",
+    "latitude": 13.045904032794544,
+    "longitude": 80.18356024177616
+  },
+  {
+    "category": "Road Issue",
+    "description": "Deep potholes causing massive slowdowns and making two-wheelers vulnerable.",
+    "address": "Near the hospital corner, Kolkata",
+    "latitude": 22.617371108003336,
+    "longitude": 88.31804960462362
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the central market, Delhi",
+    "latitude": 28.484389582662036,
+    "longitude": 77.11823665969852
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the bus terminus, Lucknow",
+    "latitude": 26.903976344009674,
+    "longitude": 80.96390743002729
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.616771277068707,
+    "longitude": 88.38593357613466
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the residential society, Lucknow",
+    "latitude": 26.861287847287237,
+    "longitude": 80.94520470276412
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the main highway, Pune",
+    "latitude": 18.530106809614267,
+    "longitude": 73.9276002552576
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the shopping mall, Delhi",
+    "latitude": 28.59081592573627,
+    "longitude": 77.30240893853225
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the metro station, Ahmedabad",
+    "latitude": 23.0109385556566,
+    "longitude": 72.5322897629716
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the college gate, Kolkata",
+    "latitude": 22.66252742866574,
+    "longitude": 88.2897120446741
+  },
+  {
+    "category": "Road Issue",
+    "description": "Broken road surface makes it extremely difficult for emergency vehicles to pass.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.580260923628828,
+    "longitude": 88.39738625223495
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the public park, Jaipur",
+    "latitude": 26.960506910271935,
+    "longitude": 75.76238409121743
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the bus terminus, Delhi",
+    "latitude": 28.761550740550646,
+    "longitude": 77.22367164517951
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the shopping mall, Lucknow",
+    "latitude": 26.846456451848017,
+    "longitude": 80.91090654849776
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the residential society, Chennai",
+    "latitude": 13.150585720472876,
+    "longitude": 80.21101343791705
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the hospital corner, Mumbai",
+    "latitude": 19.065847382922488,
+    "longitude": 72.91188057410002
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the main highway, Ahmedabad",
+    "latitude": 23.064479188915286,
+    "longitude": 72.56092779589234
+  },
+  {
+    "category": "Harassment",
+    "description": "Verbal harassment by a group of men near a public transit stop.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 22.960599937256934,
+    "longitude": 72.65113144632916
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the central market, Bengaluru",
+    "latitude": 13.015461441031109,
+    "longitude": 77.5369805125013
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the college gate, Delhi",
+    "latitude": 28.64953538429404,
+    "longitude": 77.12180088203444
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the shopping mall, Jaipur",
+    "latitude": 26.969661751448058,
+    "longitude": 75.84107926061513
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.976097462898508,
+    "longitude": 75.84092552317175
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the shopping mall, Chennai",
+    "latitude": 13.136553755726121,
+    "longitude": 80.32702556741394
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the shopping mall, Lucknow",
+    "latitude": 26.86027688208295,
+    "longitude": 80.88300364575242
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the metro station, Delhi",
+    "latitude": 28.670225659056367,
+    "longitude": 77.27142172979605
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the bus terminus, Kolkata",
+    "latitude": 22.591098294357746,
+    "longitude": 88.40610666284768
+  },
+  {
+    "category": "Road Issue",
+    "description": "Ongoing construction with no safety barricades or warning signs for the public.",
+    "address": "Near the shopping mall, Delhi",
+    "latitude": 28.50055367839821,
+    "longitude": 77.1243526923745
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the public park, Lucknow",
+    "latitude": 26.80107653668576,
+    "longitude": 80.98507089324322
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the public park, Jaipur",
+    "latitude": 26.940828443125096,
+    "longitude": 75.84805262896161
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the central market, Chennai",
+    "latitude": 13.065703147282322,
+    "longitude": 80.30525421667232
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the metro station, Chennai",
+    "latitude": 13.094379394637967,
+    "longitude": 80.17735947282564
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the residential society, Pune",
+    "latitude": 18.492615783854546,
+    "longitude": 73.89430753947698
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the public park, Pune",
+    "latitude": 18.459500927882818,
+    "longitude": 73.78816502401084
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the hospital corner, Hyderabad",
+    "latitude": 17.418290682774433,
+    "longitude": 78.55057246625401
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the college gate, Delhi",
+    "latitude": 28.623709631886907,
+    "longitude": 77.06114221833971
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the public park, Chennai",
+    "latitude": 13.028921743662638,
+    "longitude": 80.22899780246671
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the hospital corner, Mumbai",
+    "latitude": 19.174451195334147,
+    "longitude": 72.95870085124527
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A completely desolate road after 8 PM with zero commercial activity.",
+    "address": "Near the metro station, Lucknow",
+    "latitude": 26.91004445856897,
+    "longitude": 80.95581735075277
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the college gate, Bengaluru",
+    "latitude": 13.090207049908706,
+    "longitude": 77.59785599169858
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the college gate, Lucknow",
+    "latitude": 26.888687007925142,
+    "longitude": 80.95965531559754
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the central market, Jaipur",
+    "latitude": 26.95593081901149,
+    "longitude": 75.84977190915117
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the bus terminus, Kolkata",
+    "latitude": 22.669103894505497,
+    "longitude": 88.28031942154112
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the metro station, Jaipur",
+    "latitude": 26.868994931064503,
+    "longitude": 75.78451065530065
+  },
+  {
+    "category": "Theft",
+    "description": "Chain snatching by two unidentified men on a motorcycle.",
+    "address": "Near the college gate, Mumbai",
+    "latitude": 19.14044677388791,
+    "longitude": 72.94945224688209
+  },
+  {
+    "category": "Road Issue",
+    "description": "Severe waterlogging leading to traffic gridlocks and unsafe conditions for pedestrians.",
+    "address": "Near the central market, Pune",
+    "latitude": 18.479321786040032,
+    "longitude": 73.85076512211735
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Broken street lamps and dense trees make the sidewalk very poorly lit.",
+    "address": "Near the college gate, Mumbai",
+    "latitude": 19.07589273207985,
+    "longitude": 72.94916265475304
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the public park, Kolkata",
+    "latitude": 22.663541821478585,
+    "longitude": 88.37063577888297
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the college gate, Bengaluru",
+    "latitude": 12.921841393573391,
+    "longitude": 77.71213316395561
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the shopping mall, Chennai",
+    "latitude": 13.15163422480617,
+    "longitude": 80.30771441029938
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the IT park, Delhi",
+    "latitude": 28.666170495418793,
+    "longitude": 77.29554242866202
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the public park, Pune",
+    "latitude": 18.504594978170086,
+    "longitude": 73.92556596465205
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Streetlights have been non-functional for weeks, making the area very dark and unsafe.",
+    "address": "Near the IT park, Hyderabad",
+    "latitude": 17.325773097965715,
+    "longitude": 78.48178613156321
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the public park, Pune",
+    "latitude": 18.561813067847062,
+    "longitude": 73.86983326312293
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the college gate, Pune",
+    "latitude": 18.577577830552926,
+    "longitude": 73.85653426940331
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Notorious hotspot for late-night brawls and public drinking.",
+    "address": "Near the public park, Mumbai",
+    "latitude": 19.172395542027814,
+    "longitude": 72.7990940758222
+  },
+  {
+    "category": "Stalking",
+    "description": "A man was seen repeatedly following a woman from her workplace to her bus stop.",
+    "address": "Near the central market, Jaipur",
+    "latitude": 26.87089616329896,
+    "longitude": 75.84071313740543
+  },
+  {
+    "category": "Road Issue",
+    "description": "Broken road surface makes it extremely difficult for emergency vehicles to pass.",
+    "address": "Near the public park, Pune",
+    "latitude": 18.52739949447773,
+    "longitude": 73.9247239690371
+  },
+  {
+    "category": "Stalking",
+    "description": "An unknown individual has been loitering outside a residential building for several days.",
+    "address": "Near the IT park, Lucknow",
+    "latitude": 26.85079679035811,
+    "longitude": 80.93382635465392
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "No lighting near the park entrance, making it a hotspot for anti-social elements.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.89406450344475,
+    "longitude": 75.74466540522835
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the metro station, Delhi",
+    "latitude": 28.57776788194152,
+    "longitude": 77.08699487325664
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the public park, Hyderabad",
+    "latitude": 17.410337917214054,
+    "longitude": 78.4211083532344
+  },
+  {
+    "category": "Harassment",
+    "description": "A woman reported being touched inappropriately in a crowded market area.",
+    "address": "Near the main highway, Delhi",
+    "latitude": 28.503729530646986,
+    "longitude": 77.12029981926348
+  },
+  {
+    "category": "Harassment",
+    "description": "Auto-rickshaw driver passed lewd remarks during the commute.",
+    "address": "Near the hospital corner, Ahmedabad",
+    "latitude": 23.086393219890386,
+    "longitude": 72.53545710751614
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Frequent reports of drug addicts gathering near the abandoned building.",
+    "address": "Near the metro station, Kolkata",
+    "latitude": 22.58385659953327,
+    "longitude": 88.40822280659434
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the metro station, Delhi",
+    "latitude": 28.675120579988935,
+    "longitude": 77.18675418688404
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the IT park, Mumbai",
+    "latitude": 18.998522847089166,
+    "longitude": 72.8806577612254
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "Extremely poor visibility on this stretch of the road after sunset.",
+    "address": "Near the residential society, Bengaluru",
+    "latitude": 13.058418349012404,
+    "longitude": 77.5883543614483
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the college gate, Delhi",
+    "latitude": 28.500783324272344,
+    "longitude": 77.21844948645186
+  },
+  {
+    "category": "Theft",
+    "description": "Valuables stolen from a parked car while the owner was at a nearby shop.",
+    "address": "Near the public park, Lucknow",
+    "latitude": 26.827382918899918,
+    "longitude": 80.99051417986553
+  },
+  {
+    "category": "Stalking",
+    "description": "A vehicle slowly followed a pedestrian for over 2 kilometers.",
+    "address": "Near the residential society, Mumbai",
+    "latitude": 19.05000010601611,
+    "longitude": 72.93750401838928
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the metro station, Bengaluru",
+    "latitude": 13.07109806724376,
+    "longitude": 77.57980263451064
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the shopping mall, Mumbai",
+    "latitude": 19.146919229215747,
+    "longitude": 72.83847709457542
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "A deserted industrial area that feels very unsafe for women traveling alone.",
+    "address": "Near the main highway, Bengaluru",
+    "latitude": 13.065379371816,
+    "longitude": 77.47908384871451
+  },
+  {
+    "category": "Theft",
+    "description": "Pickpocketing incident reported at a busy intersection.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.881449976472727,
+    "longitude": 75.78685808235657
+  },
+  {
+    "category": "Unsafe Area",
+    "description": "Isolated stretch with no police patrolling, often frequented by miscreants.",
+    "address": "Near the shopping mall, Jaipur",
+    "latitude": 26.872740305591236,
+    "longitude": 75.7923061264732
+  },
+  {
+    "category": "Poor Lighting",
+    "description": "The alleyway is completely dark, causing residents to avoid it at night.",
+    "address": "Near the main highway, Lucknow",
+    "latitude": 26.871478041524988,
+    "longitude": 80.96932071070732
+  },
+  {
+    "category": "Stalking",
+    "description": "Unwanted attention and following by a former acquaintance.",
+    "address": "Near the IT park, Jaipur",
+    "latitude": 26.90314950600459,
+    "longitude": 75.7203092426931
+  },
+  {
+    "category": "Harassment",
+    "description": "Catcalling and inappropriate comments directed at women walking in the evening.",
+    "address": "Near the central market, Chennai",
+    "latitude": 13.109598140550455,
+    "longitude": 80.34186244688219
+  },
+  {
+    "category": "Stalking",
+    "description": "Report of a person persistently trailing a college student in the evenings.",
+    "address": "Near the shopping mall, Bengaluru",
+    "latitude": 12.95460010418484,
+    "longitude": 77.51300960015357
+  },
+  {
+    "category": "Harassment",
+    "description": "Persistent harassment by local youths near the college campus.",
+    "address": "Near the public park, Lucknow",
+    "latitude": 26.86689765006247,
+    "longitude": 80.9448844264065
+  }
+]

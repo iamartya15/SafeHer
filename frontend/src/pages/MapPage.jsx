@@ -3,32 +3,24 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import * as incidentService from '../services/incidentService';
 import * as mapService from '../services/mapService';
 import InteractiveMap from '../components/InteractiveMap';
-import { Layers, Loader2, AlertCircle } from 'lucide-react';
+import { } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
 export const MapPage = () => {
   const { latitude, longitude } = useGeolocation();
 
-  const [layers, setLayers] = useState({
+  const [layers, set] = useState({
     incidents: true,
-    gdacs: false,
-    usgs: false,
-    safePlaces: false,
-    firms: false,
-    weather: false
+    safePlaces: false
   });
 
   const [data, setData] = useState({
     incidents: [],
-    gdacs: [],
-    usgs: [],
-    safePlaces: [],
-    firms: [],
-    weather: []
+    safePlaces: []
   });
 
-  const [loading, setLoading] = useState(false);
+  
   const [bbox, setBbox] = useState(''); // "south,west,north,east"
 
   const controllers = useRef({});
@@ -41,7 +33,7 @@ export const MapPage = () => {
     return controllers.current[key].signal;
   };
 
-  const fetchIncidents = async () => {
+  const fetchIncidents = useCallback(async () => {
     if (!layers.incidents) return;
     try {
       const res = await incidentService.getIncidents(); // doesn't use AbortController yet in service, but we assume it's fast
@@ -64,65 +56,11 @@ export const MapPage = () => {
     } catch (err) {
       toast.error('Live data temporarily unavailable (Incidents)', { id: 'incidents-err' });
     }
-  };
+  }, [layers.incidents]);
 
-  const fetchGdacs = async () => {
-    if (!layers.gdacs) return;
-    const signal = abortRequest('gdacs');
-    try {
-      const res = await mapService.getGdacs(signal);
-      if (res && res.data && res.data.features) {
-        setData(prev => ({
-          ...prev,
-          gdacs: res.data.features.map(f => ({
-            id: f.properties.eventid,
-            type: 'gdacs',
-            category: f.properties.eventtype,
-            title: f.properties.eventname || f.properties.eventtype,
-            description: f.properties.htmldescription || f.properties.description,
-            address: f.properties.country,
-            timestamp: f.properties.todate,
-            lat: f.geometry.coordinates[1],
-            lng: f.geometry.coordinates[0]
-          }))
-        }));
-      }
-    } catch (err) {
-      if (!axios.isCancel(err)) {
-        toast.error('Live data temporarily unavailable (GDACS)', { id: 'gdacs-err' });
-      }
-    }
-  };
 
-  const fetchUsgs = async () => {
-    if (!layers.usgs) return;
-    const signal = abortRequest('usgs');
-    try {
-      const res = await mapService.getUsgs(signal);
-      if (res && res.data && res.data.features) {
-        setData(prev => ({
-          ...prev,
-          usgs: res.data.features.map(f => ({
-            id: f.id,
-            type: 'usgs',
-            category: 'Earthquake',
-            title: f.properties.title,
-            description: `Magnitude: ${f.properties.mag}`,
-            address: f.properties.place,
-            timestamp: new Date(f.properties.time).toISOString(),
-            lat: f.geometry.coordinates[1],
-            lng: f.geometry.coordinates[0]
-          }))
-        }));
-      }
-    } catch (err) {
-      if (!axios.isCancel(err)) {
-        toast.error('Live data temporarily unavailable (USGS)', { id: 'usgs-err' });
-      }
-    }
-  };
 
-  const fetchSafePlaces = async () => {
+  const fetchSafePlaces = useCallback(async () => {
     if (!layers.safePlaces || !bbox) return;
     const signal = abortRequest('safePlaces');
     try {
@@ -146,73 +84,8 @@ export const MapPage = () => {
         toast.error('Live data temporarily unavailable (Safe Places)', { id: 'sp-err' });
       }
     }
-  };
+  }, [layers.safePlaces, bbox]);
 
-  const fetchFirms = async () => {
-    if (!layers.firms || !bbox) return;
-    const signal = abortRequest('firms');
-    try {
-      const res = await mapService.getFirms(bbox, signal);
-      if (res && res.success === false) {
-         toast.error(res.message, { id: 'firms-key-err' });
-         return;
-      }
-      if (res && res.data) {
-        // Parse basic CSV from NASA
-        const lines = res.data.split('\\n').slice(1);
-        const firmsList = [];
-        lines.forEach((l, i) => {
-           const parts = l.split(',');
-           if (parts.length >= 2) {
-             firmsList.push({
-               id: `firm-${i}`,
-               type: 'firms',
-               category: 'Wildfire',
-               title: 'NASA FIRMS Hotspot',
-               lat: parseFloat(parts[0]),
-               lng: parseFloat(parts[1])
-             });
-           }
-        });
-        setData(prev => ({ ...prev, firms: firmsList }));
-      }
-    } catch (err) {
-      if (!axios.isCancel(err)) {
-        toast.error('Live data temporarily unavailable (NASA FIRMS)', { id: 'firms-err' });
-      }
-    }
-  };
-
-  const fetchWeather = async () => {
-    if (!layers.weather || !latitude || !longitude) return;
-    const signal = abortRequest('weather');
-    try {
-      const res = await mapService.getWeather(latitude, longitude, signal);
-      if (res && res.success === false) {
-         toast.error(res.message, { id: 'weather-key-err' });
-         return;
-      }
-      if (res && res.data && res.data.weather) {
-        setData(prev => ({
-          ...prev,
-          weather: [{
-            id: 'weather-1',
-            type: 'weather',
-            category: res.data.weather[0].main,
-            title: res.data.weather[0].main,
-            description: res.data.weather[0].description,
-            address: res.data.name,
-            lat: res.data.coord.lat,
-            lng: res.data.coord.lon
-          }]
-        }));
-      }
-    } catch (err) {
-      if (!axios.isCancel(err)) {
-        toast.error('Live data temporarily unavailable (Weather)', { id: 'weather-err' });
-      }
-    }
-  };
 
   // Setup Intervals
   useEffect(() => {
@@ -221,17 +94,7 @@ export const MapPage = () => {
     return () => clearInterval(incInt);
   }, [layers.incidents]);
 
-  useEffect(() => {
-    fetchGdacs();
-    const gdacsInt = setInterval(fetchGdacs, 300000); // 5 mins
-    return () => clearInterval(gdacsInt);
-  }, [layers.gdacs]);
 
-  useEffect(() => {
-    fetchUsgs();
-    const usgsInt = setInterval(fetchUsgs, 300000); // 5 mins
-    return () => clearInterval(usgsInt);
-  }, [layers.usgs]);
 
   useEffect(() => {
     fetchSafePlaces();
@@ -239,20 +102,10 @@ export const MapPage = () => {
     return () => clearInterval(spInt);
   }, [layers.safePlaces, bbox]);
 
-  useEffect(() => {
-    fetchFirms();
-    const fInt = setInterval(fetchFirms, 600000); // 10 mins
-    return () => clearInterval(fInt);
-  }, [layers.firms, bbox]);
 
-  useEffect(() => {
-    fetchWeather();
-    const wInt = setInterval(fetchWeather, 600000); // 10 mins
-    return () => clearInterval(wInt);
-  }, [layers.weather, latitude, longitude]);
 
   const toggleLayer = (layer) => {
-    setLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
+    set(prev => ({ ...prev, [layer]: !prev[layer] }));
   };
 
   const handleBoundsChange = useCallback((newBbox) => {
@@ -261,11 +114,7 @@ export const MapPage = () => {
 
   const mapData = [
     ...(layers.incidents ? data.incidents : []),
-    ...(layers.gdacs ? data.gdacs : []),
-    ...(layers.usgs ? data.usgs : []),
-    ...(layers.safePlaces ? data.safePlaces : []),
-    ...(layers.firms ? data.firms : []),
-    ...(layers.weather ? data.weather : [])
+    ...(layers.safePlaces ? data.safePlaces : [])
   ];
 
   return (
@@ -298,7 +147,7 @@ export const MapPage = () => {
         <InteractiveMap
           userLocation={latitude && longitude ? { latitude, longitude } : null}
           mapData={mapData}
-          zoom={12}
+          zoom={5}
           onBoundsChange={handleBoundsChange}
         />
       </div>

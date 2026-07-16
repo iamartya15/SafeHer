@@ -42,7 +42,19 @@ const processQueue = (error, token = null) => {
 };
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    if (response.data && response.data.success && response.data.data !== undefined) {
+      const dataPayload = response.data.data;
+      if (typeof dataPayload === 'object' && dataPayload !== null && !Array.isArray(dataPayload)) {
+        Object.keys(dataPayload).forEach(key => {
+          if (response.data[key] === undefined) {
+            response.data[key] = dataPayload[key];
+          }
+        });
+      }
+    }
+    return response;
+  },
   async (error) => {
     const originalRequest = error.config;
 
@@ -89,18 +101,23 @@ api.interceptors.response.use(
           { withCredentials: true }
         );
 
-        if (res.data.success && res.data.accessToken) {
-          const newAccessToken = res.data.accessToken;
-          localStorage.setItem('accessToken', newAccessToken);
+        const resData = res.data;
+        const dataPayload = resData.data;
+        const success = resData.success;
+        const accessToken = resData.accessToken || (dataPayload && dataPayload.accessToken);
+        const refreshToken = resData.refreshToken || (dataPayload && dataPayload.refreshToken);
+
+        if (success && accessToken) {
+          localStorage.setItem('accessToken', accessToken);
           
-          if (res.data.refreshToken) {
-            localStorage.setItem('refreshToken', res.data.refreshToken);
+          if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
           }
           
-          api.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`;
-          originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+          api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+          originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
           
-          processQueue(null, newAccessToken);
+          processQueue(null, accessToken);
           isRefreshing = false;
           
           return api(originalRequest);

@@ -135,7 +135,7 @@ export const InteractiveMap = ({
       map.remove();
       mapInstanceRef.current = null;
     };
-  }, []);
+  }, [center, onBoundsChange, onMapClick, zoom]);
 
   // 2. Sync User Location Marker
   useEffect(() => {

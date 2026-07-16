@@ -24,6 +24,10 @@ import ComingSoon from './pages/ComingSoon';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
 
+import MissingDashboard from './pages/MissingDashboard';
+import Reports from './pages/Reports';
+import Awareness from './pages/Awareness';
+
 // Lazy load heavy dashboard components to significantly reduce the main bundle size
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const GuardianDashboard = lazy(() => import('./pages/GuardianDashboard'));
@@ -52,6 +56,9 @@ function App() {
             {/* Public Page Routes */}
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
+              <Route path="/missing-women" element={<MissingDashboard />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/awareness" element={<Awareness />} />
               <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
               <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
               <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />

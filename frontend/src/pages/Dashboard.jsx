@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import {  Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useGeolocation } from '../hooks/useGeolocation';
 import * as sosService from '../services/sosService';
@@ -25,7 +25,7 @@ import { useNotifications } from '../context/NotificationContext';
 export const Dashboard = () => {
   const { user } = useAuth();
   const { fetchNotifications } = useNotifications();
-  const navigate = useNavigate();
+  
   const { latitude, longitude, error: geoError, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
   const [sosHistory, setSosHistory] = useState([]);

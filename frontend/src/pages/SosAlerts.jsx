@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import * as sosService from '../services/sosService';
 import * as guardianService from '../services/guardianService';
@@ -24,7 +24,7 @@ export const SosAlerts = () => {
   const [loading, setLoading] = useState(true);
   const [triggering, setTriggering] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       // 1. Get SOS History
       const resHistory = await sosService.getSOSHistory();
@@ -50,11 +50,11 @@ export const SosAlerts = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   const handleTriggerSOS = async () => {
     if (!latitude || !longitude) {

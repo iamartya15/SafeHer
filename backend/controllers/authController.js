@@ -5,6 +5,8 @@ const { sendMail } = require('../config/mail');
 const { uploadImage } = require('../config/cloudinary');
 const { OAuth2Client } = require('google-auth-library');
 const axios = require('axios');
+const { authLogger } = require('../utils/logger');
+const { sendSuccess, sendError } = require('../utils/responseHandler');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -28,7 +30,8 @@ const register = async (req, res, next) => {
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ success: false, message: 'User already exists with this email' });
+      authLogger.warn(`Registration failed: User already exists with email ${email}`);
+      return sendError(res, 'User already exists with this email', 400);
     }
 
     const adminEmail = process.env.ADMIN_EMAIL || 'amartyakushwaha30@gmail.com';
@@ -59,9 +62,8 @@ const register = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    return res.status(201).json({
-      success: true,
-      message: 'Registration successful! Welcome to SafeHer AI.',
+    authLogger.info(`User registered successfully: ${user.email} with roles ${user.roles.join(', ')}`);
+    return sendSuccess(res, 'Registration successful! Welcome to SafeHer AI.', {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       user: {
@@ -72,8 +74,9 @@ const register = async (req, res, next) => {
         phone: user.phone,
         avatar: user.avatar
       }
-    });
+    }, {}, 201);
   } catch (error) {
+    authLogger.error(`Registration error for ${email}: ${error.message}`);
     next(error);
   }
 };
@@ -85,7 +88,7 @@ const verifyEmail = async (req, res, next) => {
   const { token } = req.query;
   try {
     if (!token) {
-      return res.status(400).json({ success: false, message: 'Verification token is required' });
+      return sendError(res, 'Verification token is required', 400);
     }
 
     const user = await User.findOne({
@@ -94,7 +97,8 @@ const verifyEmail = async (req, res, next) => {
     });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+      authLogger.warn(`Email verification failed: Invalid or expired token`);
+      return sendError(res, 'Invalid or expired verification token', 400);
     }
 
     user.isVerified = true;
@@ -102,11 +106,10 @@ const verifyEmail = async (req, res, next) => {
     user.verificationTokenExpires = undefined;
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: 'Email verified successfully! You can now log in.'
-    });
+    authLogger.info(`Email verified successfully for user: ${user.email}`);
+    return sendSuccess(res, 'Email verified successfully! You can now log in.');
   } catch (error) {
+    authLogger.error(`Email verification error: ${error.message}`);
     next(error);
   }
 };
@@ -119,12 +122,14 @@ const login = async (req, res, next) => {
   try {
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      authLogger.warn(`Login failed: Invalid credentials for ${email}`);
+      return sendError(res, 'Invalid credentials', 401);
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      authLogger.warn(`Login failed: Invalid password for ${email}`);
+      return sendError(res, 'Invalid credentials', 401);
     }
 
     // Email verification disabled — allow all users to login directly
@@ -154,10 +159,10 @@ const login = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     });
 
-    res.status(200).json({
-      success: true,
+    authLogger.info(`User logged in successfully: ${user.email}`);
+    return sendSuccess(res, 'Login successful', {
       accessToken,
-      refreshToken, // Returned in body as backup for cross-origin issues
+      refreshToken, 
       user: {
         id: user._id,
         name: user.name,
@@ -170,6 +175,7 @@ const login = async (req, res, next) => {
       }
     });
   } catch (error) {
+    authLogger.error(`Login error for ${email}: ${error.message}`);
     next(error);
   }
 };
@@ -181,7 +187,7 @@ const refreshToken = async (req, res, next) => {
   const token = req.cookies?.refreshToken || req.body.refreshToken;
 
   if (!token) {
-    return res.status(401).json({ success: false, message: 'Refresh token is missing' });
+    return sendError(res, 'Refresh token is missing', 401);
   }
 
   try {
@@ -189,7 +195,8 @@ const refreshToken = async (req, res, next) => {
     const user = await User.findById(decoded.id);
 
     if (!user || user.refreshToken !== token) {
-      return res.status(401).json({ success: false, message: 'Invalid refresh token' });
+      authLogger.warn(`Token refresh failed: Invalid refresh token provided`);
+      return sendError(res, 'Invalid refresh token', 401);
     }
 
     const tokens = generateTokens(user._id);
@@ -203,13 +210,14 @@ const refreshToken = async (req, res, next) => {
       maxAge: 7 * 24 * 60 * 60 * 1000
     });
 
-    res.status(200).json({
-      success: true,
+    authLogger.info(`Token refreshed successfully for user ID: ${user._id}`);
+    return sendSuccess(res, 'Token refreshed successfully', {
       accessToken: tokens.accessToken,
-      refreshToken: tokens.refreshToken // Returned in body as backup
+      refreshToken: tokens.refreshToken
     });
   } catch (error) {
-    return res.status(401).json({ success: false, message: 'Invalid or expired refresh token' });
+    authLogger.error(`Token refresh error: ${error.message}`);
+    return sendError(res, 'Invalid or expired refresh token', 401);
   }
 };
 

@@ -74,7 +74,7 @@ export const useGeolocation = (options = {}) => {
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [getNewLocation]);
 
   return {
     location,

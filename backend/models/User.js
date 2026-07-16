@@ -97,4 +97,9 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
+// Indexes for fast lookups
+userSchema.index({ email: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ isVerified: 1 });
+
 module.exports = mongoose.model('User', userSchema);

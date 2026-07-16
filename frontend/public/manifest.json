@@ -1,25 +1,16 @@
 {
-  "short_name": "SafeHer AI",
-  "name": "SafeHer AI Safety Platform",
+  "name": "SafeHer AI",
+  "short_name": "SafeHer",
+  "description": "Advanced Smart Women Safety Companion",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F19",
+  "theme_color": "#0B0F19",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "android-chrome-192x192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "android-chrome-512x512.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#0f172a",
-  "background_color": "#0f172a"
+  ]
 }

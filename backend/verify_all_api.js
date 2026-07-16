@@ -22,7 +22,7 @@ async function runTests() {
         phone: '9999999999'
       });
       console.log(`✅ Auth Register: PASS (${regRes.status})`);
-      token = regRes.data.accessToken;
+      token = regRes.data.accessToken || regRes.data.data?.accessToken;
     } catch (e) {
       console.log(`❌ Auth Register: FAIL - ${e.response?.data?.message || e.message}`);
     }
@@ -34,8 +34,8 @@ async function runTests() {
         password: 'Password123!'
       });
       console.log(`✅ Auth Login: PASS (${loginRes.status})`);
-      token = loginRes.data.accessToken;
-      userId = loginRes.data.user.id;
+      token = loginRes.data.accessToken || loginRes.data.data?.accessToken;
+      userId = loginRes.data.user?.id || loginRes.data.data?.user?.id;
     } catch (e) {
       console.log(`❌ Auth Login: FAIL - ${e.response?.data?.message || e.message}`);
     }
@@ -62,7 +62,7 @@ async function runTests() {
         headers: { Authorization: `Bearer ${token}` }
       });
       console.log(`✅ Incidents Create: PASS (${incRes.status})`);
-      incidentId = incRes.data.report._id;
+      incidentId = incRes.data.report?._id || incRes.data.data?.report?._id;
     } catch (e) {
       console.log(`❌ Incidents Create: FAIL - ${e.response?.data?.message || e.message}`);
     }
@@ -72,15 +72,25 @@ async function runTests() {
       const incGetRes = await axios.get(`${API_BASE}/incidents`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log(`✅ Incidents Get All: PASS (${incGetRes.status}) - Found ${incGetRes.data.reports.length}`);
+      const count = (incGetRes.data.reports || incGetRes.data.data?.reports || []).length;
+      console.log(`✅ Incidents Get All: PASS (${incGetRes.status}) - Found ${count}`);
     } catch (e) {
       console.log(`❌ Incidents Get All: FAIL - ${e.response?.data?.message || e.message}`);
     }
 
     // 6. Guardians: Send Invite
     try {
+      const guardianEmail = `guardian_${Date.now()}@test.com`;
+      // Register the guardian first
+      await axios.post(`${API_BASE}/auth/register`, {
+        name: 'Test Guardian',
+        email: guardianEmail,
+        password: 'Password123!',
+        phone: '8888888888'
+      });
+
       const guardRes = await axios.post(`${API_BASE}/guardians/add`, {
-        email: `guardian_${Date.now()}@test.com`,
+        email: guardianEmail,
         name: 'Test Guardian',
         phone: '8888888888'
       }, {

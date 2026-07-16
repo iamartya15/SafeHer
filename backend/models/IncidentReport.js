@@ -46,7 +46,17 @@ const incidentReportSchema = new mongoose.Schema(
   }
 );
 
-// Index 2dsphere for geospatial queries
+// Geospatial Index
 incidentReportSchema.index({ location: '2dsphere' });
+
+// Text Index for full-text search
+incidentReportSchema.index({ description: 'text', address: 'text', category: 'text' }, {
+  weights: { category: 3, address: 2, description: 1 },
+  name: "incident_text_index"
+});
+
+// Compound Indexes for fast filtering and sorting
+incidentReportSchema.index({ category: 1, isVerified: 1, createdAt: -1 });
+incidentReportSchema.index({ userId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('IncidentReport', incidentReportSchema);

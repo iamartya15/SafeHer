@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useGeolocation } from '../hooks/useGeolocation';
@@ -8,8 +8,6 @@ import {
   AlertTriangle,
   Upload,
   MapPin,
-  FileText,
-  HelpCircle,
   Loader2
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -38,20 +36,7 @@ export const ReportIncident = () => {
     }
   });
 
-  // Sync user location on fetch
-  useEffect(() => {
-    if (currentLat && currentLng) {
-      const coords = { latitude: currentLat, longitude: currentLng };
-      setSelectedCoords(coords);
-      setValue('latitude', currentLat.toString());
-      setValue('longitude', currentLng.toString());
-      
-      // Try to reverse geocode coordinate address (mocked or OSM Nominatim lookup)
-      reverseGeocode(currentLat, currentLng);
-    }
-  }, [currentLat, currentLng, setValue]);
-
-  const reverseGeocode = async (lat, lng) => {
+  const reverseGeocode = useCallback(async (lat, lng) => {
     try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
@@ -67,7 +52,22 @@ export const ReportIncident = () => {
     } catch (err) {
       setValue('address', `Coords: ${lat.toFixed(4)}, ${lng.toFixed(4)}`);
     }
-  };
+  }, [setValue]);
+
+  // Sync user location on fetch
+  useEffect(() => {
+    if (currentLat && currentLng) {
+      const coords = { latitude: currentLat, longitude: currentLng };
+      setSelectedCoords(coords);
+      setValue('latitude', currentLat.toString());
+      setValue('longitude', currentLng.toString());
+      
+      // Try to reverse geocode coordinate address (mocked or OSM Nominatim lookup)
+      reverseGeocode(currentLat, currentLng);
+    }
+  }, [currentLat, currentLng, setValue, reverseGeocode]);
+
+
 
   const handleMapClick = (coords) => {
     setSelectedCoords(coords);

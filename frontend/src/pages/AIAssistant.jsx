@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as chatService from '../services/chatService';
 import { Bot, Send, Trash2, Sparkles, Loader2, MapPin } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import ReactMarkdown from 'react-markdown';
 
 export const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
@@ -271,10 +272,14 @@ export const AIAssistant = () => {
                     </div>
                     <div className={`p-4 rounded-2xl text-xs leading-relaxed ${
                       isModel 
-                        ? 'bg-slate-900/80 border border-white/5 text-slate-200 rounded-tl-none font-light markdown-body' 
+                        ? 'bg-slate-900/80 border border-white/5 text-slate-200 rounded-tl-none font-light markdown-body prose prose-invert max-w-none' 
                         : 'bg-gradient-to-br from-purple-600 to-fuchsia-600 text-white rounded-tr-none font-medium'
                     }`}>
-                      <p className="whitespace-pre-line">{msg.content}</p>
+                      {isModel ? (
+                         <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      ) : (
+                         <p className="whitespace-pre-line">{msg.content}</p>
+                      )}
                     </div>
                   </div>
                 );
