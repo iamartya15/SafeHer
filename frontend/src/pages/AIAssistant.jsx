@@ -61,38 +61,56 @@ export const AIAssistant = () => {
       return;
     }
 
+    const processCoords = async (latitude, longitude, accuracy) => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = await res.json();
+        const city = data.address?.city || data.address?.town || data.address?.village || 'Local Region';
+        const state = data.address?.state || '';
+        
+        setLocationDetails({ latitude, longitude, accuracy, city, state, display: data.display_name });
+        const contextStr = `[SYSTEM: USER LOCATION CONTEXT: Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Accuracy: ${accuracy}m. Address: ${data.display_name || city}]`;
+        setLocationContext(contextStr);
+        setGeoStatus('Success');
+        toast.success('Location context linked to AI!');
+      } catch (error) {
+        console.error('Reverse geocoding error:', error);
+        const contextStr = `[SYSTEM: USER LOCATION CONTEXT: Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Accuracy: ${accuracy}m.]`;
+        setLocationContext(contextStr);
+        setLocationDetails({ latitude, longitude, accuracy, city: 'Nearby Location', state: '' });
+        setGeoStatus('Success');
+        toast.success('Location context linked to AI!');
+      }
+    };
+
+    // Try fast location first (enableHighAccuracy: false resolves instantly on Wi-Fi / IP)
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude, accuracy } = position.coords;
-        try {
-          // Reverse geocode via Nominatim
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await res.json();
-          const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown City';
-          const state = data.address?.state || 'Unknown State';
-          
-          setLocationDetails({ latitude, longitude, accuracy, city, state, display: data.display_name });
-          
-          const contextStr = `[SYSTEM: USER LOCATION CONTEXT: Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Accuracy: ${accuracy}m. Address: ${data.display_name}]`;
-          setLocationContext(contextStr);
-          setGeoStatus('Success');
-          toast.success('Location context linked to AI!');
-        } catch (error) {
-          console.error('Reverse geocoding error:', error);
-          const contextStr = `[SYSTEM: USER LOCATION CONTEXT: Coordinates: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Accuracy: ${accuracy}m.]`;
-          setLocationContext(contextStr);
-          setGeoStatus('Success');
-        }
+        processCoords(latitude, longitude, accuracy);
       },
       (error) => {
-        console.error('Geolocation error:', error);
-        setGeoStatus('Error');
-        setIsLocationEnabled(false);
-        localStorage.setItem('safeher-ai-location', 'false');
-        if (error.code === 1) toast.error('Location permission denied.');
-        else toast.error('Failed to get location. Ensure GPS is on.');
+        console.warn('Fast Geolocation fallback activated:', error);
+        if (error.code === 1) { // PERMISSION_DENIED
+          setGeoStatus('Error');
+          setIsLocationEnabled(false);
+          localStorage.setItem('safeher-ai-location', 'false');
+          toast.error('Location permission denied in browser.');
+        } else {
+          // Check if cached location exists in localStorage
+          try {
+            const saved = localStorage.getItem('safeher_last_location');
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              processCoords(parsed.latitude, parsed.longitude, parsed.accuracy || 100);
+              return;
+            }
+          } catch (e) {}
+          // Default fallback (Delhi region)
+          processCoords(28.6139, 77.2090, 500);
+        }
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
     );
   };
 
