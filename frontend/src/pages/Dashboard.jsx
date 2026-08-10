@@ -45,7 +45,8 @@ export const Dashboard = () => {
     try {
       const sosData = await sosService.getSOSHistory();
       if (sosData.success && mountedRef.current) {
-        setSosHistory(sosData.history.slice(0, 5));
+        const historyList = sosData.history || sosData.data || [];
+        setSosHistory(historyList.slice(0, 5));
       }
 
       const activeSosData = await sosService.getActiveSOS();
@@ -57,7 +58,8 @@ export const Dashboard = () => {
 
       const incidentData = await incidentService.getIncidents();
       if (incidentData.success && mountedRef.current) {
-        setIncidents(incidentData.reports.slice(0, 5));
+        const reportsList = incidentData.reports || incidentData.data || [];
+        setIncidents(reportsList.slice(0, 5));
       }
     } catch (err) {
       if (mountedRef.current) console.error('Failed to load dashboard statistics:', err);
@@ -243,7 +245,9 @@ export const Dashboard = () => {
                 </div>
                 <div className="bg-slate-950/40 p-2.5 rounded-lg border border-white/5">
                   <span className="text-[9px] text-slate-500 uppercase tracking-wider block">Active Alerts</span>
-                  <span className="text-sm font-bold text-emerald-400">0 Alerts</span>
+                  <span className={`text-sm font-bold ${activeSos ? 'text-red-400 animate-pulse' : 'text-emerald-400'}`}>
+                    {activeSos ? '1 Active SOS' : '0 Active Alerts'}
+                  </span>
                 </div>
               </div>
             </div>

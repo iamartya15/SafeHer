@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useGeolocation } from '../hooks/useGeolocation';
 import * as sosService from '../services/sosService';
 import * as guardianService from '../services/guardianService';
@@ -43,7 +44,8 @@ export const SosAlerts = () => {
       // 3. Get Guardians list to display who gets alerted
       const resGuard = await guardianService.getGuardians();
       if (resGuard.success) {
-        setGuardians(resGuard.guardians.filter(g => g.status === 'approved'));
+        const guardiansList = resGuard.guardians || resGuard.data || [];
+        setGuardians(guardiansList.filter(g => g.status === 'approved'));
       }
     } catch (err) {
       console.error(err);
@@ -214,7 +216,7 @@ export const SosAlerts = () => {
                     <p className="text-sm font-bold text-white">No verified guardians</p>
                     <p className="text-xs text-slate-500 mt-1">Invite trusted contacts to receive your SOS alerts.</p>
                   </div>
-                  <a href="/guardian" className="btn-primary text-xs py-2 px-4">Go to Guardian Center</a>
+                  <Link to="/guardian" className="btn-primary text-xs py-2 px-4">Go to Guardian Center</Link>
                 </div>
               ) : (
                 guardians.map((guard) => (

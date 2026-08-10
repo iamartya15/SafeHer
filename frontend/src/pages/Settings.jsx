@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import {
@@ -83,6 +84,7 @@ const ThemePill = ({ mode, label, icon: Icon, active, onClick }) => (
 
 // ─── Main Settings Page ───────────────────────────────────────────────────────
 export const Settings = () => {
+  const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { user } = useAuth();
 
@@ -207,7 +209,7 @@ export const Settings = () => {
         <SettingsRow
           label="Manage Profile"
           description="Update name, phone, avatar, and guardian role."
-          onClick={() => window.location.href = '/profile'}
+          onClick={() => navigate('/profile')}
         >
           <ChevronRight className="w-4 h-4" style={{ color: 'var(--text-muted)' }} />
         </SettingsRow>

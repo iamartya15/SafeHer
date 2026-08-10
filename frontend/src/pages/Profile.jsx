@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import * as authService from '../services/authService';
 import { User, Phone, Mail, Camera, Loader2 } from 'lucide-react';
@@ -235,7 +236,7 @@ export const Profile = () => {
 
           {/* Quick links */}
           <div className="flex items-center gap-3 pt-2 border-t border-white/5">
-            <a href="/settings" className="text-xs text-purple-400 hover:underline">App Settings →</a>
+            <Link to="/settings" className="text-xs text-purple-400 hover:underline">App Settings →</Link>
           </div>
 
         </div>

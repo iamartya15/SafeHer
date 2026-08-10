@@ -1,11 +1,10 @@
+import api from './api';
 import axios from 'axios';
-
-const BASE_URL = '/api/map';
 
 const fetchWithRetry = async (url, options = {}, retries = 2) => {
   for (let i = 0; i <= retries; i++) {
     try {
-      const response = await axios({ url, ...options });
+      const response = await api({ url, ...options });
       return response.data;
     } catch (error) {
       if (axios.isCancel(error)) throw error; // Don't retry cancelled requests
@@ -15,9 +14,7 @@ const fetchWithRetry = async (url, options = {}, retries = 2) => {
   }
 };
 
-
-
 export const getSafePlaces = async (bbox, signal) => {
-  return fetchWithRetry(`${BASE_URL}/safe-places?bbox=${bbox}`, { signal });
+  return fetchWithRetry(`/map/safe-places?bbox=${bbox}`, { signal });
 };
 

@@ -3,7 +3,6 @@ import { useGeolocation } from '../hooks/useGeolocation';
 import * as incidentService from '../services/incidentService';
 import * as mapService from '../services/mapService';
 import InteractiveMap from '../components/InteractiveMap';
-import { } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 
@@ -36,11 +35,12 @@ export const MapPage = () => {
   const fetchIncidents = useCallback(async () => {
     if (!layers.incidents) return;
     try {
-      const res = await incidentService.getIncidents(); // doesn't use AbortController yet in service, but we assume it's fast
+      const res = await incidentService.getIncidents();
       if (res.success) {
+        const reportsList = res.reports || res.data || [];
         setData(prev => ({
           ...prev,
-          incidents: res.reports.map(r => ({
+          incidents: reportsList.map(r => ({
             id: r._id,
             type: 'incident',
             category: r.category,
