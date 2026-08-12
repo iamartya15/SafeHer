@@ -263,7 +263,7 @@ const generateFallbackPlaces = (lat, lng) => [
     lng: lng - 0.011,
     distance: calculateDistance(lat, lng, lat + 0.015, lng - 0.011)
   }
-].filter(p => p.distance <= 5.0);
+].filter(Boolean);
 
 export const SafePlaces = () => {
   const { latitude, longitude, loading: geoLoading, isFallback, locationSource, refresh: refreshGeo } = useGeolocation();
@@ -271,21 +271,22 @@ export const SafePlaces = () => {
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all'); // all, police, hospital, pharmacy, fuel, fire_station
+  const [searchRadius, setSearchRadius] = useState(15); // Default 15 km search radius
 
-  const fetchNearbyPlaces = useCallback(async (lat, lng) => {
+  const fetchNearbyPlaces = useCallback(async (lat, lng, radiusKm = 15) => {
     setLoading(true);
-    const radius = 5000; // 5 km radius
+    const radiusMeters = radiusKm * 1000; 
     const query = `
       [out:json][timeout:20];
       (
-        nwr["amenity"="police"](around:${radius},${lat},${lng});
-        nwr["amenity"="hospital"](around:${radius},${lat},${lng});
-        nwr["amenity"="clinic"](around:${radius},${lat},${lng});
-        nwr["amenity"="doctors"](around:${radius},${lat},${lng});
-        nwr["amenity"="pharmacy"](around:${radius},${lat},${lng});
-        nwr["healthcare"="pharmacy"](around:${radius},${lat},${lng});
-        nwr["amenity"="fuel"](around:${radius},${lat},${lng});
-        nwr["amenity"="fire_station"](around:${radius},${lat},${lng});
+        nwr["amenity"="police"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="hospital"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="clinic"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="doctors"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="pharmacy"](around:${radiusMeters},${lat},${lng});
+        nwr["healthcare"="pharmacy"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="fuel"](around:${radiusMeters},${lat},${lng});
+        nwr["amenity"="fire_station"](around:${radiusMeters},${lat},${lng});
       );
       out center;
     `;
@@ -316,7 +317,7 @@ export const SafePlaces = () => {
               if (!itemLat || !itemLng) return null;
 
               const distance = calculateDistance(lat, lng, itemLat, itemLng);
-              if (distance > 5.0) return null; // Strictly within 5 km
+              if (distance > radiusKm) return null;
 
               let rawAmenity = item.tags?.amenity || item.tags?.healthcare || 'police';
               if (['clinic', 'doctors'].includes(rawAmenity)) rawAmenity = 'hospital';
@@ -353,7 +354,8 @@ export const SafePlaces = () => {
     }
 
     if (!fetchedSuccess) {
-      setPlaces(generateFallbackPlaces(lat, lng));
+      const fallbackList = generateFallbackPlaces(lat, lng).filter(p => p.distance <= radiusKm);
+      setPlaces(fallbackList);
     }
 
     setLoading(false);
@@ -361,16 +363,16 @@ export const SafePlaces = () => {
 
   useEffect(() => {
     if (latitude && longitude) {
-      fetchNearbyPlaces(latitude, longitude);
+      fetchNearbyPlaces(latitude, longitude, searchRadius);
     }
-  }, [latitude, longitude, fetchNearbyPlaces]);
+  }, [latitude, longitude, searchRadius, fetchNearbyPlaces]);
 
   const filteredPlaces = activeFilter === 'all'
     ? places
     : places.filter((p) => p.amenity === activeFilter);
 
   const filters = [
-    { id: 'all', label: 'All Places (≤ 5km)' },
+    { id: 'all', label: `All Places (≤ ${searchRadius}km)` },
     { id: 'police', label: 'Police Stations' },
     { id: 'hospital', label: 'Hospitals & Clinics' },
     { id: 'pharmacy', label: 'Pharmacies' },
@@ -421,6 +423,29 @@ export const SafePlaces = () => {
               </button>
             </div>
           )}
+          {/* Distance Radius Selector */}
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-900/60 border border-white/5 rounded-2xl">
+            <div className="flex items-center gap-2 text-sm font-bold text-white">
+              <Compass className="w-5 h-5 text-fuchsia-400" />
+              <span>Search Radius Range:</span>
+            </div>
+            <div className="flex items-center gap-2">
+              {[5, 10, 15, 25, 50].map((r) => (
+                <button
+                  key={r}
+                  onClick={() => setSearchRadius(r)}
+                  className={`px-3 py-1.5 text-xs font-extrabold rounded-xl border transition-all ${
+                    searchRadius === r
+                      ? 'bg-fuchsia-600 border-fuchsia-500 text-white shadow-lg shadow-fuchsia-900/50'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {r} km
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
             {filters.map((f) => (

@@ -60,8 +60,8 @@ const createMapIcon = (type, category) => {
       break;
     case 'safe_place':
       if (category === 'police') { color = 'bg-blue-600'; border = 'border-blue-400'; iconText = '🚓'; }
-      else if (category === 'hospital') { color = 'bg-teal-500'; border = 'border-teal-300'; iconText = '🏥'; }
-      else if (category === 'pharmacy') { color = 'bg-emerald-500'; border = 'border-emerald-300'; iconText = '💊'; }
+      else if (['hospital', 'clinic', 'doctors'].includes(category)) { color = 'bg-teal-500'; border = 'border-teal-300'; iconText = '🏥'; }
+      else if (['pharmacy'].includes(category)) { color = 'bg-emerald-500'; border = 'border-emerald-300'; iconText = '💊'; }
       else if (category === 'fire_station') { color = 'bg-red-500'; border = 'border-red-300'; iconText = '🚒'; }
       else if (category === 'fuel') { color = 'bg-slate-700'; border = 'border-slate-500'; iconText = '⛽'; }
       break;
@@ -88,6 +88,8 @@ export const InteractiveMap = ({
   mapData = [],
   userLocation = null,
   onMapClick = null,
+  onMarkerClick = null,
+  selectedItem = null,
   selectedLocation = null,
   onBoundsChange = null
 }) => {
@@ -166,7 +168,16 @@ export const InteractiveMap = ({
     }
   }, [selectedLocation]);
 
-  // 4. Sync Map Data (Incidents, GDACS, USGS, SafePlaces, etc)
+  // 4. Handle Selected Item Panning
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !selectedItem || !selectedItem.lat || !selectedItem.lng) return;
+    map.flyTo([selectedItem.lat, selectedItem.lng], Math.max(map.getZoom(), 14), {
+      duration: 1.2
+    });
+  }, [selectedItem]);
+
+  // 5. Sync Map Data (Incidents, GDACS, USGS, SafePlaces, etc)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
@@ -175,7 +186,7 @@ export const InteractiveMap = ({
 
     markerClusterGroupRef.current = L.markerClusterGroup({
       chunkedLoading: true,
-      maxClusterRadius: 50,
+      maxClusterRadius: 45,
       showCoverageOnHover: false,
       spiderfyOnMaxZoom: true,
       iconCreateFunction: function (cluster) {
@@ -193,25 +204,54 @@ export const InteractiveMap = ({
 
     mapData.forEach((item) => {
       if (item.lat && item.lng) {
+        const title = item.title || item.category || item.type;
+        const safeId = `btn-view-${item.id || String(item.lat).replace('.', '_')}`;
+
         const popupContent = `
-          <div style="color: #1e293b; padding: 4px; max-width: 200px;">
-            <h5 style="margin: 0 0 4px 0; font-weight: bold; color: #7e22ce; text-transform: capitalize;">
-              ${item.title || item.category || item.type}
-            </h5>
-            <p style="margin: 0 0 6px 0; font-size: 11px;">${item.description || ''}</p>
-            ${item.image ? `<img src="${item.image}" style="width: 100%; border-radius: 4px; margin-bottom: 6px;" />` : ''}
-            ${item.address ? `<span style="font-size: 10px; color: #64748b; display:block;">📍 ${item.address}</span>` : ''}
-            ${item.timestamp ? `<span style="font-size: 9px; color: #94a3b8; display:block; margin-top: 2px;">${formatShortDateTime(item.timestamp)}</span>` : ''}
+          <div style="color: #f8fafc; padding: 6px; width: 220px; font-family: system-ui, sans-serif;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+              <span style="font-size:10px; font-weight:700; background:#9333ea25; color:#c084fc; padding: 2px 6px; border-radius:4px; text-transform:uppercase; border: 1px solid #9333ea40;">
+                ${item.category || item.type || 'Incident'}
+              </span>
+            </div>
+            <h4 style="margin: 0 0 4px 0; font-size: 13px; font-weight: 700; color: #ffffff;">
+              ${title}
+            </h4>
+            ${item.address ? `<p style="margin: 0 0 6px 0; font-size: 11px; color: #94a3b8; line-height: 1.3;">📍 ${item.address}</p>` : ''}
+            ${item.description ? `<p style="margin: 0 0 8px 0; font-size: 11px; color: #cbd5e1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${item.description}</p>` : ''}
+            <button id="${safeId}" style="width:100%; background:#9333ea; color:white; border:none; padding:7px 12px; border-radius:8px; font-size:11px; font-weight:700; cursor:pointer; transition: background 0.2s; box-shadow: 0 4px 12px rgba(147,51,234,0.4);">
+              🔍 View Full Report
+            </button>
           </div>
         `;
+
         const marker = L.marker([item.lat, item.lng], { icon: createMapIcon(item.type, item.category) })
           .bindPopup(popupContent);
+
+        marker.on('click', () => {
+          if (onMarkerClick) {
+            onMarkerClick(item);
+          }
+        });
+
+        marker.on('popupopen', () => {
+          setTimeout(() => {
+            const btn = document.getElementById(safeId);
+            if (btn && onMarkerClick) {
+              btn.onclick = (e) => {
+                e.stopPropagation();
+                onMarkerClick(item);
+              };
+            }
+          }, 50);
+        });
+
         markerClusterGroupRef.current.addLayer(marker);
       }
     });
 
     map.addLayer(markerClusterGroupRef.current);
-  }, [mapData]);
+  }, [mapData, onMarkerClick]);
 
   return (
     <div className="relative w-full h-full min-h-[400px] rounded-xl overflow-hidden shadow-inner border border-white/5 bg-slate-900">
