@@ -160,6 +160,19 @@ const generateFallbackPlaces = (lat, lng) => [
     distance: calculateDistance(lat, lng, lat + 0.008, lng + 0.005)
   },
   {
+    id: 'fb-police-2',
+    name: 'Model Town Police Help Post',
+    address: 'Main Highway Circle',
+    amenity: 'police',
+    phone: '100',
+    website: null,
+    openingHours: '24/7 Open',
+    operator: 'District Police',
+    lat: lat - 0.012,
+    lng: -0.008 + lng,
+    distance: calculateDistance(lat, lng, lat - 0.012, lng - 0.008)
+  },
+  {
     id: 'fb-hosp-1',
     name: 'City Care Emergency Hospital & Trauma Center',
     address: 'Sector 4, Hospital Avenue',
@@ -171,6 +184,19 @@ const generateFallbackPlaces = (lat, lng) => [
     lat: lat - 0.006,
     lng: lng + 0.009,
     distance: calculateDistance(lat, lng, lat - 0.006, lng + 0.009)
+  },
+  {
+    id: 'fb-hosp-2',
+    name: 'LifeLine Community Healthcare Clinic',
+    address: 'Market Road Sector 2',
+    amenity: 'hospital',
+    phone: '+91 98765 43210',
+    website: null,
+    openingHours: '08:00 - 22:00',
+    operator: 'Community Health',
+    lat: lat + 0.011,
+    lng: lng - 0.007,
+    distance: calculateDistance(lat, lng, lat + 0.011, lng - 0.007)
   },
   {
     id: 'fb-pharmacy-1',
@@ -186,6 +212,19 @@ const generateFallbackPlaces = (lat, lng) => [
     distance: calculateDistance(lat, lng, lat + 0.003, lng - 0.004)
   },
   {
+    id: 'fb-pharmacy-2',
+    name: 'MedPlus Emergency Pharmacy',
+    address: 'Station Road Opposite Bus Stand',
+    amenity: 'pharmacy',
+    phone: '+91 1800 000 1111',
+    website: null,
+    openingHours: '24 Hours Open',
+    operator: 'MedPlus Healthcare',
+    lat: lat - 0.009,
+    lng: lng + 0.004,
+    distance: calculateDistance(lat, lng, lat - 0.009, lng + 0.004)
+  },
+  {
     id: 'fb-fuel-1',
     name: 'IndianOil / HPCL 24/7 Safe Station',
     address: 'Highway Junction 12',
@@ -197,26 +236,56 @@ const generateFallbackPlaces = (lat, lng) => [
     lat: lat - 0.005,
     lng: lng - 0.007,
     distance: calculateDistance(lat, lng, lat - 0.005, lng - 0.007)
+  },
+  {
+    id: 'fb-fuel-2',
+    name: 'Bharat Petroleum 24 Hours Pump',
+    address: 'Ring Road Bypass',
+    amenity: 'fuel',
+    phone: null,
+    website: null,
+    openingHours: '24/7 Open',
+    operator: 'BPCL',
+    lat: lat + 0.014,
+    lng: lng + 0.012,
+    distance: calculateDistance(lat, lng, lat + 0.014, lng + 0.012)
+  },
+  {
+    id: 'fb-fire-1',
+    name: 'District Fire & Disaster Safety Station',
+    address: 'Civil Lines Road',
+    amenity: 'fire_station',
+    phone: '101',
+    website: null,
+    openingHours: '24/7 Emergency',
+    operator: 'Fire & Rescue Dept',
+    lat: lat + 0.015,
+    lng: lng - 0.011,
+    distance: calculateDistance(lat, lng, lat + 0.015, lng - 0.011)
   }
-];
+].filter(p => p.distance <= 5.0);
 
 export const SafePlaces = () => {
   const { latitude, longitude, loading: geoLoading, isFallback, locationSource, refresh: refreshGeo } = useGeolocation();
 
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeFilter, setActiveFilter] = useState('all'); // all, police, hospital, pharmacy, fuel
+  const [activeFilter, setActiveFilter] = useState('all'); // all, police, hospital, pharmacy, fuel, fire_station
 
   const fetchNearbyPlaces = useCallback(async (lat, lng) => {
     setLoading(true);
-    const radius = 5000; 
+    const radius = 5000; // 5 km radius
     const query = `
-      [out:json][timeout:15];
+      [out:json][timeout:20];
       (
         nwr["amenity"="police"](around:${radius},${lat},${lng});
         nwr["amenity"="hospital"](around:${radius},${lat},${lng});
+        nwr["amenity"="clinic"](around:${radius},${lat},${lng});
+        nwr["amenity"="doctors"](around:${radius},${lat},${lng});
         nwr["amenity"="pharmacy"](around:${radius},${lat},${lng});
+        nwr["healthcare"="pharmacy"](around:${radius},${lat},${lng});
         nwr["amenity"="fuel"](around:${radius},${lat},${lng});
+        nwr["amenity"="fire_station"](around:${radius},${lat},${lng});
       );
       out center;
     `;
@@ -232,7 +301,7 @@ export const SafePlaces = () => {
     for (const endpoint of endpoints) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 6000);
+        const timer = setTimeout(() => controller.abort(), 7000);
         const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, { signal: controller.signal });
         clearTimeout(timer);
 
@@ -247,15 +316,19 @@ export const SafePlaces = () => {
               if (!itemLat || !itemLng) return null;
 
               const distance = calculateDistance(lat, lng, itemLat, itemLng);
-              const amenityType = item.tags?.amenity || 'police';
-              const name = item.tags?.name || `${getCategoryDetails(amenityType).label} (Verified)`;
+              if (distance > 5.0) return null; // Strictly within 5 km
+
+              let rawAmenity = item.tags?.amenity || item.tags?.healthcare || 'police';
+              if (['clinic', 'doctors'].includes(rawAmenity)) rawAmenity = 'hospital';
+
+              const name = item.tags?.name || `${getCategoryDetails(rawAmenity).label} (Verified)`;
               const address = item.tags?.['addr:street'] || item.tags?.['addr:full'] || item.tags?.['addr:city'] || 'Coordinates mapping available';
 
               return {
                 id: item.id,
                 name,
                 address,
-                amenity: amenityType,
+                amenity: rawAmenity,
                 phone: item.tags?.phone || item.tags?.['contact:phone'] || null,
                 website: item.tags?.website || item.tags?.['contact:website'] || null,
                 openingHours: item.tags?.opening_hours || null,
@@ -297,11 +370,12 @@ export const SafePlaces = () => {
     : places.filter((p) => p.amenity === activeFilter);
 
   const filters = [
-    { id: 'all', label: 'All Places' },
+    { id: 'all', label: 'All Places (≤ 5km)' },
     { id: 'police', label: 'Police Stations' },
-    { id: 'hospital', label: 'Hospitals' },
+    { id: 'hospital', label: 'Hospitals & Clinics' },
     { id: 'pharmacy', label: 'Pharmacies' },
-    { id: 'fuel', label: 'Petrol Pumps' }
+    { id: 'fuel', label: 'Petrol Pumps' },
+    { id: 'fire_station', label: 'Fire Stations' }
   ];
 
   return (
