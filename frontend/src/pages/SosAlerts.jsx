@@ -17,7 +17,7 @@ import { getAvatarSrc } from '../utils/avatar';
 import { formatDate } from '../utils/dateFormatter';
 
 export const SosAlerts = () => {
-  const { latitude, longitude, loading: geoLoading, error: geoError } = useGeolocation();
+  const { latitude, longitude, isFallback, locationSource, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
   const [guardians, setGuardians] = useState([]);
   const [sosHistory, setSosHistory] = useState([]);
@@ -134,11 +134,19 @@ export const SosAlerts = () => {
             <div className="absolute inset-0 bg-red-600/5 animate-pulse-slow pointer-events-none" />
           )}
 
-          {/* Alert Warning if no GPS */}
-          {geoError && (
-            <div className="max-w-md mx-auto mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-300 flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5 shrink-0" />
-              <span>{geoError} Enable GPS coordinates before triggering SOS.</span>
+          {/* Approximate location notice if fallback */}
+          {isFallback && (
+            <div className="max-w-md mx-auto mb-6 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>Using approximate location ({locationSource === 'ip' ? 'IP Geolocation' : 'Default Region'}).</span>
+              </div>
+              <button
+                onClick={refreshGeo}
+                className="underline text-amber-200 hover:text-white font-semibold shrink-0"
+              >
+                Retry GPS
+              </button>
             </div>
           )}
 

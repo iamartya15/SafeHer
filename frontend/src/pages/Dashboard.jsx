@@ -26,7 +26,7 @@ export const Dashboard = () => {
   const { user } = useAuth();
   const { fetchNotifications } = useNotifications();
   
-  const { latitude, longitude, error: geoError, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
+  const { latitude, longitude, isFallback, locationSource, loading: geoLoading, refresh: refreshGeo } = useGeolocation();
 
   const [sosHistory, setSosHistory] = useState([]);
   const [activeSos, setActiveSos] = useState(null);
@@ -184,14 +184,25 @@ export const Dashboard = () => {
               </div>
 
               <div className="mt-4 space-y-2 bg-slate-950/40 p-3 rounded-lg border border-white/5 text-xs text-slate-300">
-                {geoLoading ? (
+                {geoLoading && !latitude ? (
                   <div className="flex items-center justify-center py-2 text-slate-500">
                     <Loader2 className="w-4 h-4 animate-spin mr-1.5" /> Loading Coordinates...
                   </div>
-                ) : geoError ? (
-                  <span className="text-red-400 block">{geoError}</span>
                 ) : (
                   <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Source</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
+                        locationSource === 'gps' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' :
+                        locationSource === 'gps-coarse' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                        locationSource === 'ip' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+                        'bg-slate-700/50 text-slate-300 border border-slate-600/50'
+                      }`}>
+                        {locationSource === 'gps' ? 'GPS (High Precision)' :
+                         locationSource === 'gps-coarse' ? 'GPS (Standard)' :
+                         locationSource === 'ip' ? 'Approximate (IP)' : 'Default Area'}
+                      </span>
+                    </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Latitude</span>
                       <code className="text-white font-mono">{latitude?.toFixed(6) || 'N/A'}</code>
@@ -202,7 +213,9 @@ export const Dashboard = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Accuracy</span>
-                      <span className="text-emerald-400">~15 meters</span>
+                      <span className={isFallback ? 'text-amber-400' : 'text-emerald-400'}>
+                        {isFallback ? (locationSource === 'ip' ? '~5 km' : 'City Level') : '~15 meters'}
+                      </span>
                     </div>
                   </>
                 )}

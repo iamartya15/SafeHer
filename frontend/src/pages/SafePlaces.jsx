@@ -145,7 +145,7 @@ const PlaceCard = ({ place, latitude, longitude }) => {
 }
 
 export const SafePlaces = () => {
-  const { latitude, longitude, loading: geoLoading, error: geoError } = useGeolocation();
+  const { latitude, longitude, loading: geoLoading, isFallback, locationSource, refresh: refreshGeo } = useGeolocation();
 
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -240,23 +240,32 @@ export const SafePlaces = () => {
       </div>
 
       {/* Geolocation Status check */}
-      {geoLoading ? (
+      {geoLoading && !latitude ? (
         <div className="glass-card rounded-2xl p-16 border border-white/5 flex flex-col items-center justify-center gap-4 text-slate-400">
           <Loader2 className="w-10 h-10 animate-spin text-fuchsia-500" />
-          <span className="font-semibold text-lg text-white">Querying GPS satellites...</span>
-          <span className="text-sm">Calculating precise coordinates to map emergency shelters.</span>
-        </div>
-      ) : geoError ? (
-        <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-300 flex items-start gap-4">
-          <AlertTriangle className="w-6 h-6 shrink-0 mt-1" />
-          <div>
-             <h4 className="text-lg font-bold text-red-400 mb-1">Location Access Denied</h4>
-             <p className="text-sm">{geoError} We require location permissions strictly to query nearby safe zones.</p>
-          </div>
+          <span className="font-semibold text-lg text-white">Calculating emergency location...</span>
+          <span className="text-sm">Mapping emergency shelters near your area.</span>
         </div>
       ) : (
         <div className="space-y-8">
-          
+
+          {/* Approximate Location Notice */}
+          {isFallback && (
+            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl text-amber-300 flex items-center justify-between gap-4 text-sm">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0" />
+                <span>
+                  Using approximate location ({locationSource === 'ip' ? 'IP Geolocation' : 'Default Region'}). Enable browser location permissions for exact precision.
+                </span>
+              </div>
+              <button
+                onClick={refreshGeo}
+                className="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/30 rounded-lg text-xs font-semibold shrink-0 transition-colors"
+              >
+                Retry GPS
+              </button>
+            </div>
+          )}
           {/* Filters */}
           <div className="flex flex-wrap gap-3">
             {filters.map((f) => (

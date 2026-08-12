@@ -1,11 +1,63 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
-// Default fallback coordinates (New Delhi, India) if browser GPS is unavailable or denied
+// Default fallback coordinates (New Delhi, India) if browser GPS and IP lookup are unavailable
 const DEFAULT_LOCATION = {
   latitude: 28.6139,
   longitude: 77.2090,
-  accuracy: 100,
-  isFallback: true
+  accuracy: 5000,
+  isFallback: true,
+  locationSource: 'default'
+};
+
+/**
+ * Fast HTTPS IP-based Geolocation fallback for devices/desktops without hardware GPS
+ */
+const fetchIPLocation = async () => {
+  // Primary IP geolocation service (ipwho.is)
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://ipwho.is/', { signal: controller.signal });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (data && data.success && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+      return {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        accuracy: 5000,
+        city: data.city || '',
+        region: data.region || '',
+        isFallback: true,
+        locationSource: 'ip'
+      };
+    }
+  } catch (e) {
+    // Silent catch, proceed to secondary service
+  }
+
+  // Secondary IP geolocation service (ipapi.co)
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(timer);
+    const data = await res.json();
+    if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+      return {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        accuracy: 5000,
+        city: data.city || '',
+        region: data.region || '',
+        isFallback: true,
+        locationSource: 'ip'
+      };
+    }
+  } catch (e) {
+    // Silent catch
+  }
+
+  return null;
 };
 
 export const useGeolocation = (options = {}) => {
@@ -25,76 +77,105 @@ export const useGeolocation = (options = {}) => {
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
-  const retriesRef = useRef(0);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
-  const getNewLocation = useCallback(() => {
-    setError(null);
+  const getNewLocation = useCallback(async () => {
+    setLoading(true);
+
+    const updateLocation = (newLoc) => {
+      setLocation(newLoc);
+      setError(null);
+      setLoading(false);
+      try {
+        localStorage.setItem('safeher_last_location', JSON.stringify(newLoc));
+      } catch (e) {}
+    };
+
+    const handleFallback = async () => {
+      // 1. Try IP Geolocation lookup
+      const ipLoc = await fetchIPLocation();
+      if (ipLoc) {
+        updateLocation(ipLoc);
+        return;
+      }
+
+      // 2. Try stored localStorage location or hardcoded DEFAULT_LOCATION
+      try {
+        const saved = localStorage.getItem('safeher_last_location');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          updateLocation({ ...parsed, isFallback: true, locationSource: parsed.locationSource || 'cache' });
+          return;
+        }
+      } catch (e) {}
+
+      updateLocation(DEFAULT_LOCATION);
+    };
 
     if (!navigator.geolocation) {
-      setError('Geolocation is not supported by your browser');
-      setLoading(false);
+      handleFallback();
       return;
     }
 
-    const currentOptions = {
+    const highAccuracyOptions = {
       enableHighAccuracy: true,
+      timeout: 12000,
+      maximumAge: 30000,
+      ...optionsRef.current
+    };
+
+    const coarseAccuracyOptions = {
+      enableHighAccuracy: false,
       timeout: 8000,
       maximumAge: 60000,
       ...optionsRef.current
     };
 
-    const successHandler = (position) => {
-      const newLoc = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        accuracy: position.coords.accuracy,
-        timestamp: position.timestamp,
-        isFallback: false
-      };
-      setLocation(newLoc);
-      try {
-        localStorage.setItem('safeher_last_location', JSON.stringify(newLoc));
-      } catch (e) {}
-      retriesRef.current = 0;
-      setLoading(false);
-    };
-
-    const finalErrorHandler = (err) => {
-      let message = 'An error occurred fetching location';
-      if (err) {
-        switch (err.code) {
-          case err.PERMISSION_DENIED:
-            message = 'Location access denied. Please enable GPS permissions.';
-            break;
-          case err.POSITION_UNAVAILABLE:
-            message = 'Location information is unavailable.';
-            break;
-          case err.TIMEOUT:
-            message = 'Location request timed out. Using approximate location.';
-            break;
-          default:
-            break;
+    // Attempt 1: High Accuracy GPS
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setPermissionDenied(false);
+        updateLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+          timestamp: position.timestamp,
+          isFallback: false,
+          locationSource: 'gps'
+        });
+      },
+      (err1) => {
+        if (err1 && err1.code === err1.PERMISSION_DENIED) {
+          setPermissionDenied(true);
+          handleFallback();
+          return;
         }
-      }
-      setError(message);
-      setLoading(false);
-    };
 
-    const errorHandler = (err) => {
-      if (err && err.code === err.TIMEOUT && retriesRef.current < 1) {
-        retriesRef.current += 1;
+        // Attempt 2: Coarse Accuracy GPS
         navigator.geolocation.getCurrentPosition(
-          successHandler,
-          finalErrorHandler,
-          { ...currentOptions, enableHighAccuracy: false, timeout: 10000 }
+          (position) => {
+            setPermissionDenied(false);
+            updateLocation({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+              accuracy: position.coords.accuracy,
+              timestamp: position.timestamp,
+              isFallback: false,
+              locationSource: 'gps-coarse'
+            });
+          },
+          (err2) => {
+            if (err2 && err2.code === err2.PERMISSION_DENIED) {
+              setPermissionDenied(true);
+            }
+            handleFallback();
+          },
+          coarseAccuracyOptions
         );
-        return;
-      }
-      finalErrorHandler(err);
-    };
-
-    navigator.geolocation.getCurrentPosition(successHandler, errorHandler, currentOptions);
-  }, []); // Stable empty dependency array prevents infinite re-render loop!
+      },
+      highAccuracyOptions
+    );
+  }, []);
 
   useEffect(() => {
     getNewLocation();
@@ -113,9 +194,10 @@ export const useGeolocation = (options = {}) => {
     longitude: location?.longitude || DEFAULT_LOCATION.longitude,
     accuracy: location?.accuracy || null,
     isFallback: location?.isFallback || false,
+    locationSource: location?.locationSource || 'default',
+    permissionDenied,
     error,
     loading,
     refresh: getNewLocation
   };
 };
-
