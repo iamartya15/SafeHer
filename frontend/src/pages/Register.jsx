@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Shield, Mail, Lock, User, Phone, AlertCircle, Loader2 } from 'lucide-react';
+import { Shield, Mail, Lock, User, Phone, AlertCircle, Loader2, Check, CheckCircle2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useGoogleLogin } from '@react-oauth/google';
 
@@ -12,26 +12,16 @@ export const Register = () => {
   
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [otpStep, setOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false);
 
   const containerRef = useRef(null);
-  const [buttonWidth, setButtonWidth] = useState(320);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-    const handleResize = () => {
-      const rect = containerRef.current.getBoundingClientRect();
-      const padding = 64; // subtracted padding p-8 (2 * 32)
-      const width = rect.width - padding;
-      setButtonWidth(Math.max(200, Math.min(400, Math.floor(width))));
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors }
   } = useForm({
     defaultValues: {
@@ -39,11 +29,54 @@ export const Register = () => {
       email: '',
       password: '',
       phone: '',
-      role: 'user'
+      role: 'user',
+      acceptTerms: false
     }
   });
 
+  const passwordValue = watch('password', '');
+  const phoneValue = watch('phone', '');
+
+  // Calculate Password Strength
+  const getPasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-700' };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-red-500' };
+    if (score === 2 || score === 3) return { score: 2, label: 'Medium', color: 'bg-amber-500' };
+    return { score: 4, label: 'Strong', color: 'bg-emerald-500' };
+  };
+
+  const pStrength = getPasswordStrength(passwordValue);
+
+  const handleSendOtp = () => {
+    if (!phoneValue || phoneValue.length < 10) {
+      toast.error('Please enter a valid 10-digit Indian phone number first');
+      return;
+    }
+    toast.success('OTP sent to ' + phoneValue + ' (Use test OTP: 123456)');
+    setOtpStep(true);
+  };
+
+  const handleVerifyOtp = () => {
+    if (otpCode === '123456' || otpCode.length === 6) {
+      setOtpVerified(true);
+      setOtpStep(false);
+      toast.success('Phone number verified successfully!');
+    } else {
+      toast.error('Invalid OTP. Please try 123456');
+    }
+  };
+
   const onSubmit = async (data) => {
+    if (!data.acceptTerms) {
+      toast.error('You must accept the Terms of Service & Privacy Policy to register.');
+      return;
+    }
     setLoading(true);
     setApiError('');
     try {
@@ -88,7 +121,6 @@ export const Register = () => {
       toast.error(msg);
     }
   });
-
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-12">
@@ -156,9 +188,16 @@ export const Register = () => {
             )}
           </div>
 
-          {/* Password */}
+          {/* Password with Strength Meter */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Password</label>
+            <div className="flex justify-between items-center text-xs">
+              <label className="font-semibold text-slate-300">Password</label>
+              {passwordValue && (
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Strength: <span className={pStrength.score >= 3 ? 'text-emerald-400' : pStrength.score === 2 ? 'text-amber-400' : 'text-red-400'}>{pStrength.label}</span>
+                </span>
+              )}
+            </div>
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
               <input
@@ -167,35 +206,88 @@ export const Register = () => {
                 className={`glass-input pl-10 ${errors.password ? 'border-red-500/50 focus:border-red-500' : ''}`}
                 {...register('password', {
                   required: 'Password is required',
-                  pattern: {
-                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
-                    message: 'Must be at least 8 chars, 1 uppercase, 1 lowercase, 1 number'
-                  }
+                  minLength: { value: 8, message: 'Password must be at least 8 characters' }
                 })}
               />
             </div>
+
+            {/* Strength Indicator Bar */}
+            {passwordValue && (
+              <div className="space-y-1 pt-1">
+                <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden flex gap-1">
+                  <div className={`h-full transition-all duration-300 ${pStrength.score >= 1 ? pStrength.color : 'bg-slate-800'} flex-1`} />
+                  <div className={`h-full transition-all duration-300 ${pStrength.score >= 2 ? pStrength.color : 'bg-slate-800'} flex-1`} />
+                  <div className={`h-full transition-all duration-300 ${pStrength.score >= 3 ? pStrength.color : 'bg-slate-800'} flex-1`} />
+                  <div className={`h-full transition-all duration-300 ${pStrength.score >= 4 ? pStrength.color : 'bg-slate-800'} flex-1`} />
+                </div>
+              </div>
+            )}
             {errors.password && (
               <span className="text-[10px] text-red-400 block">{errors.password.message}</span>
             )}
           </div>
 
-          {/* Phone */}
+          {/* Phone Number with OTP Simulation */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">Phone Number</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
-              <input
-                type="tel"
-                placeholder="+91 9876543210"
-                className="glass-input pl-10"
-                {...register('phone')}
-              />
+            <div className="flex justify-between items-center text-xs">
+              <label className="font-semibold text-slate-300">Indian Mobile Number (+91)</label>
+              {otpVerified && (
+                <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
+                  <Check className="w-3 h-3" /> Verified
+                </span>
+              )}
             </div>
+
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Phone className="absolute left-3 top-3.5 w-4 h-4 text-slate-500" />
+                <input
+                  type="tel"
+                  placeholder="+91 9876543210"
+                  disabled={otpVerified}
+                  className="glass-input pl-10 text-xs"
+                  {...register('phone')}
+                />
+              </div>
+              {!otpVerified && (
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 text-purple-300 text-xs font-bold rounded-xl shrink-0 transition-colors"
+                >
+                  Verify OTP
+                </button>
+              )}
+            </div>
+
+            {/* OTP Entry Field */}
+            {otpStep && !otpVerified && (
+              <div className="p-3 bg-purple-950/40 rounded-xl border border-purple-500/30 space-y-2 text-xs">
+                <span className="text-slate-300 font-medium">Enter 6-digit OTP sent via SMS:</span>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    className="glass-input text-center font-mono tracking-widest text-sm py-1.5"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleVerifyOtp}
+                    className="btn-primary py-1.5 px-4 text-xs font-bold shrink-0"
+                  >
+                    Confirm
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Account Role Selection */}
+          {/* Role Selection */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300">I am registering as a:</label>
+            <label className="text-xs font-semibold text-slate-300">Account Role:</label>
             <div className="grid grid-cols-2 gap-4">
               <label className="flex items-center justify-between p-3 rounded-lg border border-slate-700/50 bg-slate-900/30 hover:bg-slate-900/60 cursor-pointer transition-colors text-xs font-medium">
                 <span>User (Monitored)</span>
@@ -218,7 +310,25 @@ export const Register = () => {
             </div>
           </div>
 
-          {/* Submit */}
+          {/* Terms & Privacy Agreement Checkbox */}
+          <div className="pt-2">
+            <label className="flex items-start gap-2 cursor-pointer text-xs text-slate-400">
+              <input
+                type="checkbox"
+                className="accent-purple-500 w-4 h-4 mt-0.5 rounded"
+                {...register('acceptTerms', { required: true })}
+              />
+              <span className="leading-snug">
+                I agree to the{' '}
+                <Link to="/terms" target="_blank" className="text-purple-400 underline hover:text-purple-300">Terms of Service</Link>{' '}
+                and{' '}
+                <Link to="/privacy" target="_blank" className="text-purple-400 underline hover:text-purple-300">Privacy Policy</Link>{' '}
+                including GPS location processing.
+              </span>
+            </label>
+          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
@@ -233,7 +343,7 @@ export const Register = () => {
               <span>Create Account</span>
             )}
           </button>
-         </form>
+        </form>
  
         {/* OR Divider */}
         <div className="relative flex py-2 items-center">

@@ -103,8 +103,8 @@ export const MissingDashboard = () => {
           )}
 
           {activeTab === 'yearly' && (
-             <div className="flex flex-col justify-end h-[350px] space-y-4">
-               <div className="flex items-end justify-around h-full border-b border-slate-700 pb-4 relative">
+             <div className="flex flex-col justify-between min-h-[320px] space-y-4">
+               <div className="flex items-end justify-between sm:justify-around h-[260px] border-b border-slate-700 pb-2 px-2 sm:px-6 relative">
                  {/* Y-axis guidelines */}
                  <div className="absolute left-0 top-0 w-full h-full flex flex-col justify-between pointer-events-none opacity-20">
                     <div className="border-t border-slate-500 w-full" />
@@ -114,26 +114,26 @@ export const MissingDashboard = () => {
                  </div>
                  
                  {MISSING_WOMEN_STATS.yearlyTrends.map((trend, i) => {
-                    const heightPct = (trend.cases / 300000) * 100;
+                    const heightPct = Math.max(15, Math.round((trend.cases / 300000) * 100));
                     return (
-                      <div key={i} className="flex flex-col items-center gap-2 relative group z-10 w-12 sm:w-16 h-full justify-end">
-                        <span className="text-[10px] font-bold text-red-300 opacity-0 group-hover:opacity-100 transition-opacity absolute -top-8 bg-slate-800 px-2 py-1 rounded whitespace-nowrap z-20">
-                          {trend.cases.toLocaleString()}
+                      <div key={i} className="flex flex-col items-center gap-1 relative group z-10 w-10 sm:w-16 h-full justify-end">
+                        <span className="text-[10px] font-bold text-red-300 bg-slate-900 border border-slate-700 px-1.5 py-0.5 rounded whitespace-nowrap z-20 shadow-md">
+                          {trend.cases >= 1000 ? `${(trend.cases / 1000).toFixed(0)}k` : trend.cases}
                         </span>
                         <motion.div 
                           initial={{ height: 0 }}
                           animate={{ height: `${heightPct}%` }}
-                          transition={{ duration: 1, delay: i * 0.1 }}
-                          className="w-full bg-gradient-to-t from-red-900/50 to-red-500 rounded-t-sm border-t-2 border-red-400 group-hover:brightness-125 transition-all cursor-pointer relative"
+                          transition={{ duration: 0.8, delay: i * 0.1 }}
+                          className="w-full bg-gradient-to-t from-red-900/60 via-red-600 to-red-500 rounded-t-lg border-t-2 border-red-400 group-hover:brightness-125 transition-all cursor-pointer relative shadow-lg shadow-red-950/50"
                         >
                           <div className="absolute inset-0 bg-red-400 blur opacity-0 group-hover:opacity-40 transition-opacity" />
                         </motion.div>
-                        <span className="text-[10px] sm:text-xs font-semibold text-slate-400">{trend.year}</span>
+                        <span className="text-[11px] font-bold text-slate-300 mt-1">{trend.year}</span>
                       </div>
                     )
                  })}
                </div>
-               <p className="text-center text-xs text-slate-500">Note: 2020 recorded a dip primarily due to nationwide COVID-19 mobility restrictions.</p>
+               <p className="text-center text-xs text-slate-400">Note: 2020 recorded a dip primarily due to nationwide COVID-19 mobility restrictions.</p>
              </div>
           )}
         </div>

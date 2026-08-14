@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useNotifications } from '../context/NotificationContext';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from '../context/i18nContext';
 import {
   Shield,
   Bell,
@@ -17,16 +18,14 @@ import {
   Settings,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  PhoneCall,
+  Languages
 } from 'lucide-react';
 
 import { getAvatarSrc } from '../utils/avatar';
 import { formatTime } from '../utils/dateFormatter';
 
-/* ────────────────────────────────────────────────────────────────────────
-   Theme Toggle — professional animated toggle beside the notification bell
-   ──────────────────────────────────────────────────────────────────────── */
-const THEME_ORDER = ['dark', 'light', 'system'];
 const THEME_META = {
   dark:   { icon: Moon,    tip: 'Dark mode'   },
   light:  { icon: Sun,     tip: 'Light mode'  },
@@ -54,12 +53,10 @@ const ThemeToggleButton = ({ theme, cycleTheme }) => {
   );
 };
 
-/* ────────────────────────────────────────────────────────────────────────
-   Navbar
-   ──────────────────────────────────────────────────────────────────────── */
 export const Navbar = () => {
   const { user, logout, isAuthenticated, activeWorkspace, setActiveWorkspace } = useAuth();
   const { theme, cycleTheme } = useTheme();
+  const { language, toggleLanguage, t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,47 +64,47 @@ export const Navbar = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const { notifications, unreadCount, markAllRead, markRead } = useNotifications();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
   const dropdownRef = useRef(null);
   const profileMenuRef = useRef(null);
   const hamburgerRef = useRef(null);
+  const moreMenuRef = useRef(null);
 
-  // Close drawers on route change
   useEffect(() => {
     setMobileMenuOpen(false);
     setShowNotifications(false);
     setShowProfileMenu(false);
+    setShowMoreMenu(false);
   }, [location.pathname]);
 
-  // Lock body scroll
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
 
-  // Escape key
   useEffect(() => {
     const onKey = (e) => {
       if (e.key !== 'Escape') return;
       if (mobileMenuOpen) { setMobileMenuOpen(false); hamburgerRef.current?.focus(); }
       if (showNotifications) setShowNotifications(false);
       if (showProfileMenu) setShowProfileMenu(false);
+      if (showMoreMenu) setShowMoreMenu(false);
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [mobileMenuOpen, showNotifications, showProfileMenu]);
+  }, [mobileMenuOpen, showNotifications, showProfileMenu, showMoreMenu]);
 
-  // Outside click
   useEffect(() => {
     const fn = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowNotifications(false);
       if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) setShowProfileMenu(false);
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) setShowMoreMenu(false);
     };
     document.addEventListener('mousedown', fn);
     return () => document.removeEventListener('mousedown', fn);
   }, []);
 
-  // ─── Notifications ───────────────────────────────────────────────
-  
   const handleToggleNotifications = () => {
     setShowNotifications(!showNotifications);
     setShowProfileMenu(false);
@@ -141,17 +138,16 @@ export const Navbar = () => {
   const userRoles = user?.roles?.length > 0 ? user.roles : [user?.role || 'user'];
 
   const primaryLinks = [
-    { name: 'News', path: '/#news' },
-    { name: 'Safety', path: '/map' },
-    { name: 'Resources', path: '/awareness' },
+    { name: t('navHome'), path: '/' },
+    { name: t('navSafetyMap'), path: '/map' },
+    { name: t('navAwareness'), path: '/awareness' },
   ];
 
   const moreLinks = [
-    { name: 'Missing Women', path: '/missing-women' },
-    { name: 'Reports', path: '/reports' },
-    { name: 'Awareness', path: '/awareness' },
+    { name: t('navGuestSos'), path: '/guest-sos' },
+    { name: t('navMissing'), path: '/missing-women' },
+    { name: t('navReports'), path: '/reports' },
     { name: 'Nearby Places', path: '/nearby', protected: true, roles: ['user'] },
-    { name: 'Safety Map', path: '/map', protected: true, roles: ['user'] },
     { name: 'Report Incident', path: '/report-incident', protected: true, roles: ['user'] },
     { name: 'SOS Center', path: '/sos', protected: true, roles: ['user'] },
     { name: 'AI Companion', path: '/ai', protected: true, roles: ['user'] },
@@ -178,21 +174,7 @@ export const Navbar = () => {
   const filteredMore = filterLinks(moreLinks);
   const filteredAdmin = filterLinks(adminGuardianLinks);
 
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
-  const moreMenuRef = useRef(null);
-
-  useEffect(() => {
-    const fn = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) setShowNotifications(false);
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) setShowProfileMenu(false);
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target)) setShowMoreMenu(false);
-    };
-    document.addEventListener('mousedown', fn);
-    return () => document.removeEventListener('mousedown', fn);
-  }, []);
-
-  // ─── Notification List (shared) ─────────────────────────────────
-  const renderNotificationList = () => { return (
+  const renderNotificationList = () => (
     <>
       <div className="px-4 py-3 flex justify-between items-center" style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--bg-surface)' }}>
         <span className="text-xs font-semibold text-purple-500">Notifications</span>
@@ -237,19 +219,17 @@ export const Navbar = () => {
         )}
       </div>
     </>
-  )};
+  );
 
-  // ─── Mobile Drawer ──────────────────────────────────────────────
-  const renderMobileDrawer = () => { return (
+  const renderMobileDrawer = () => (
     createPortal(
       <>
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[999]" onClick={() => setMobileMenuOpen(false)} aria-hidden="true" />
         <div
           className="fixed top-0 right-0 h-full w-[min(320px,100vw)] z-[1000] shadow-2xl flex flex-col"
-          style={{ background: 'var(--bg-surface)', borderLeft: '1px solid var(--border-color)', animation: 'slideInRight 0.25s ease-out forwards' }}
+          style={{ background: 'var(--bg-surface)', borderLeft: '1px solid var(--border-color)' }}
           role="dialog" aria-modal="true" aria-label="Navigation menu"
         >
-          {/* Header */}
           <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid var(--border-color)' }}>
             <div className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-fuchsia-500" />
@@ -260,38 +240,26 @@ export const Navbar = () => {
             </button>
           </div>
 
-          {/* User info */}
-          {isAuthenticated && user && (
-            <div className="px-5 py-3 flex items-center gap-3" style={{ borderBottom: '1px solid var(--border-muted)' }}>
-              <img src={getAvatarSrc(user.avatar, user.name)} alt={user.name}
-                className="w-9 h-9 rounded-full object-cover border border-purple-500/30"
-                onError={(e) => { e.target.src = getAvatarSrc('', user.name); }}
-              />
-              <div className="min-w-0">
-                <p className="text-sm font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
-                <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
-              </div>
-            </div>
-          )}
+          <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-300">Language</span>
+            <button
+              onClick={() => toggleLanguage()}
+              className="px-3 py-1 bg-purple-500/20 text-purple-300 font-bold text-xs rounded-lg border border-purple-500/30 flex items-center gap-1.5"
+            >
+              <Languages className="w-3.5 h-3.5" /> {language === 'en' ? 'हिन्दी' : 'English'}
+            </button>
+          </div>
 
-          {/* Workspace switcher */}
-          {isAuthenticated && userRoles.length > 1 && (
-            <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--border-muted)' }}>
-              <label className="text-[9px] font-extrabold uppercase tracking-widest block mb-1.5" style={{ color: 'var(--text-muted)' }}>Workspace</label>
-              <select
-                value={activeWorkspace}
-                onChange={(e) => { const ws = e.target.value; setActiveWorkspace(ws); setMobileMenuOpen(false); navigate(ws === 'admin' ? '/admin' : ws === 'guardian' ? '/guardian' : '/dashboard'); }}
-                className="w-full rounded-lg px-3 py-2 text-xs font-semibold focus:outline-none cursor-pointer"
-                style={{ background: 'var(--input-bg)', border: '1px solid var(--input-border)', color: 'var(--text-primary)' }}
-              >
-                {userRoles.includes('user') && <option value="user">User Dashboard</option>}
-                {userRoles.includes('guardian') && <option value="guardian">Guardian Command</option>}
-                {userRoles.includes('admin') && <option value="admin">Admin Dashboard</option>}
-              </select>
-            </div>
-          )}
+          <div className="px-5 py-3 border-b border-white/10">
+            <Link
+              to="/guest-sos"
+              onClick={() => setMobileMenuOpen(false)}
+              className="btn-primary bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 w-full shadow-lg"
+            >
+              <PhoneCall className="w-4 h-4" /> Guest SOS (No Login)
+            </Link>
+          </div>
 
-          {/* Links */}
           <div className="flex-1 overflow-y-auto px-3 py-3">
             <nav className="space-y-1">
               {[...filteredPrimary, ...(isAuthenticated ? [{name: 'Dashboard', path: '/dashboard'}] : []), ...filteredMore, ...filteredAdmin].map((link) => {
@@ -309,16 +277,6 @@ export const Navbar = () => {
                   >{displayName}</Link>
                 );
               })}
-              {isAuthenticated && (
-                <>
-                  <Link to="/profile" onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors"
-                    style={{ color: 'var(--text-secondary)' }}>Profile Settings</Link>
-                  <Link to="/settings" onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-colors"
-                    style={{ color: 'var(--text-secondary)' }}>Settings</Link>
-                </>
-              )}
             </nav>
             {!isAuthenticated && (
               <div className="mt-4 pt-4 space-y-3" style={{ borderTop: '1px solid var(--border-color)' }}>
@@ -327,46 +285,16 @@ export const Navbar = () => {
               </div>
             )}
           </div>
-
-          {/* Footer */}
-          {isAuthenticated && (
-            <div className="px-3 py-3 space-y-1" style={{ borderTop: '1px solid var(--border-color)' }}>
-              <button
-                onClick={() => cycleTheme()}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 hover:bg-white/5"
-                style={{ color: 'var(--text-secondary)' }}
-              >
-                {(() => {
-                  const meta = THEME_META[theme] || THEME_META.dark;
-                  const Icon = meta.icon;
-                  return <Icon className="w-5 h-5 shrink-0" style={{ color: theme === 'dark' ? '#c084fc' : theme === 'light' ? '#f59e0b' : '#38bdf8' }} />;
-                })()}
-                <span>{THEME_META[theme]?.tip}</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-3 w-full px-4 py-3 rounded-lg text-sm font-medium text-red-500 transition-all duration-200 hover:bg-red-500/10 hover:text-red-400"
-              >
-                <LogOut className="w-5 h-5 shrink-0" />
-                <span>Logout</span>
-              </button>
-            </div>
-          )}
         </div>
       </>,
       document.body
     )
-  )};
+  );
 
   return (
     <>
-      <nav className="sticky top-0 z-50 px-4 md:px-8 py-3 flex items-center justify-between"
-        style={{
-          background: 'var(--bg-surface)',
-          borderBottom: '1px solid var(--border-muted)',
-          backdropFilter: 'blur(12px)',
-        }}
-      >
+      <nav className="sticky top-0 z-40 px-4 md:px-8 py-3 flex items-center justify-between backdrop-blur-md border-b border-white/10 bg-slate-950/80">
+        
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-bold bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent shrink-0">
           <Shield className="w-6 h-6 text-fuchsia-500 fill-fuchsia-500/10 shrink-0" />
@@ -376,7 +304,7 @@ export const Navbar = () => {
           </span>
         </Link>
 
-        {/* Desktop Nav */}
+        {/* Desktop Links */}
         <div className="hidden lg:flex items-center gap-6 lg:ml-8">
           {filteredPrimary.map((link) => (
             <Link key={link.name} to={link.path}
@@ -393,7 +321,6 @@ export const Navbar = () => {
             >Dashboard</Link>
           )}
 
-          {/* More Dropdown */}
           <div className="relative" ref={moreMenuRef}>
             <button
               onClick={() => setShowMoreMenu(!showMoreMenu)}
@@ -405,7 +332,7 @@ export const Navbar = () => {
             </button>
             {showMoreMenu && (
               <div className="absolute top-full left-0 mt-4 w-48 rounded-xl overflow-hidden shadow-2xl z-50 py-2 border border-white/10"
-                style={{ background: 'var(--dropdown-bg)', animation: 'slideInRight 0.2s ease-out' }}>
+                style={{ background: 'var(--dropdown-bg)' }}>
                 {[...filteredMore, ...filteredAdmin].map((link) => (
                   <Link key={link.name} to={link.path}
                     onClick={() => setShowMoreMenu(false)}
@@ -420,137 +347,77 @@ export const Navbar = () => {
           </div>
         </div>
 
-        {/* Desktop Right: [ Bell ] [ Theme ] [ Profile ] */}
-        <div className="hidden lg:flex items-center gap-1">
+        {/* Desktop Actions: Guest SOS, i18n, Theme, User */}
+        <div className="hidden lg:flex items-center gap-3">
+          
+          {/* Prominent Red Guest SOS Callout */}
+          <Link
+            to="/guest-sos"
+            className="bg-red-600 hover:bg-red-500 text-white font-extrabold text-xs px-3.5 py-2 rounded-full flex items-center gap-1.5 shadow-md shadow-red-950/50 uppercase tracking-wider transition-all hover:scale-105"
+          >
+            <PhoneCall className="w-3.5 h-3.5" />
+            <span>{t('navGuestSos')}</span>
+          </Link>
+
+          {/* Language Switcher */}
+          <button
+            onClick={() => toggleLanguage()}
+            className="px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-slate-300 flex items-center gap-1 transition-colors"
+            title="Switch Language"
+          >
+            <Languages className="w-3.5 h-3.5 text-fuchsia-400" />
+            <span>{language === 'en' ? 'HI' : 'EN'}</span>
+          </button>
+
+          <ThemeToggleButton theme={theme} cycleTheme={cycleTheme} />
+
           {isAuthenticated ? (
-            <>
-              {/* Notification Bell */}
-              <div className="relative" ref={dropdownRef}>
-                <button onClick={handleToggleNotifications}
-                  className="p-2 rounded-full transition-colors relative"
-                  aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
-                  style={{ color: 'var(--text-secondary)' }}
-                >
-                  <Bell className="w-5 h-5" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-red-600 rounded-full text-[9px] font-bold flex items-center justify-center text-white animate-pulse" style={{ color: '#fff' }}>
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-                {showNotifications && (
-                  <div className="absolute right-0 mt-3 w-80 rounded-xl overflow-hidden shadow-2xl z-50"
-                    style={{ background: 'var(--dropdown-bg)', border: '1px solid var(--border-color)' }}>
-                    {renderNotificationList()}
+            <div className="relative" ref={profileMenuRef}>
+              <button onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifications(false); }}
+                className="flex items-center gap-2 focus:outline-none pl-2 border-l border-white/10"
+              >
+                <img src={getAvatarSrc(user.avatar, user.name)} alt={user.name}
+                  className="w-8 h-8 rounded-full object-cover border border-purple-500/30"
+                  onError={(e) => { e.target.src = getAvatarSrc('', user.name); }}
+                />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+
+              {showProfileMenu && (
+                <div className="absolute right-0 mt-3 w-56 rounded-xl overflow-hidden shadow-2xl z-50 py-1.5 border border-white/10 bg-slate-900">
+                  <div className="px-4 py-2.5 border-b border-white/10">
+                    <p className="text-xs font-bold truncate text-white">{user.name}</p>
+                    <p className="text-[10px] truncate text-slate-400">{user.email}</p>
                   </div>
-                )}
-              </div>
-
-              {/* Theme Toggle */}
-              <ThemeToggleButton theme={theme} cycleTheme={cycleTheme} />
-
-              {/* Profile Dropdown */}
-              <div className="relative" ref={profileMenuRef}>
-                <button onClick={() => { setShowProfileMenu(!showProfileMenu); setShowNotifications(false); }}
-                  className="flex items-center gap-2 focus:outline-none pl-2"
-                  style={{ borderLeft: '1px solid var(--border-muted)' }}
-                  aria-label="Profile menu" aria-expanded={showProfileMenu}
-                >
-                  <img src={getAvatarSrc(user.avatar, user.name)} alt={user.name}
-                    className="w-8 h-8 rounded-full object-cover border border-purple-500/30 hover:border-purple-500/70 transition-colors"
-                    onError={(e) => { e.target.src = getAvatarSrc('', user.name); }}
-                  />
-                  <ChevronDown className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
-                </button>
-
-                {showProfileMenu && (
-                  <div className="absolute right-0 mt-3 w-56 rounded-xl overflow-hidden shadow-2xl z-50 py-1.5"
-                    style={{ background: 'var(--dropdown-bg)', border: '1px solid var(--border-color)' }}>
-                    <div className="px-4 py-2.5" style={{ borderBottom: '1px solid var(--border-muted)' }}>
-                      <p className="text-xs font-bold truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
-                      <p className="text-[10px] truncate" style={{ color: 'var(--text-secondary)' }}>{user.email}</p>
-                    </div>
-
-                    <Link to="/profile" onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs transition-colors"
-                      style={{ color: 'var(--text-secondary)' }}>
-                      <User className="w-4 h-4 text-purple-400" /> Profile Settings
-                    </Link>
-                    <Link to="/settings" onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-xs transition-colors"
-                      style={{ color: 'var(--text-secondary)' }}>
-                      <Settings className="w-4 h-4 text-purple-400" /> Settings
-                    </Link>
-
-                    {userRoles.includes('guardian') && (
-                      <button onClick={() => { const t = activeWorkspace === 'guardian' ? 'user' : 'guardian'; setActiveWorkspace(t); setShowProfileMenu(false); navigate(t === 'user' ? '/dashboard' : '/guardian'); }}
-                        className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs transition-colors"
-                        style={{ color: 'var(--text-secondary)' }}>
-                        <HeartHandshake className="w-4 h-4 text-purple-400" />
-                        Switch to {activeWorkspace === 'guardian' ? 'User' : 'Guardian'} Workspace
-                      </button>
-                    )}
-
-                    {userRoles.includes('admin') && activeWorkspace !== 'admin' && (
-                      <Link to="/admin" onClick={() => { setActiveWorkspace('admin'); setShowProfileMenu(false); }}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs transition-colors"
-                        style={{ color: 'var(--text-secondary)' }}>
-                        <ShieldPlus className="w-4 h-4 text-fuchsia-400" /> Admin Dashboard
-                      </Link>
-                    )}
-
-                    <div style={{ borderTop: '1px solid var(--border-muted)', margin: '4px 0' }} />
-
-                    <button onClick={() => { setShowProfileMenu(false); handleLogout(); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-left text-xs text-red-500 hover:text-red-400 transition-colors">
-                      <LogOut className="w-4 h-4" /> Logout
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
+                  <Link to="/profile" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:text-white">
+                    <User className="w-4 h-4 text-purple-400" /> Profile Settings
+                  </Link>
+                  <Link to="/settings" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-2 px-4 py-2 text-xs text-slate-300 hover:text-white">
+                    <Settings className="w-4 h-4 text-purple-400" /> Settings
+                  </Link>
+                  <button onClick={() => { setShowProfileMenu(false); handleLogout(); }} className="w-full flex items-center gap-2 px-4 py-2 text-xs text-red-400 hover:text-red-300">
+                    <LogOut className="w-4 h-4" /> Logout
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
-            <div className="flex items-center gap-3">
-              {/* Theme toggle for unauthenticated users too */}
-              <ThemeToggleButton theme={theme} cycleTheme={cycleTheme} />
-              <Link to="/login" className="text-sm font-medium px-4 py-2 hover:text-purple-400 transition-colors" style={{ color: 'var(--text-secondary)' }}>Login</Link>
-              <Link to="/register" className="btn-primary py-2 px-4 text-xs font-semibold">Sign Up</Link>
+            <div className="flex items-center gap-2">
+              <Link to="/login" className="text-xs font-semibold px-3 py-2 text-slate-300 hover:text-white">Sign In</Link>
+              <Link to="/register" className="btn-primary py-2 px-4 text-xs font-bold">Get Started</Link>
             </div>
           )}
         </div>
 
-        {/* Mobile: Theme + Bell + Hamburger */}
-        <div className="flex items-center gap-1 lg:hidden">
-          <ThemeToggleButton theme={theme} cycleTheme={cycleTheme} />
-          {isAuthenticated && (
-            <button onClick={() => { setShowNotifications(!showNotifications); setMobileMenuOpen(false); }}
-              className="p-2 rounded-full transition-colors relative"
-              aria-label="Notifications" style={{ color: 'var(--text-secondary)' }}>
-              <Bell className="w-5 h-5" />
-              {unreadCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-red-600 rounded-full text-[8px] font-bold flex items-center justify-center" style={{ color: '#fff' }}>
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </button>
-          )}
-          <button ref={hamburgerRef} onClick={() => { setMobileMenuOpen(!mobileMenuOpen); setShowNotifications(false); }}
-            className="p-2 rounded-full transition-colors"
-            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
-            style={{ color: 'var(--text-secondary)' }}>
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-6 h-6" />}
+        {/* Mobile Hamburger */}
+        <div className="flex items-center gap-2 lg:hidden">
+          <Link to="/guest-sos" className="bg-red-600 text-white font-extrabold text-[10px] px-2.5 py-1.5 rounded-full uppercase">SOS</Link>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 text-slate-300">
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
+
       </nav>
-
-      {/* Mobile Notification Panel */}
-      {showNotifications && (
-        <div className="lg:hidden fixed top-[57px] left-3 right-3 rounded-xl overflow-hidden shadow-2xl z-[998]"
-          style={{ background: 'var(--dropdown-bg)', border: '1px solid var(--border-color)' }}>
-          {renderNotificationList()}
-        </div>
-      )}
-
       {mobileMenuOpen && renderMobileDrawer()}
     </>
   );
